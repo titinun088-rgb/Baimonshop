@@ -1,0 +1,588 @@
+import {
+  collection,
+  addDoc,
+  getDocs,
+  getDoc,
+  doc,
+  query,
+  where,
+  orderBy,
+  Timestamp,
+  updateDoc,
+  deleteDoc,
+} from "firebase/firestore";
+import { db } from "./firebase";
+import { Sale, SaleInput, DashboardStats, ChartData } from "@/types/sale";
+import { getGameById, getGameItemById } from "./gameUtils";
+import { logActivity } from "./activityUtils";
+import * as XLSX from "xlsx";
+
+/**
+ * สร้างยอดขายใหม่
+ */
+export async function createSale(
+  userId: string,
+  userEmail: string,
+  shopName: string | undefined,
+  saleData: SaleInput
+): Promise<{ success: boolean; id?: string; error?: string }> {
+  try {
+    console.log("📝 salesUtils: กำลังสร้างยอดขาย...", saleData);
+
+    // ดึงข้อมูลเกมและรายการเติม
+    const game = await getGameById(saleData.gameId);
+    if (!game) {
+      return { success: false, error: "ไม่พบข้อมูลเกม" };
+    }
+
+    const gameItem = await getGameItemById(saleData.gameItemId);
+    if (!gameItem) {
+      return { success: false, error: "ไม่พบข้อมูลรายการเติม" };
+    }
+
+    // คำนวณ
+    const totalCost = gameItem.costPrice * saleData.quantity;
+    const totalSell = gameItem.sellPrice * saleData.quantity;
+    const netAmount = totalSell - saleData.discount;
+    const profit = netAmount - totalCost;
+
+    const newSale = {
+      userId,
+      userEmail,
+      shopName: shopName || "",
+      gameId: saleData.gameId,
+      gameName: game.name,
+      gameItemId: saleData.gameItemId,
+      gameItemName: gameItem.name,
+      quantity: saleData.quantity,
+      costPricePerUnit: gameItem.costPrice,
+      sellPricePerUnit: gameItem.sellPrice,
+      discount: saleData.discount,
+      totalCost,
+      totalSell,
+      netAmount,
+      profit,
+      saleDate: Timestamp.now(),
+      createdAt: Timestamp.now(),
+    };
+
+    const docRef = await addDoc(collection(db, "sales"), newSale);
+    console.log("✅ salesUtils: สร้างยอดขายสำเร็จ! Doc ID:", docRef.id);
+
+    // บันทึก Activity Log
+    await logActivity({
+      userId,
+      email: userEmail,
+      shopName,
+      action: "sale_created",
+      details: `บันทึกยอดขาย "${gameItem.name}" จำนวน ${saleData.quantity} รายการ (฿${netAmount.toFixed(2)})`,
+      metadata: {
+        saleId: docRef.id,
+        gameId: saleData.gameId,
+        gameName: game.name,
+        gameItemId: saleData.gameItemId,
+        gameItemName: gameItem.name,
+        quantity: saleData.quantity,
+        netAmount,
+        profit,
+      },
+    });
+
+    return { success: true, id: docRef.id };
+  } catch (error: any) {
+    console.error("❌ salesUtils: Error creating sale:", error);
+    return {
+      success: false,
+      error: error.message || "เกิดข้อผิดพลาดในการสร้างยอดขาย",
+    };
+  }
+}
+
+/**
+ * ดึงยอดขายทั้งหมดของ user
+ */
+export async function getSalesByUser(userId: string): Promise<Sale[]> {
+  try {
+    console.log("🔍 salesUtils: ดึงยอดขายของ user:", userId);
+    const salesRef = collection(db, "sales");
+    const q = query(salesRef, where("userId", "==", userId));
+    const snapshot = await getDocs(q);
+
+    const sales = snapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        userId: data.userId || "",
+        userEmail: data.userEmail || "",
+        shopName: data.shopName || "",
+        gameId: data.gameId || "",
+        gameName: data.gameName || "ไม่มีชื่อ",
+        gameItemId: data.gameItemId || "",
+        gameItemName: data.gameItemName || "ไม่มีชื่อ",
+        quantity: data.quantity || 0,
+        costPricePerUnit: data.costPricePerUnit || 0,
+        sellPricePerUnit: data.sellPricePerUnit || 0,
+        discount: data.discount || 0,
+        totalCost: data.totalCost || 0,
+        totalSell: data.totalSell || 0,
+        netAmount: data.netAmount || 0,
+        profit: data.profit || 0,
+        saleDate: data.saleDate?.toDate ? data.saleDate.toDate() : new Date(),
+        createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(),
+        updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : undefined,
+      } as Sale;
+    });
+
+    // เรียงลำดับใน JavaScript (ใหม่สุดก่อน)
+    sales.sort((a, b) => b.saleDate.getTime() - a.saleDate.getTime());
+
+    console.log("✅ salesUtils: พบยอดขาย", sales.length, "รายการ");
+    return sales;
+  } catch (error) {
+    console.error("❌ salesUtils: Error getting sales:", error);
+    return [];
+  }
+}
+
+/**
+ * ดึงยอดขายทั้งหมด (สำหรับ Admin)
+ */
+export async function getAllSales(): Promise<Sale[]> {
+  try {
+    console.log("🔍 salesUtils: ดึงยอดขายทั้งหมด");
+    const salesRef = collection(db, "sales");
+    const snapshot = await getDocs(salesRef);
+
+    const sales = snapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        userId: data.userId || "",
+        userEmail: data.userEmail || "",
+        shopName: data.shopName || "",
+        gameId: data.gameId || "",
+        gameName: data.gameName || "ไม่มีชื่อ",
+        gameItemId: data.gameItemId || "",
+        gameItemName: data.gameItemName || "ไม่มีชื่อ",
+        quantity: data.quantity || 0,
+        costPricePerUnit: data.costPricePerUnit || 0,
+        sellPricePerUnit: data.sellPricePerUnit || 0,
+        discount: data.discount || 0,
+        totalCost: data.totalCost || 0,
+        totalSell: data.totalSell || 0,
+        netAmount: data.netAmount || 0,
+        profit: data.profit || 0,
+        saleDate: data.saleDate?.toDate ? data.saleDate.toDate() : new Date(),
+        createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(),
+        updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : undefined,
+      } as Sale;
+    });
+
+    // เรียงลำดับใน JavaScript (ใหม่สุดก่อน)
+    sales.sort((a, b) => b.saleDate.getTime() - a.saleDate.getTime());
+
+    console.log("✅ salesUtils: พบยอดขายทั้งหมด", sales.length, "รายการ");
+    return sales;
+  } catch (error) {
+    console.error("❌ salesUtils: Error getting all sales:", error);
+    return [];
+  }
+}
+
+/**
+ * แก้ไขยอดขาย
+ */
+export async function updateSale(
+  saleId: string,
+  saleData: SaleInput,
+  userInfo?: { userId: string; email: string; shopName?: string }
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    console.log("✏️ salesUtils: กำลังแก้ไขยอดขาย:", saleId);
+
+    // ดึงข้อมูลเกมและรายการเติม
+    const game = await getGameById(saleData.gameId);
+    if (!game) {
+      return { success: false, error: "ไม่พบข้อมูลเกม" };
+    }
+
+    const gameItem = await getGameItemById(saleData.gameItemId);
+    if (!gameItem) {
+      return { success: false, error: "ไม่พบข้อมูลรายการเติม" };
+    }
+
+    // คำนวณใหม่
+    const totalCost = gameItem.costPrice * saleData.quantity;
+    const totalSell = gameItem.sellPrice * saleData.quantity;
+    const netAmount = totalSell - saleData.discount;
+    const profit = netAmount - totalCost;
+
+    const updateData = {
+      gameId: saleData.gameId,
+      gameName: game.name,
+      gameItemId: saleData.gameItemId,
+      gameItemName: gameItem.name,
+      quantity: saleData.quantity,
+      costPricePerUnit: gameItem.costPrice,
+      sellPricePerUnit: gameItem.sellPrice,
+      discount: saleData.discount,
+      totalCost,
+      totalSell,
+      netAmount,
+      profit,
+      updatedAt: Timestamp.now(),
+    };
+
+    const saleRef = doc(db, "sales", saleId);
+    await updateDoc(saleRef, updateData);
+
+    console.log("✅ salesUtils: แก้ไขยอดขายสำเร็จ");
+
+    // บันทึก Activity Log
+    if (userInfo) {
+      await logActivity({
+        userId: userInfo.userId,
+        email: userInfo.email,
+        shopName: userInfo.shopName,
+        action: "sale_updated",
+        details: `แก้ไขยอดขาย "${gameItem.name}" จำนวน ${saleData.quantity} รายการ (฿${netAmount.toFixed(2)})`,
+        metadata: {
+          saleId,
+          gameId: saleData.gameId,
+          gameName: game.name,
+          gameItemId: saleData.gameItemId,
+          gameItemName: gameItem.name,
+          quantity: saleData.quantity,
+          netAmount,
+          profit,
+        },
+      });
+    }
+
+    return { success: true };
+  } catch (error: any) {
+    console.error("❌ salesUtils: Error updating sale:", error);
+    return {
+      success: false,
+      error: error.message || "เกิดข้อผิดพลาดในการแก้ไขยอดขาย",
+    };
+  }
+}
+
+/**
+ * ลบยอดขาย
+ */
+export async function deleteSale(
+  saleId: string,
+  userInfo?: { userId: string; email: string; shopName?: string; saleName?: string }
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    console.log("🗑️ salesUtils: กำลังลบยอดขาย:", saleId);
+    await deleteDoc(doc(db, "sales", saleId));
+    console.log("✅ salesUtils: ลบยอดขายสำเร็จ");
+
+    // บันทึก Activity Log
+    if (userInfo) {
+      await logActivity({
+        userId: userInfo.userId,
+        email: userInfo.email,
+        shopName: userInfo.shopName,
+        action: "sale_deleted",
+        details: `ลบยอดขาย${userInfo.saleName ? ` "${userInfo.saleName}"` : ''} (ID: ${saleId})`,
+        metadata: { saleId },
+      });
+    }
+
+    return { success: true };
+  } catch (error: any) {
+    console.error("❌ salesUtils: Error deleting sale:", error);
+    return {
+      success: false,
+      error: error.message || "เกิดข้อผิดพลาดในการลบยอดขาย",
+    };
+  }
+}
+
+/**
+ * คำนวณสถิติ Dashboard
+ */
+export async function getDashboardStats(
+  userId?: string
+): Promise<DashboardStats> {
+  try {
+    console.log("📊 salesUtils: คำนวณสถิติ Dashboard...");
+    
+    // ดึงข้อมูลยอดขาย
+    const sales = userId ? await getSalesByUser(userId) : await getAllSales();
+    
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    // กรองยอดขายวันนี้
+    const todaySales = sales.filter(
+      (sale) => sale.saleDate >= todayStart
+    );
+
+    // กรองยอดขายเดือนนี้
+    const monthSales = sales.filter(
+      (sale) => sale.saleDate >= monthStart
+    );
+
+    const stats: DashboardStats = {
+      // วันนี้
+      todaySales: todaySales.reduce((sum, s) => sum + s.netAmount, 0),
+      todayCost: todaySales.reduce((sum, s) => sum + s.totalCost, 0),
+      todayProfit: todaySales.reduce((sum, s) => sum + s.profit, 0),
+      todayOrders: todaySales.length,
+
+      // เดือนนี้
+      monthSales: monthSales.reduce((sum, s) => sum + s.netAmount, 0),
+      monthCost: monthSales.reduce((sum, s) => sum + s.totalCost, 0),
+      monthProfit: monthSales.reduce((sum, s) => sum + s.profit, 0),
+      monthOrders: monthSales.length,
+
+      // ทั้งหมด
+      totalSales: sales.reduce((sum, s) => sum + s.netAmount, 0),
+      totalProfit: sales.reduce((sum, s) => sum + s.profit, 0),
+      totalOrders: sales.length,
+    };
+
+    console.log("✅ salesUtils: คำนวณสถิติเสร็จสิ้น", stats);
+    return stats;
+  } catch (error) {
+    console.error("❌ salesUtils: Error calculating stats:", error);
+    return {
+      todaySales: 0,
+      todayCost: 0,
+      todayProfit: 0,
+      todayOrders: 0,
+      monthSales: 0,
+      monthCost: 0,
+      monthProfit: 0,
+      monthOrders: 0,
+      totalSales: 0,
+      totalProfit: 0,
+      totalOrders: 0,
+    };
+  }
+}
+
+/**
+ * สร้างข้อมูลกราฟรายวัน (7 วันล่าสุด)
+ */
+export async function getDailyChartData(userId?: string): Promise<ChartData[]> {
+  try {
+    console.log("📈 salesUtils: สร้างข้อมูลกราฟรายวัน...");
+    
+    const sales = userId ? await getSalesByUser(userId) : await getAllSales();
+    
+    // สร้าง array 7 วันล่าสุด
+    const chartData: ChartData[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      const dateEnd = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+
+      const daySales = sales.filter(
+        (sale) => sale.saleDate >= dateStart && sale.saleDate < dateEnd
+      );
+
+      chartData.push({
+        date: `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}`,
+        sales: daySales.reduce((sum, s) => sum + s.netAmount, 0),
+        profit: daySales.reduce((sum, s) => sum + s.profit, 0),
+        cost: daySales.reduce((sum, s) => sum + s.totalCost, 0),
+      });
+    }
+
+    console.log("✅ salesUtils: สร้างข้อมูลกราฟเสร็จสิ้น");
+    return chartData;
+  } catch (error) {
+    console.error("❌ salesUtils: Error creating chart data:", error);
+    return [];
+  }
+}
+
+/**
+ * Export ยอดขายเป็น CSV
+ */
+export function exportSalesToCSV(sales: Sale[], filename = "sales-export.csv") {
+  try {
+    console.log("📊 salesUtils: กำลัง export ยอดขาย", sales.length, "รายการ");
+
+    // สร้าง CSV headers
+    const headers = [
+      "วันที่ขาย",
+      "เกม",
+      "รายการเติม",
+      "จำนวน",
+      "ราคาทุน",
+      "ราคาขาย",
+      "ส่วนลด",
+      "ยอดสุทธิ",
+      "กำไร",
+      "ร้านค้า",
+      "อีเมล",
+    ];
+
+    // สร้าง CSV rows
+    const rows = sales.map((sale) => [
+      sale.saleDate.toLocaleDateString("th-TH"),
+      sale.gameName,
+      sale.gameItemName,
+      sale.quantity,
+      sale.totalCost,
+      sale.totalSell,
+      sale.discount,
+      sale.netAmount,
+      sale.profit,
+      sale.shopName || "",
+      sale.userEmail,
+    ]);
+
+    // รวม headers และ rows
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row) => row.join(",")),
+    ].join("\n");
+
+    // สร้าง Blob และ download
+    const BOM = "\uFEFF"; // สำหรับรองรับภาษาไทย
+    const blob = new Blob([BOM + csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+
+    console.log("✅ salesUtils: Export สำเร็จ");
+    return { success: true };
+  } catch (error: any) {
+    console.error("❌ salesUtils: Error exporting sales:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Import ยอดขายจาก Excel
+ */
+export async function importSalesFromExcel(
+  file: File,
+  userId: string,
+  userEmail: string,
+  shopName: string | undefined
+): Promise<{ success: boolean; imported: number; errors: string[] }> {
+  try {
+    console.log("📥 salesUtils: กำลัง import จาก Excel:", file.name);
+    
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      
+      reader.onload = async (e) => {
+        try {
+          const data = e.target?.result;
+          const workbook = XLSX.read(data, { type: "binary" });
+          const sheetName = workbook.SheetNames[0];
+          const sheet = workbook.Sheets[sheetName];
+          const rows = XLSX.utils.sheet_to_json(sheet) as any[];
+
+          console.log("📋 salesUtils: พบข้อมูล", rows.length, "แถว");
+
+          let imported = 0;
+          const errors: string[] = [];
+
+          // ดึงข้อมูลเกมและรายการทั้งหมดเพื่อ validate
+          const gamesSnapshot = await getDocs(collection(db, "games"));
+          const gameItems: any[] = [];
+          
+          for (const gameDoc of gamesSnapshot.docs) {
+            const itemsSnapshot = await getDocs(
+              collection(db, "games", gameDoc.id, "items")
+            );
+            itemsSnapshot.docs.forEach((itemDoc) => {
+              gameItems.push({
+                id: itemDoc.id,
+                gameId: gameDoc.id,
+                gameName: gameDoc.data().name,
+                itemName: itemDoc.data().name,
+                costPrice: itemDoc.data().costPrice,
+                sellPrice: itemDoc.data().sellPrice,
+              });
+            });
+          }
+
+          // Import แต่ละแถว
+          for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            try {
+              // ตรวจสอบข้อมูลที่จำเป็น
+              const gameName = (row["เกม"] || row["Game"] || "").toString().trim();
+              const itemName = (row["รายการเติม"] || row["Item"] || "").toString().trim();
+              const quantity = Number(row["จำนวน"] || row["Quantity"]);
+              const discount = Number(row["ส่วนลด"] || row["Discount"] || 0);
+
+              if (!gameName || !itemName || !quantity) {
+                errors.push(`แถว ${i + 2}: ข้อมูลไม่ครบถ้วน`);
+                continue;
+              }
+
+              // หา gameItem ที่ตรงกัน
+              const matchedItem = gameItems.find(
+                (item) =>
+                  item.gameName.trim() === gameName && item.itemName.trim() === itemName
+              );
+
+              if (!matchedItem) {
+                // หาเกมที่ตรงกัน
+                const matchedGame = gameItems.find(item => item.gameName.trim() === gameName);
+                if (!matchedGame) {
+                  errors.push(`แถว ${i + 2}: ไม่พบเกม "${gameName}"`);
+                } else {
+                  errors.push(`แถว ${i + 2}: ไม่พบรายการ "${itemName}" ในเกม "${gameName}"`);
+                }
+                continue;
+              }
+
+              // สร้างยอดขาย
+              const saleInput: SaleInput = {
+                gameId: matchedItem.gameId,
+                gameItemId: matchedItem.id,
+                quantity,
+                discount,
+              };
+
+              const result = await createSale(userId, userEmail, shopName, saleInput);
+              
+              if (result.success) {
+                imported++;
+              } else {
+                errors.push(`แถว ${i + 2}: ${result.error}`);
+              }
+            } catch (error: any) {
+              errors.push(`แถว ${i + 2}: ${error.message}`);
+            }
+          }
+
+          console.log(`✅ salesUtils: Import สำเร็จ ${imported} รายการ, พบข้อผิดพลาด ${errors.length} รายการ`);
+          resolve({ success: true, imported, errors });
+        } catch (error: any) {
+          console.error("❌ salesUtils: Error processing Excel:", error);
+          resolve({ success: false, imported: 0, errors: [error.message] });
+        }
+      };
+
+      reader.onerror = () => {
+        resolve({ success: false, imported: 0, errors: ["ไม่สามารถอ่านไฟล์ได้"] });
+      };
+
+      reader.readAsBinaryString(file);
+    });
+  } catch (error: any) {
+    console.error("❌ salesUtils: Error importing sales:", error);
+    return { success: false, imported: 0, errors: [error.message] };
+  }
+}
+

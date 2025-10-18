@@ -105,3 +105,33 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* Mobile-friendly utilities */
+@layer utilities {
+  .table-container {
+    @apply overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0;
+  }
+  
+  .table-container::-webkit-scrollbar {
+    height: 8px;
+  }
+  
+  .table-container::-webkit-scrollbar-track {
+    @apply bg-muted rounded;
+  }
+  
+  .table-container::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/30 rounded hover:bg-muted-foreground/50;
+  }
+
+  @media (max-width: 768px) {
+    .table-compact th,
+    .table-compact td {
+      @apply px-2 py-2 text-xs;
+    }
+    
+    .table-compact .hide-mobile {
+      @apply hidden;
+    }
+  }
+}
