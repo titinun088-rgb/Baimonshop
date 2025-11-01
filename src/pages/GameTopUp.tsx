@@ -316,36 +316,37 @@ const GameTopUp = () => {
     <Layout>
         <div className="bg-gradient-to-b from-[#0f0f2d] to-[#1a0033] text-white min-h-screen font-['Kanit',sans-serif]">
           {/* Header */}
-          <header className="bg-black/20 backdrop-blur-sm border-b border-purple-500/30 p-6">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <header className="bg-black/20 backdrop-blur-sm border-b border-purple-500/30 p-4 sm:p-6">
+            <div className="flex flex-col gap-4">
               <div>
-                <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                   เติมเกม
                 </h1>
-                <p className="text-purple-300 mt-2">เติมเงินเกมออนไลน์</p>
-                <div className="mt-2 flex gap-4 text-sm text-purple-300">
+                <p className="text-purple-300 mt-1 sm:mt-2 text-sm sm:text-base">เติมเงินเกมออนไลน์</p>
+                <div className="mt-2 flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-purple-300">
                   <span>📂 รวม {[...new Set(gameProducts.map(g => g.category))].length} หมวดหมู่</span>
                   <span>🎮 รวม {gameProducts.length} เกม</span>
                 </div>
               </div>
-              <div className="flex gap-2">
-                <div className="relative">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
+                <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-purple-300" />
                   <Input
                     placeholder="ค้นหาเกม..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-12 pr-4 py-3 rounded-2xl bg-black/30 backdrop-blur-sm text-white placeholder:text-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 w-80 border-purple-500/30"
+                    className="pl-10 sm:pl-12 pr-4 py-2 sm:py-3 rounded-xl sm:rounded-2xl bg-black/30 backdrop-blur-sm text-white placeholder:text-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 w-full border-purple-500/30 text-sm sm:text-base"
                   />
                 </div>
                 <Button
                   onClick={handleRefresh}
                   disabled={loading}
                   variant="outline"
-                  className="bg-black/30 backdrop-blur-sm border-purple-500/30 text-white hover:bg-purple-500/20"
+                  size="sm"
+                  className="bg-black/30 backdrop-blur-sm border-purple-500/30 text-white hover:bg-purple-500/20 sm:w-auto"
                 >
-                  <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                  รีเฟรชข้อมูล
+                  <RefreshCw className={`h-4 w-4 sm:mr-2 ${loading ? 'animate-spin' : ''}`} />
+                  <span className="hidden sm:inline">รีเฟรชข้อมูล</span>
                 </Button>
               </div>
             </div>
@@ -353,7 +354,7 @@ const GameTopUp = () => {
 
           {/* Game Detail Page */}
           {showGameDetail && selectedGame ? (
-            <section className="p-6">
+            <section className="p-3 sm:p-4 md:p-6">
               {/* Back Button */}
               <div className="mb-6 flex items-center justify-between">
                 <button 
@@ -501,7 +502,7 @@ const GameTopUp = () => {
             </section>
           ) : showCategoryGames && selectedCategory ? (
             /* Category Games Page - แสดงเกมในหมวดหมู่ */
-            <section className="p-6">
+            <section className="p-3 sm:p-4 md:p-6">
               {/* Back Button */}
               <div className="mb-6 flex items-center justify-between">
                 <button 
@@ -650,15 +651,15 @@ const GameTopUp = () => {
                 }
 
                 return (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
                     {apiCategories.map((category) => (
                       <div 
                         key={category.name}
                         onClick={() => openCategory(category.name)}
-                        className="group bg-black/30 backdrop-blur-sm rounded-2xl shadow-lg p-6 cursor-pointer hover:bg-black/40 transition-all duration-300 hover:scale-105 hover:shadow-purple-500/25 border border-purple-500/30"
+                        className="group bg-black/30 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg p-3 sm:p-4 md:p-6 cursor-pointer hover:bg-black/40 transition-all duration-300 hover:scale-105 hover:shadow-purple-500/25 border border-purple-500/30"
                       >
                         {/* Category Image */}
-                        <div className="w-full h-48 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl mb-4 flex items-center justify-center overflow-hidden">
+                        <div className="w-full h-32 sm:h-40 md:h-48 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg sm:rounded-xl mb-2 sm:mb-4 flex items-center justify-center overflow-hidden">
                           {category.img ? (
                             <img 
                               src={category.img} 
@@ -666,17 +667,17 @@ const GameTopUp = () => {
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                             />
                           ) : (
-                            <Gamepad2 className="h-20 w-20 text-white opacity-70" />
+                            <Gamepad2 className="h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 text-white opacity-70" />
                           )}
                         </div>
 
                         {/* Category Info */}
                         <div className="text-center">
-                          <h2 className="text-xl font-bold text-white mb-4 group-hover:text-purple-300 transition-colors">
+                          <h2 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold text-white mb-1 sm:mb-2 md:mb-4 group-hover:text-purple-300 transition-colors line-clamp-2">
                             {category.name}
                           </h2>
-                          <div className="flex items-center justify-center">
-                            <Badge variant="secondary" className="text-xs">
+                          <div className="flex items-center justify-center mb-2 sm:mb-0">
+                            <Badge variant="secondary" className="text-[10px] sm:text-xs">
                               {category.count} รายการ
                             </Badge>
                           </div>
@@ -688,9 +689,10 @@ const GameTopUp = () => {
                             e.stopPropagation();
                             openCategory(category.name);
                           }}
-                          className="w-full mt-4 py-3 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-xl font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/25"
+                          className="w-full mt-2 sm:mt-4 py-2 sm:py-3 px-2 sm:px-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/25"
                         >
-                          ดูเกมในหมวดหมู่
+                          <span className="hidden sm:inline">ดูเกมในหมวดหมู่</span>
+                          <span className="sm:hidden">ดูเกม</span>
                         </button>
                       </div>
                     ))}

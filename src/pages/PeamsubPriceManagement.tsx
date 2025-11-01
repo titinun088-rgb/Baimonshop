@@ -243,14 +243,14 @@ const PeamsubPriceManagement = () => {
     <Layout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-primary">จัดการราคาสินค้า Peamsub</h1>
-            <p className="text-muted-foreground mt-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-primary">จัดการราคาสินค้า Peamsub</h1>
+            <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
               ตั้งราคาขายสำหรับสินค้า Peamsub ทุกประเภท
             </p>
           </div>
-          <Button onClick={loadData} disabled={loading}>
+          <Button onClick={loadData} disabled={loading} size="sm" className="w-full sm:w-auto">
             <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             รีเฟรช
           </Button>
@@ -296,55 +296,31 @@ const PeamsubPriceManagement = () => {
                     <p className="text-muted-foreground">กำลังโหลด...</p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>ชื่อสินค้า</TableHead>
-                          <TableHead>ราคา API (ทุน)</TableHead>
-                          <TableHead>ราคาแนะนำ</TableHead>
-                          <TableHead>ราคาขายที่ตั้ง</TableHead>
-                          <TableHead>กำไร</TableHead>
-                          <TableHead>สต็อก</TableHead>
-                          <TableHead>จัดการ</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {getFilteredPremiumProducts().map((product) => {
-                          const priceInfo = premiumPrices.get(product.id);
-                          const apiPrice = product.price || 0;
-                          // Premium App ไม่มี recommendedPrice ใช้ apiPrice แทน
-                          const recommendedPrice = apiPrice; 
-                          const sellPrice = priceInfo?.sellPrice || recommendedPrice;
-                          const profit = sellPrice - apiPrice;
+                  <>
+                    {/* Mobile Card View */}
+                    <div className="block md:hidden space-y-3">
+                      {getFilteredPremiumProducts().map((product) => {
+                        const priceInfo = premiumPrices.get(product.id);
+                        const apiPrice = product.price || 0;
+                        const recommendedPrice = apiPrice;
+                        const sellPrice = priceInfo?.sellPrice || recommendedPrice;
+                        const profit = sellPrice - apiPrice;
 
-                          return (
-                            <TableRow key={product.id}>
-                              <TableCell className="font-medium">{product.name}</TableCell>
-                              <TableCell>฿{apiPrice.toFixed(2)}</TableCell>
-                              <TableCell>
-                                <span className="text-blue-600">฿{recommendedPrice.toFixed(2)}</span>
-                              </TableCell>
-                              <TableCell>
-                                {priceInfo ? (
-                                  <span className="font-semibold text-green-600">
-                                    ฿{sellPrice.toFixed(2)}
-                                  </span>
-                                ) : (
-                                  <Badge variant="outline">ใช้ราคาแนะนำ</Badge>
-                                )}
-                              </TableCell>
-                              <TableCell>
-                                <span className={profit >= 0 ? "text-green-600" : "text-red-600"}>
-                                  ฿{profit.toFixed(2)}
-                                </span>
-                              </TableCell>
-                              <TableCell>{product.stock}</TableCell>
-                              <TableCell>
-                                <div className="flex gap-2">
+                        return (
+                          <Card key={product.id} className="p-4">
+                            <div className="space-y-3">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <p className="font-semibold text-sm mb-1">{product.name}</p>
+                                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                    <span>สต็อก: {product.stock}</span>
+                                  </div>
+                                </div>
+                                <div className="flex gap-1">
                                   <Button
                                     variant="outline"
                                     size="sm"
+                                    className="h-8 w-8 p-0"
                                     onClick={() =>
                                       openEditDialog(
                                         product.id,
@@ -356,25 +332,130 @@ const PeamsubPriceManagement = () => {
                                       )
                                     }
                                   >
-                                    <Edit className="h-4 w-4" />
+                                    <Edit className="h-3 w-3" />
                                   </Button>
                                   {priceInfo && (
                                     <Button
                                       variant="outline"
                                       size="sm"
+                                      className="h-8 w-8 p-0"
                                       onClick={() => handleDeletePrice(product.id, 'premium')}
                                     >
-                                      <Trash2 className="h-4 w-4" />
+                                      <Trash2 className="h-3 w-3" />
                                     </Button>
                                   )}
                                 </div>
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
-                  </div>
+                              </div>
+                              <div className="grid grid-cols-2 gap-2 pt-2 border-t text-xs">
+                                <div>
+                                  <p className="text-muted-foreground">ราคา API</p>
+                                  <p className="font-medium">฿{apiPrice.toFixed(2)}</p>
+                                </div>
+                                <div>
+                                  <p className="text-muted-foreground">ราคาแนะนำ</p>
+                                  <p className="font-medium text-blue-600">฿{recommendedPrice.toFixed(2)}</p>
+                                </div>
+                                <div>
+                                  <p className="text-muted-foreground">ราคาขาย</p>
+                                  {priceInfo ? (
+                                    <p className="font-semibold text-green-600">฿{sellPrice.toFixed(2)}</p>
+                                  ) : (
+                                    <Badge variant="outline" className="text-[10px]">ใช้ราคาแนะนำ</Badge>
+                                  )}
+                                </div>
+                                <div>
+                                  <p className="text-muted-foreground">กำไร</p>
+                                  <p className={profit >= 0 ? "font-medium text-green-600" : "font-medium text-red-600"}>
+                                    ฿{profit.toFixed(2)}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </Card>
+                        );
+                      })}
+                    </div>
+
+                    {/* Desktop Table View */}
+                    <div className="hidden md:block overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="text-sm">ชื่อสินค้า</TableHead>
+                            <TableHead className="text-sm">ราคา API (ทุน)</TableHead>
+                            <TableHead className="text-sm">ราคาแนะนำ</TableHead>
+                            <TableHead className="text-sm">ราคาขายที่ตั้ง</TableHead>
+                            <TableHead className="text-sm">กำไร</TableHead>
+                            <TableHead className="text-sm">สต็อก</TableHead>
+                            <TableHead className="text-sm">จัดการ</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {getFilteredPremiumProducts().map((product) => {
+                            const priceInfo = premiumPrices.get(product.id);
+                            const apiPrice = product.price || 0;
+                            const recommendedPrice = apiPrice;
+                            const sellPrice = priceInfo?.sellPrice || recommendedPrice;
+                            const profit = sellPrice - apiPrice;
+
+                            return (
+                              <TableRow key={product.id}>
+                                <TableCell className="font-medium text-sm">{product.name}</TableCell>
+                                <TableCell className="text-sm">฿{apiPrice.toFixed(2)}</TableCell>
+                                <TableCell className="text-sm">
+                                  <span className="text-blue-600">฿{recommendedPrice.toFixed(2)}</span>
+                                </TableCell>
+                                <TableCell className="text-sm">
+                                  {priceInfo ? (
+                                    <span className="font-semibold text-green-600">
+                                      ฿{sellPrice.toFixed(2)}
+                                    </span>
+                                  ) : (
+                                    <Badge variant="outline" className="text-xs">ใช้ราคาแนะนำ</Badge>
+                                  )}
+                                </TableCell>
+                                <TableCell className="text-sm">
+                                  <span className={profit >= 0 ? "text-green-600" : "text-red-600"}>
+                                    ฿{profit.toFixed(2)}
+                                  </span>
+                                </TableCell>
+                                <TableCell className="text-sm">{product.stock}</TableCell>
+                                <TableCell>
+                                  <div className="flex gap-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() =>
+                                        openEditDialog(
+                                          product.id,
+                                          'premium',
+                                          product.name,
+                                          apiPrice,
+                                          recommendedPrice,
+                                          priceInfo?.sellPrice
+                                        )
+                                      }
+                                    >
+                                      <Edit className="h-4 w-4" />
+                                    </Button>
+                                    {priceInfo && (
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handleDeletePrice(product.id, 'premium')}
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    )}
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </>
                 )}
               </CardContent>
             </Card>
@@ -396,54 +477,29 @@ const PeamsubPriceManagement = () => {
                     <p className="text-muted-foreground">กำลังโหลด...</p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>หมวดหมู่</TableHead>
-                          <TableHead>ข้อมูล</TableHead>
-                          <TableHead>ราคา API (ทุน)</TableHead>
-                          <TableHead>ราคาแนะนำ</TableHead>
-                          <TableHead>ราคาขายที่ตั้ง</TableHead>
-                          <TableHead>กำไร</TableHead>
-                          <TableHead>จัดการ</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {getFilteredGameProducts().map((product) => {
-                          const priceInfo = gamePrices.get(product.id);
-                          const apiPrice = parseFloat(product.price) || 0; // ราคา API (ราคาทุน)
-                          const recommendedPrice = parseFloat(product.recommendedPrice) || 0; // ราคาแนะนำ (ราคาขายเริ่มต้น)
-                          const sellPrice = priceInfo?.sellPrice || recommendedPrice;
-                          const profit = sellPrice - apiPrice;
+                  <>
+                    {/* Mobile Card View */}
+                    <div className="block md:hidden space-y-3">
+                      {getFilteredGameProducts().map((product) => {
+                        const priceInfo = gamePrices.get(product.id);
+                        const apiPrice = parseFloat(product.price) || 0;
+                        const recommendedPrice = parseFloat(product.recommendedPrice) || 0;
+                        const sellPrice = priceInfo?.sellPrice || recommendedPrice;
+                        const profit = sellPrice - apiPrice;
 
-                          return (
-                            <TableRow key={product.id}>
-                              <TableCell className="font-medium">{product.category}</TableCell>
-                              <TableCell className="max-w-xs truncate">{product.info}</TableCell>
-                              <TableCell>฿{apiPrice.toFixed(2)}</TableCell>
-                              <TableCell>
-                                <span className="text-blue-600">฿{recommendedPrice.toFixed(2)}</span>
-                              </TableCell>
-                              <TableCell>
-                                {priceInfo ? (
-                                  <span className="font-semibold text-green-600">
-                                    ฿{sellPrice.toFixed(2)}
-                                  </span>
-                                ) : (
-                                  <Badge variant="outline">ใช้ราคาแนะนำ</Badge>
-                                )}
-                              </TableCell>
-                              <TableCell>
-                                <span className={profit >= 0 ? "text-green-600" : "text-red-600"}>
-                                  ฿{profit.toFixed(2)}
-                                </span>
-                              </TableCell>
-                              <TableCell>
-                                <div className="flex gap-2">
+                        return (
+                          <Card key={product.id} className="p-4">
+                            <div className="space-y-3">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-semibold text-sm mb-1">{product.category}</p>
+                                  <p className="text-xs text-muted-foreground line-clamp-2">{product.info}</p>
+                                </div>
+                                <div className="flex gap-1 flex-shrink-0 ml-2">
                                   <Button
                                     variant="outline"
                                     size="sm"
+                                    className="h-8 w-8 p-0"
                                     onClick={() =>
                                       openEditDialog(
                                         product.id,
@@ -455,25 +511,130 @@ const PeamsubPriceManagement = () => {
                                       )
                                     }
                                   >
-                                    <Edit className="h-4 w-4" />
+                                    <Edit className="h-3 w-3" />
                                   </Button>
                                   {priceInfo && (
                                     <Button
                                       variant="outline"
                                       size="sm"
+                                      className="h-8 w-8 p-0"
                                       onClick={() => handleDeletePrice(product.id, 'game')}
                                     >
-                                      <Trash2 className="h-4 w-4" />
+                                      <Trash2 className="h-3 w-3" />
                                     </Button>
                                   )}
                                 </div>
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
-                  </div>
+                              </div>
+                              <div className="grid grid-cols-2 gap-2 pt-2 border-t text-xs">
+                                <div>
+                                  <p className="text-muted-foreground">ราคา API</p>
+                                  <p className="font-medium">฿{apiPrice.toFixed(2)}</p>
+                                </div>
+                                <div>
+                                  <p className="text-muted-foreground">ราคาแนะนำ</p>
+                                  <p className="font-medium text-blue-600">฿{recommendedPrice.toFixed(2)}</p>
+                                </div>
+                                <div>
+                                  <p className="text-muted-foreground">ราคาขาย</p>
+                                  {priceInfo ? (
+                                    <p className="font-semibold text-green-600">฿{sellPrice.toFixed(2)}</p>
+                                  ) : (
+                                    <Badge variant="outline" className="text-[10px]">ใช้ราคาแนะนำ</Badge>
+                                  )}
+                                </div>
+                                <div>
+                                  <p className="text-muted-foreground">กำไร</p>
+                                  <p className={profit >= 0 ? "font-medium text-green-600" : "font-medium text-red-600"}>
+                                    ฿{profit.toFixed(2)}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </Card>
+                        );
+                      })}
+                    </div>
+
+                    {/* Desktop Table View */}
+                    <div className="hidden md:block overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="text-sm">หมวดหมู่</TableHead>
+                            <TableHead className="text-sm">ข้อมูล</TableHead>
+                            <TableHead className="text-sm">ราคา API (ทุน)</TableHead>
+                            <TableHead className="text-sm">ราคาแนะนำ</TableHead>
+                            <TableHead className="text-sm">ราคาขายที่ตั้ง</TableHead>
+                            <TableHead className="text-sm">กำไร</TableHead>
+                            <TableHead className="text-sm">จัดการ</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {getFilteredGameProducts().map((product) => {
+                            const priceInfo = gamePrices.get(product.id);
+                            const apiPrice = parseFloat(product.price) || 0;
+                            const recommendedPrice = parseFloat(product.recommendedPrice) || 0;
+                            const sellPrice = priceInfo?.sellPrice || recommendedPrice;
+                            const profit = sellPrice - apiPrice;
+
+                            return (
+                              <TableRow key={product.id}>
+                                <TableCell className="font-medium text-sm">{product.category}</TableCell>
+                                <TableCell className="max-w-xs truncate text-sm">{product.info}</TableCell>
+                                <TableCell className="text-sm">฿{apiPrice.toFixed(2)}</TableCell>
+                                <TableCell className="text-sm">
+                                  <span className="text-blue-600">฿{recommendedPrice.toFixed(2)}</span>
+                                </TableCell>
+                                <TableCell className="text-sm">
+                                  {priceInfo ? (
+                                    <span className="font-semibold text-green-600">
+                                      ฿{sellPrice.toFixed(2)}
+                                    </span>
+                                  ) : (
+                                    <Badge variant="outline" className="text-xs">ใช้ราคาแนะนำ</Badge>
+                                  )}
+                                </TableCell>
+                                <TableCell className="text-sm">
+                                  <span className={profit >= 0 ? "text-green-600" : "text-red-600"}>
+                                    ฿{profit.toFixed(2)}
+                                  </span>
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex gap-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() =>
+                                        openEditDialog(
+                                          product.id,
+                                          'game',
+                                          product.category,
+                                          apiPrice,
+                                          recommendedPrice,
+                                          priceInfo?.sellPrice
+                                        )
+                                      }
+                                    >
+                                      <Edit className="h-4 w-4" />
+                                    </Button>
+                                    {priceInfo && (
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handleDeletePrice(product.id, 'game')}
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    )}
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </>
                 )}
               </CardContent>
             </Card>

@@ -454,10 +454,10 @@ const CardTopUp = () => {
     <Layout>
         <div className="space-y-6">
           {/* Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold">บัตรเติมเงินมือถือ</h1>
-              <p className="text-muted-foreground">จัดการบัตรเติมเงินมือถือ</p>
+              <h1 className="text-2xl sm:text-3xl font-bold">บัตรเติมเงินมือถือ</h1>
+              <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">จัดการบัตรเติมเงินมือถือ</p>
             </div>
             <Button onClick={handleRefresh} disabled={loading}>
               <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
@@ -475,7 +475,7 @@ const CardTopUp = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
                   <div>
                     <p className="text-sm text-muted-foreground">ชื่อผู้ใช้</p>
                     <p className="font-semibold">{userInfo.username}</p>

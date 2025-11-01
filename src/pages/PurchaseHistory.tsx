@@ -359,21 +359,21 @@ const PurchaseHistory = () => {
     <Layout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-primary">ประวัติการซื้อสินค้า</h1>
-            <p className="text-muted-foreground mt-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-primary">ประวัติการซื้อสินค้า</h1>
+            <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
               ดูประวัติการซื้อสินค้าทั้งหมดของคุณ
             </p>
           </div>
-          <Button onClick={loadPurchaseHistory} disabled={loading}>
+          <Button onClick={loadPurchaseHistory} disabled={loading} size="sm" className="w-full sm:w-auto">
             <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             รีเฟรช
           </Button>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
@@ -469,14 +469,14 @@ const PurchaseHistory = () => {
           </CardContent>
         </Card>
 
-        {/* Purchase History Table */}
+        {/* Purchase History - Mobile Card View / Desktop Table */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <History className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+              <History className="h-4 w-4 sm:h-5 sm:w-5" />
               รายการซื้อสินค้า
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs sm:text-sm">
               แสดงผลรายการที่ {startIndex + 1} ถึง {Math.min(endIndex, filteredHistory.length)} จาก {filteredHistory.length} รายการ
             </CardDescription>
           </CardHeader>
@@ -487,138 +487,223 @@ const PurchaseHistory = () => {
                 <p className="text-muted-foreground">ไม่พบประวัติการซื้อสินค้า</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left p-3 font-medium">#</th>
-                      <th className="text-left p-3 font-medium">วันที่</th>
-                      <th className="text-left p-3 font-medium">ประเภท</th>
-                      <th className="text-left p-3 font-medium">สินค้า</th>
-                      <th className="text-left p-3 font-medium">จำนวน</th>
-                      <th className="text-left p-3 font-medium">สถานะ</th>
-                      <th className="text-left p-3 font-medium">รายละเอียด</th>
-                      <th className="text-left p-3 font-medium">เคลมสินค้า</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentItems.map((item, index) => (
-                      <tr key={item.id || index} className="border-b hover:bg-muted/50">
-                        <td className="p-3">{startIndex + index + 1}</td>
-                        <td className="p-3">
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
-                            {formatDate(item.createdAt || item.date || new Date().toISOString())}
+              <>
+                {/* Mobile Card View */}
+                <div className="block md:hidden space-y-3">
+                  {currentItems.map((item, index) => (
+                    <Card key={item.id || index} className="p-4">
+                      <div className="space-y-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <p className="font-semibold text-sm mb-1">{getItemName(item)}</p>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <Calendar className="h-3 w-3" />
+                              {formatDate(item.createdAt || item.date || new Date().toISOString())}
+                            </div>
                           </div>
-                        </td>
-                        <td className="p-3">
                           <Badge variant={
                             item.type === 'premium' ? 'default' : 
                             item.type === 'game' ? 'secondary' : 
                             item.type === 'mobile' ? 'destructive' :
                             'outline'
-                          }>
+                          } className="text-xs">
                             {item.type === 'premium' ? 'แอพพรีเมียม' : 
                              item.type === 'game' ? 'เติมเกม' : 
-                             item.type === 'mobile' ? 'เติมเน็ต-เติมเงินมือถือ' :
+                             item.type === 'mobile' ? 'เติมเน็ต' :
                              'บัตรเงินสด'}
                           </Badge>
-                        </td>
-                        <td className="p-3 font-medium">{getItemName(item)}</td>
-                        <td className="p-3">
-                          <div className="flex flex-col">
-                            <span className={`font-semibold ${getDisplayPrice(item).color}`}>
+                        </div>
+                        <div className="flex items-center justify-between pt-2 border-t">
+                          <div>
+                            <p className="text-xs text-muted-foreground">ราคา</p>
+                            <p className={`font-semibold ${getDisplayPrice(item).color}`}>
                               {getDisplayPrice(item).price} บาท
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              {getDisplayPrice(item).label}
-                            </span>
+                            </p>
                           </div>
-                        </td>
-                        <td className="p-3">{getStatusBadge(item.status)}</td>
-                        <td className="p-3">
+                          <div className="text-right">
+                            <p className="text-xs text-muted-foreground">สถานะ</p>
+                            {getStatusBadge(item.status)}
+                          </div>
+                        </div>
+                        <div className="flex gap-2 pt-2">
                           <Button
                             variant="outline"
                             size="sm"
+                            className="flex-1 text-xs"
                             onClick={() => handleViewDetails(item)}
                           >
-                            <Info className="h-4 w-4" />
+                            <Info className="h-3 w-3 mr-1" />
+                            รายละเอียด
                           </Button>
-                        </td>
-                        <td className="p-3">
                           <Button
                             variant="outline"
                             size="sm"
+                            className="flex-1 text-xs"
                             onClick={() => handleClaimProduct(item)}
                             disabled={item.status !== "success" && item.status !== "completed"}
                           >
-                            <AlertTriangle className="h-4 w-4" />
+                            <AlertTriangle className="h-3 w-3 mr-1" />
+                            เคลม
                           </Button>
-                        </td>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left p-3 font-medium text-sm">#</th>
+                        <th className="text-left p-3 font-medium text-sm">วันที่</th>
+                        <th className="text-left p-3 font-medium text-sm">ประเภท</th>
+                        <th className="text-left p-3 font-medium text-sm">สินค้า</th>
+                        <th className="text-left p-3 font-medium text-sm">จำนวน</th>
+                        <th className="text-left p-3 font-medium text-sm">สถานะ</th>
+                        <th className="text-left p-3 font-medium text-sm">รายละเอียด</th>
+                        <th className="text-left p-3 font-medium text-sm">เคลมสินค้า</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {currentItems.map((item, index) => (
+                        <tr key={item.id || index} className="border-b hover:bg-muted/50">
+                          <td className="p-3 text-sm">{startIndex + index + 1}</td>
+                          <td className="p-3 text-sm">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-4 w-4 text-muted-foreground" />
+                              {formatDate(item.createdAt || item.date || new Date().toISOString())}
+                            </div>
+                          </td>
+                          <td className="p-3">
+                            <Badge variant={
+                              item.type === 'premium' ? 'default' : 
+                              item.type === 'game' ? 'secondary' : 
+                              item.type === 'mobile' ? 'destructive' :
+                              'outline'
+                            } className="text-xs">
+                              {item.type === 'premium' ? 'แอพพรีเมียม' : 
+                               item.type === 'game' ? 'เติมเกม' : 
+                               item.type === 'mobile' ? 'เติมเน็ต-เติมเงินมือถือ' :
+                               'บัตรเงินสด'}
+                            </Badge>
+                          </td>
+                          <td className="p-3 font-medium text-sm">{getItemName(item)}</td>
+                          <td className="p-3 text-sm">
+                            <div className="flex flex-col">
+                              <span className={`font-semibold ${getDisplayPrice(item).color}`}>
+                                {getDisplayPrice(item).price} บาท
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                {getDisplayPrice(item).label}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="p-3">{getStatusBadge(item.status)}</td>
+                          <td className="p-3">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleViewDetails(item)}
+                            >
+                              <Info className="h-4 w-4" />
+                            </Button>
+                          </td>
+                          <td className="p-3">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleClaimProduct(item)}
+                              disabled={item.status !== "success" && item.status !== "completed"}
+                            >
+                              <AlertTriangle className="h-4 w-4" />
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-between mt-6">
-                <div className="text-sm text-muted-foreground">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6">
+                <div className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
                   แสดงผลรายการที่ {startIndex + 1} ถึง {Math.min(endIndex, filteredHistory.length)} จาก {filteredHistory.length} รายการ
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 sm:gap-2 w-full sm:w-auto justify-center">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => goToPage(currentPage - 1)}
                     disabled={currentPage === 1}
+                    className="text-xs"
                   >
                     ←
                   </Button>
                   
-                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
-                    if (pageNum > totalPages) return null;
-                    
-                    return (
-                      <Button
-                        key={pageNum}
-                        variant={currentPage === pageNum ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => goToPage(pageNum)}
-                      >
-                        {pageNum}
-                      </Button>
-                    );
-                  })}
+                  {/* Mobile: Show less pages */}
+                  <div className="hidden sm:flex items-center gap-2">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+                      if (pageNum > totalPages) return null;
+                      
+                      return (
+                        <Button
+                          key={pageNum}
+                          variant={currentPage === pageNum ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => goToPage(pageNum)}
+                          className="text-xs"
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                  
+                  {/* Mobile: Show current page only */}
+                  <div className="flex sm:hidden items-center gap-1">
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="text-xs"
+                      disabled
+                    >
+                      {currentPage} / {totalPages}
+                    </Button>
+                  </div>
                   
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => goToPage(currentPage + 1)}
                     disabled={currentPage === totalPages}
+                    className="text-xs"
                   >
                     →
                   </Button>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">กรอกเลขหน้าที่ต้องการไป...</span>
-                  <Input
-                    type="number"
-                    min="1"
-                    max={totalPages}
-                    value={currentPage}
-                    onChange={(e) => {
-                      const page = parseInt(e.target.value);
-                      if (page >= 1 && page <= totalPages) {
-                        goToPage(page);
-                      }
-                    }}
-                    className="w-16"
-                  />
+                  
+                  {/* Desktop: Page input */}
+                  <div className="hidden lg:flex items-center gap-2 ml-2">
+                    <span className="text-xs text-muted-foreground">ไปหน้า:</span>
+                    <Input
+                      type="number"
+                      min="1"
+                      max={totalPages}
+                      value={currentPage}
+                      onChange={(e) => {
+                        const page = parseInt(e.target.value);
+                        if (page >= 1 && page <= totalPages) {
+                          goToPage(page);
+                        }
+                      }}
+                      className="w-16 h-8 text-xs"
+                    />
+                  </div>
                 </div>
               </div>
             )}

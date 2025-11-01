@@ -227,13 +227,13 @@ const Layout = ({ children }: LayoutProps) => {
 
       {/* Balance Display */}
       {userData && (
-        <div className="border-b border-border px-6 py-4">
+        <div className="border-b border-border px-4 lg:px-6 py-3 lg:py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Wallet className="h-4 w-4 text-green-600" />
-              <span className="text-sm text-gray-600">ยอดเงิน:</span>
+              <Wallet className="h-4 w-4 text-green-600 flex-shrink-0" />
+              <span className="text-xs lg:text-sm text-gray-600">ยอดเงิน:</span>
             </div>
-            <span className="font-semibold text-green-600">
+            <span className="font-semibold text-green-600 text-sm lg:text-base">
               ฿{(userData.balance || 0).toLocaleString()}
             </span>
           </div>
@@ -241,7 +241,7 @@ const Layout = ({ children }: LayoutProps) => {
       )}
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
+      <nav className="flex-1 space-y-1 px-2 lg:px-3 py-3 lg:py-4 overflow-y-auto">
         {navigation.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.href);
@@ -251,18 +251,18 @@ const Layout = ({ children }: LayoutProps) => {
               to={item.href}
               onClick={() => {}}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
+                "flex items-center gap-2 lg:gap-3 rounded-lg px-2 lg:px-3 py-2 lg:py-2.5 text-xs lg:text-sm font-medium transition-all",
                 active
                   ? "bg-primary text-primary-foreground shadow-glow"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
-              <Icon className="h-5 w-5" />
-              <span className="flex-1">{item.name}</span>
+              <Icon className="h-4 w-4 lg:h-5 lg:w-5 flex-shrink-0" />
+              <span className="flex-1 truncate">{item.name}</span>
               {item.badge && (
                 <Badge 
                   variant="destructive" 
-                  className="ml-auto h-5 min-w-5 px-1.5 text-xs font-bold"
+                  className="ml-auto h-4 lg:h-5 min-w-4 lg:min-w-5 px-1 lg:px-1.5 text-[10px] lg:text-xs font-bold flex-shrink-0"
                 >
                   {item.badge}
                 </Badge>
@@ -366,8 +366,8 @@ const Layout = ({ children }: LayoutProps) => {
       </div>
 
       {/* Main content */}
-      <main className="flex-1 lg:ml-64 pt-16 lg:pt-0">
-        <div className="mx-auto w-full px-4 sm:px-6 lg:px-8">{children}</div>
+      <main className="flex-1 lg:ml-64 pt-16 lg:pt-0 pb-4 lg:pb-8">
+        <div className="mx-auto w-full px-3 sm:px-4 lg:px-8 max-w-7xl">{children}</div>
       </main>
     </div>
   );
