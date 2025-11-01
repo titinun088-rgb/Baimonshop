@@ -380,9 +380,8 @@ const TopUp = () => {
   if (!selectedPaymentMethod) {
     return (
       <Layout>
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
-          <div className="container mx-auto px-4 py-8">
-            <div className="max-w-6xl mx-auto">
+        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 -mx-3 sm:-mx-4 lg:-mx-6 xl:-mx-8 -mt-16 lg:-mt-16">
+          <div className="w-full px-3 sm:px-4 lg:px-6 xl:px-8 pt-20 lg:pt-20">
               {/* Header */}
               <div className="mb-8 text-center">
                 <h1 className="text-5xl font-bold text-white flex items-center justify-center gap-3 mb-4">
@@ -498,7 +497,6 @@ const TopUp = () => {
                   </div>
                 </CardContent>
               </Card>
-            </div>
           </div>
         </div>
       </Layout>
@@ -508,9 +506,8 @@ const TopUp = () => {
   // Show the payment form after method selection
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
-        <div className="container mx-auto px-4 py-8">
-          <div className="max-w-6xl mx-auto">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 -mx-3 sm:-mx-4 lg:-mx-6 xl:-mx-8 -mt-16 lg:-mt-16">
+        <div className="w-full px-3 sm:px-4 lg:px-6 xl:px-8 pt-20 lg:pt-20">
             {/* Header with Back Button */}
             <div className="mb-6">
               <Button
@@ -903,8 +900,6 @@ const TopUp = () => {
               </CardContent>
             </Card>
           </div>
-          </div>
-          
         </div>
       </div>
     </Layout>

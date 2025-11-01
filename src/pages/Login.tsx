@@ -82,7 +82,7 @@ const Login = () => {
               CoinZone
             </h1>
           </div>
-          <p className="text-muted-foreground">ระบบจัดการร้านเกม</p>
+          <p className="text-muted-foreground">รับเติมเกมและแอปพรีเมียม</p>
         </div>
 
         <Card className="border-border bg-card shadow-card">

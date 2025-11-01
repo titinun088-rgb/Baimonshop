@@ -50,9 +50,8 @@ const QRCodeManager = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900">
-        <div className="container mx-auto px-4 py-8">
-          <div className="max-w-6xl mx-auto">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 -mx-3 sm:-mx-4 lg:-mx-6 xl:-mx-8 -mt-16 lg:-mt-16">
+        <div className="w-full px-3 sm:px-4 lg:px-6 xl:px-8 pt-20 lg:pt-20">
             {/* Header */}
             <div className="mb-8">
               <h1 className="text-4xl font-bold flex items-center gap-3 mb-2 text-white">
@@ -205,7 +204,6 @@ const QRCodeManager = () => {
               <p>• สามารถดาวน์โหลด QR Code เป็นรูปภาพได้</p>
             </CardContent>
           </Card>
-          </div>
         </div>
       </div>
     </Layout>

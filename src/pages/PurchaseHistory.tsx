@@ -109,12 +109,12 @@ const PurchaseHistory = () => {
       // Sync ประวัติใหม่จาก API (เพื่ออัปเดตข้อมูลล่าสุด)
       try {
         const [premiumHistoryAPI, gameHistoryAPI, mobileHistoryAPI, cardHistoryAPI] = await Promise.all([
-          getPeamsubPurchaseHistory(premiumRefs.length > 0 ? premiumRefs : []).catch(() => []),
-          getPeamsubGameHistory(gameRefs.length > 0 ? gameRefs : []).catch(() => []),
-          getPeamsubMobileHistory(mobileRefs.length > 0 ? mobileRefs : []).catch(() => []),
-          getPeamsubCashCardHistory(cashCardRefs.length > 0 ? cashCardRefs : []).catch(() => [])
-        ]);
-        
+        getPeamsubPurchaseHistory(premiumRefs.length > 0 ? premiumRefs : []).catch(() => []),
+        getPeamsubGameHistory(gameRefs.length > 0 ? gameRefs : []).catch(() => []),
+        getPeamsubMobileHistory(mobileRefs.length > 0 ? mobileRefs : []).catch(() => []),
+        getPeamsubCashCardHistory(cashCardRefs.length > 0 ? cashCardRefs : []).catch(() => [])
+      ]);
+      
         // Sync ลง Firestore (จะรักษา sellPrice ไว้)
         await Promise.all([
           syncPurchaseHistoryFromAPI(userId, 'premium', premiumHistoryAPI),
@@ -154,10 +154,10 @@ const PurchaseHistory = () => {
       } catch (error) {
         console.warn('⚠️ บางส่วนของ sync ล้มเหลว:', error);
         // แสดงข้อมูลจาก Firestore ที่มีอยู่แล้ว
-        setPurchaseHistory(premiumHistory);
-        setGameHistory(gameHistoryData);
-        setMobileHistory(mobileHistoryData);
-        setCardHistory(cardHistoryData);
+      setPurchaseHistory(premiumHistory);
+      setGameHistory(gameHistoryData);
+      setMobileHistory(mobileHistoryData);
+      setCardHistory(cardHistoryData);
       }
     } catch (error) {
       console.error("Error loading purchase history:", error);
@@ -553,9 +553,9 @@ const PurchaseHistory = () => {
 
                 {/* Desktop Table View */}
                 <div className="hidden md:block overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b">
                         <th className="text-left p-3 font-medium text-sm">#</th>
                         <th className="text-left p-3 font-medium text-sm">วันที่</th>
                         <th className="text-left p-3 font-medium text-sm">ประเภท</th>
@@ -564,67 +564,67 @@ const PurchaseHistory = () => {
                         <th className="text-left p-3 font-medium text-sm">สถานะ</th>
                         <th className="text-left p-3 font-medium text-sm">รายละเอียด</th>
                         <th className="text-left p-3 font-medium text-sm">เคลมสินค้า</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {currentItems.map((item, index) => (
-                        <tr key={item.id || index} className="border-b hover:bg-muted/50">
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentItems.map((item, index) => (
+                      <tr key={item.id || index} className="border-b hover:bg-muted/50">
                           <td className="p-3 text-sm">{startIndex + index + 1}</td>
                           <td className="p-3 text-sm">
-                            <div className="flex items-center gap-2">
-                              <Calendar className="h-4 w-4 text-muted-foreground" />
-                              {formatDate(item.createdAt || item.date || new Date().toISOString())}
-                            </div>
-                          </td>
-                          <td className="p-3">
-                            <Badge variant={
-                              item.type === 'premium' ? 'default' : 
-                              item.type === 'game' ? 'secondary' : 
-                              item.type === 'mobile' ? 'destructive' :
-                              'outline'
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            {formatDate(item.createdAt || item.date || new Date().toISOString())}
+                          </div>
+                        </td>
+                        <td className="p-3">
+                          <Badge variant={
+                            item.type === 'premium' ? 'default' : 
+                            item.type === 'game' ? 'secondary' : 
+                            item.type === 'mobile' ? 'destructive' :
+                            'outline'
                             } className="text-xs">
-                              {item.type === 'premium' ? 'แอพพรีเมียม' : 
-                               item.type === 'game' ? 'เติมเกม' : 
-                               item.type === 'mobile' ? 'เติมเน็ต-เติมเงินมือถือ' :
-                               'บัตรเงินสด'}
-                            </Badge>
-                          </td>
+                            {item.type === 'premium' ? 'แอพพรีเมียม' : 
+                             item.type === 'game' ? 'เติมเกม' : 
+                             item.type === 'mobile' ? 'เติมเน็ต-เติมเงินมือถือ' :
+                             'บัตรเงินสด'}
+                          </Badge>
+                        </td>
                           <td className="p-3 font-medium text-sm">{getItemName(item)}</td>
                           <td className="p-3 text-sm">
-                            <div className="flex flex-col">
-                              <span className={`font-semibold ${getDisplayPrice(item).color}`}>
-                                {getDisplayPrice(item).price} บาท
-                              </span>
-                              <span className="text-xs text-gray-500">
-                                {getDisplayPrice(item).label}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="p-3">{getStatusBadge(item.status)}</td>
-                          <td className="p-3">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleViewDetails(item)}
-                            >
-                              <Info className="h-4 w-4" />
-                            </Button>
-                          </td>
-                          <td className="p-3">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleClaimProduct(item)}
-                              disabled={item.status !== "success" && item.status !== "completed"}
-                            >
-                              <AlertTriangle className="h-4 w-4" />
-                            </Button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                          <div className="flex flex-col">
+                            <span className={`font-semibold ${getDisplayPrice(item).color}`}>
+                              {getDisplayPrice(item).price} บาท
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {getDisplayPrice(item).label}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="p-3">{getStatusBadge(item.status)}</td>
+                        <td className="p-3">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleViewDetails(item)}
+                          >
+                            <Info className="h-4 w-4" />
+                          </Button>
+                        </td>
+                        <td className="p-3">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleClaimProduct(item)}
+                            disabled={item.status !== "success" && item.status !== "completed"}
+                          >
+                            <AlertTriangle className="h-4 w-4" />
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
               </>
             )}
 
@@ -647,22 +647,22 @@ const PurchaseHistory = () => {
                   
                   {/* Mobile: Show less pages */}
                   <div className="hidden sm:flex items-center gap-2">
-                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                      const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
-                      if (pageNum > totalPages) return null;
-                      
-                      return (
-                        <Button
-                          key={pageNum}
-                          variant={currentPage === pageNum ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => goToPage(pageNum)}
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+                    if (pageNum > totalPages) return null;
+                    
+                    return (
+                      <Button
+                        key={pageNum}
+                        variant={currentPage === pageNum ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => goToPage(pageNum)}
                           className="text-xs"
-                        >
-                          {pageNum}
-                        </Button>
-                      );
-                    })}
+                      >
+                        {pageNum}
+                      </Button>
+                    );
+                  })}
                   </div>
                   
                   {/* Mobile: Show current page only */}
@@ -686,23 +686,23 @@ const PurchaseHistory = () => {
                   >
                     →
                   </Button>
-                  
+                
                   {/* Desktop: Page input */}
                   <div className="hidden lg:flex items-center gap-2 ml-2">
                     <span className="text-xs text-muted-foreground">ไปหน้า:</span>
-                    <Input
-                      type="number"
-                      min="1"
-                      max={totalPages}
-                      value={currentPage}
-                      onChange={(e) => {
-                        const page = parseInt(e.target.value);
-                        if (page >= 1 && page <= totalPages) {
-                          goToPage(page);
-                        }
-                      }}
+                  <Input
+                    type="number"
+                    min="1"
+                    max={totalPages}
+                    value={currentPage}
+                    onChange={(e) => {
+                      const page = parseInt(e.target.value);
+                      if (page >= 1 && page <= totalPages) {
+                        goToPage(page);
+                      }
+                    }}
                       className="w-16 h-8 text-xs"
-                    />
+                  />
                   </div>
                 </div>
               </div>

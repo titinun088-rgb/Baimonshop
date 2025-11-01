@@ -5,6 +5,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu";
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 import {
   LayoutDashboard,
@@ -31,6 +39,7 @@ import {
   Smartphone,
   Home,
   DollarSign,
+  ChevronDown,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -39,162 +48,242 @@ interface LayoutProps {
   children: ReactNode;
 }
 
+interface NavItem {
+  name: string;
+  href: string;
+  icon: any;
+  roles: string[];
+  badge?: number;
+}
+
+interface NavCategory {
+  name: string;
+  icon: any;
+  items: NavItem[];
+}
+
 const Layout = ({ children }: LayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, userData, signOut, invitationCount } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // เมนูทั้งหมด พร้อมระบุว่าใครเห็นได้บ้าง
-  const allNavigation: Array<{
-    name: string;
-    href: string;
-    icon: any;
-    roles: string[];
-    badge?: number;
-  }> = [
-    // เมนูหลักที่ต้องการให้อยู่บนสุด
+  // เมนูทั้งหมด
+  const allNavigation: NavItem[] = [
+    // หลัก
     { 
       name: "หน้าหลัก", 
-      href: "/", 
+      href: "/home", 
       icon: Home,
-      roles: ['admin', 'seller'] // ทุกคนเห็น
+      roles: ['admin', 'seller']
     },
+    
+    // ซื้อ/เติม
     { 
       name: "เติมเกม", 
       href: "/game-topup", 
       icon: Gamepad2,
-      roles: ['admin', 'seller'] // ทุกคนเห็น
+      roles: ['admin', 'seller']
     },
     { 
       name: "แอปพรีเมียม", 
       href: "/premium-app", 
       icon: Package,
-      roles: ['admin', 'seller'] // ทุกคนเห็น
+      roles: ['admin', 'seller']
     },
     { 
       name: "บัตรเติมเงิน", 
       href: "/card-topup", 
       icon: CreditCard,
-      roles: ['admin', 'seller'] // ทุกคนเห็น
+      roles: ['admin', 'seller']
     },
     {
       name: "บัตรเงินสด",
       href: "/cash-card",
       icon: CreditCard,
-      roles: ['admin', 'seller'] // ทุกคนเห็น
+      roles: ['admin', 'seller']
     },
+    
+    // ประวัติ
     {
       name: "ประวัติการซื้อสินค้า",
       href: "/purchase-history",
       icon: Package,
-      roles: ['admin', 'seller'] // ทุกคนเห็น
-    },
-    
-    // เมนูอื่นๆ
-    { 
-      name: "Dashboard", 
-      href: "/dashboard", 
-      icon: LayoutDashboard,
-      roles: ['admin'] // เฉพาะแอดมิน
-    },
-    { 
-      name: "เกม", 
-      href: "/games", 
-      icon: Gamepad2,
-      roles: ['admin'] // เฉพาะแอดมิน
-    },
-    { 
-      name: "ยอดขาย", 
-      href: "/sales", 
-      icon: ShoppingCart,
-      roles: ['admin'] // เฉพาะแอดมิน
-    },
-    { 
-      name: "เติมเงิน", 
-      href: "/top-up", 
-      icon: Wallet,
-      roles: ['admin', 'seller'] // ทุกคนเห็น
+      roles: ['admin', 'seller']
     },
     { 
       name: "ประวัติการเติมเงิน", 
       href: "/top-up-history", 
       icon: History,
-      roles: ['admin', 'seller'] // ทุกคนเห็น
+      roles: ['admin', 'seller']
     },
     { 
       name: "ประวัติสลิป", 
       href: "/slip-history", 
       icon: Receipt,
-      roles: ['admin', 'seller'] // ทุกคนเห็น
+      roles: ['admin', 'seller']
+    },
+    
+    // การเงิน
+    { 
+      name: "เติมเงิน", 
+      href: "/top-up", 
+      icon: Wallet,
+      roles: ['admin', 'seller']
     },
     { 
       name: "ข้อมูลบัญชี", 
       href: "/account-info", 
       icon: Building2,
-      roles: ['admin', 'seller'] // ทุกคนเห็น
+      roles: ['admin', 'seller']
     },
-    { 
-      name: "ผู้ใช้", 
-      href: "/users", 
-      icon: Users,
-      roles: ['admin'] // เฉพาะ Admin
-    },
-    { 
-      name: "กิจกรรม", 
-      href: "/activity", 
-      icon: Activity,
-      roles: ['admin'] // เฉพาะ Admin
-    },
+    
+    // แจ้งเตือน
     { 
       name: "แจ้งเตือน",
       href: "/notifications", 
       icon: Bell,
-      roles: ['admin', 'seller'] // ทุกคนเห็น
-    },
-    { 
-      name: "รายงานปัญหา", 
-      href: "/reports", 
-      icon: AlertCircle,
-      roles: ['admin'] // เฉพาะ Admin
+      roles: ['admin', 'seller']
     },
     { 
       name: "แจ้งปัญหา", 
       href: "/my-reports", 
       icon: MessageSquare,
-      roles: ['seller'] // เฉพาะ Seller
+      roles: ['seller']
+    },
+    
+    // จัดการ (Admin)
+    { 
+      name: "Dashboard", 
+      href: "/dashboard", 
+      icon: LayoutDashboard,
+      roles: ['admin']
+    },
+    { 
+      name: "เกม", 
+      href: "/games", 
+      icon: Gamepad2,
+      roles: ['admin']
+    },
+    { 
+      name: "ยอดขาย", 
+      href: "/sales", 
+      icon: ShoppingCart,
+      roles: ['admin']
+    },
+    { 
+      name: "ผู้ใช้", 
+      href: "/users", 
+      icon: Users,
+      roles: ['admin']
+    },
+    { 
+      name: "กิจกรรม", 
+      href: "/activity", 
+      icon: Activity,
+      roles: ['admin']
+    },
+    { 
+      name: "รายงานปัญหา", 
+      href: "/reports", 
+      icon: AlertCircle,
+      roles: ['admin']
     },
     { 
       name: "คำขอผู้ดูแล", 
       href: "/invitations", 
       icon: UserPlus,
-      roles: ['admin'], // เฉพาะแอดมิน
-      badge: invitationCount > 0 ? invitationCount : undefined // แสดง badge ถ้ามีคำขอ
-    },
-    { 
-      name: "โปรไฟล์", 
-      href: "/profile", 
-      icon: User,
-      roles: ['admin', 'seller'] // ทุกคนเห็น
+      roles: ['admin'],
+      badge: invitationCount > 0 ? invitationCount : undefined
     },
     { 
       name: "Peamsub API", 
       href: "/peamsub-api", 
       icon: Wifi,
-      roles: ['admin'] // เฉพาะแอดมิน
+      roles: ['admin']
     },
     { 
       name: "จัดการราคา Peamsub", 
       href: "/peamsub-price-management", 
       icon: DollarSign,
-      roles: ['admin'] // เฉพาะแอดมิน
+      roles: ['admin']
+    },
+    
+    // โปรไฟล์
+    { 
+      name: "โปรไฟล์", 
+      href: "/profile", 
+      icon: User,
+      roles: ['admin', 'seller']
     },
   ];
 
-  // กรองเมนูตาม role ของ user
+  // กรองเมนูตาม role
   const navigation = allNavigation.filter(item => 
     item.roles.includes(userData?.role || 'seller')
   );
+
+  // จัดหมวดหมู่เมนู
+  const getCategorizedMenus = (): NavCategory[] => {
+    const categories: NavCategory[] = [
+      {
+        name: "หลัก",
+        icon: Home,
+        items: navigation.filter(item => item.name === "หน้าหลัก")
+      },
+      {
+        name: "ซื้อ/เติม",
+        icon: ShoppingCart,
+        items: navigation.filter(item => 
+          ["เติมเกม", "แอปพรีเมียม", "บัตรเติมเงิน", "บัตรเงินสด"].includes(item.name)
+        )
+      },
+      {
+        name: "ประวัติ",
+        icon: History,
+        items: navigation.filter(item => 
+          ["ประวัติการซื้อสินค้า", "ประวัติการเติมเงิน", "ประวัติสลิป"].includes(item.name)
+        )
+      },
+      {
+        name: "การเงิน",
+        icon: Wallet,
+        items: navigation.filter(item => 
+          ["เติมเงิน", "ข้อมูลบัญชี"].includes(item.name)
+        )
+      },
+      {
+        name: "แจ้งเตือน",
+        icon: Bell,
+        items: navigation.filter(item => 
+          ["แจ้งเตือน", "แจ้งปัญหา"].includes(item.name)
+        )
+      },
+    ];
+
+    // เพิ่มหมวดจัดการสำหรับ Admin
+    if (userData?.role === 'admin') {
+      categories.push({
+        name: "จัดการ",
+        icon: LayoutDashboard,
+        items: navigation.filter(item => 
+          ["Dashboard", "เกม", "ยอดขาย", "ผู้ใช้", "กิจกรรม", "รายงานปัญหา", "คำขอผู้ดูแล", "Peamsub API", "จัดการราคา Peamsub"].includes(item.name)
+        )
+      });
+    }
+
+    // เพิ่มโปรไฟล์
+    categories.push({
+      name: "โปรไฟล์",
+      icon: User,
+      items: navigation.filter(item => item.name === "โปรไฟล์")
+    });
+
+    // กรองหมวดหมู่ที่ไม่มี items
+    return categories.filter(cat => cat.items.length > 0);
+  };
+
+  const categorizedMenus = getCategorizedMenus();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -208,7 +297,7 @@ const Layout = ({ children }: LayoutProps) => {
     }
   };
 
-  // Sidebar content component (ใช้ทั้ง desktop และ mobile)
+  // Sidebar content for mobile (with categories)
   const SidebarContent = ({ onNavigate }: { onNavigate?: () => void }) => (
     <div className="flex h-full flex-col">
       {/* Logo */}
@@ -240,34 +329,52 @@ const Layout = ({ children }: LayoutProps) => {
         </div>
       )}
 
-      {/* Navigation */}
-      <nav className="flex-1 space-y-1 px-2 lg:px-3 py-3 lg:py-4 overflow-y-auto">
-        {navigation.map((item) => {
+      {/* Navigation with Categories */}
+      <nav className="flex-1 space-y-2 px-2 lg:px-3 py-3 lg:py-4 overflow-y-auto">
+        {categorizedMenus.map((category) => {
+          const CategoryIcon = category.icon;
+          return (
+            <div key={category.name} className="space-y-1">
+              {/* Category Header */}
+              <div className="flex items-center gap-2 px-2 lg:px-3 py-1.5 text-sm font-bold text-white uppercase tracking-wider">
+                <CategoryIcon className="h-3 w-3 lg:h-4 lg:w-4" />
+                <span>{category.name}</span>
+              </div>
+              
+              {/* Category Items */}
+              <div className="space-y-0.5">
+                {category.items.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.href);
           return (
             <Link
               key={item.name}
               to={item.href}
-              onClick={() => {}}
+                      onClick={() => {
+                        if (onNavigate) onNavigate();
+                      }}
               className={cn(
-                "flex items-center gap-2 lg:gap-3 rounded-lg px-2 lg:px-3 py-2 lg:py-2.5 text-xs lg:text-sm font-medium transition-all",
+                        "flex items-center gap-2 lg:gap-3 rounded-lg px-2 lg:px-3 py-2 lg:py-2.5 text-xs lg:text-sm font-medium transition-all",
                 active
-                  ? "bg-primary text-primary-foreground shadow-glow"
+                          ? "bg-primary text-primary-foreground shadow-sm"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
-              <Icon className="h-4 w-4 lg:h-5 lg:w-5 flex-shrink-0" />
-              <span className="flex-1 truncate">{item.name}</span>
+                      <Icon className="h-4 w-4 lg:h-5 lg:w-5 flex-shrink-0" />
+                      <span className="flex-1 truncate">{item.name}</span>
               {item.badge && (
                 <Badge 
                   variant="destructive" 
-                  className="ml-auto h-4 lg:h-5 min-w-4 lg:min-w-5 px-1 lg:px-1.5 text-[10px] lg:text-xs font-bold flex-shrink-0"
+                          className="ml-auto h-4 lg:h-5 min-w-4 lg:min-w-5 px-1 lg:px-1.5 text-[10px] lg:text-xs font-bold flex-shrink-0"
                 >
                   {item.badge}
                 </Badge>
               )}
             </Link>
+                  );
+                })}
+              </div>
+            </div>
           );
         })}
       </nav>
@@ -276,7 +383,9 @@ const Layout = ({ children }: LayoutProps) => {
       <div className="border-t border-border p-4">
         <Link 
           to="/profile" 
-          onClick={() => {}}
+          onClick={() => {
+            if (onNavigate) onNavigate();
+          }}
           className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted transition-colors group"
         >
           <div className="relative">
@@ -327,16 +436,167 @@ const Layout = ({ children }: LayoutProps) => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Desktop Sidebar */}
-      <aside className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-64 lg:flex-col">
-        <SidebarContent />
-      </aside>
+      {/* Desktop Top Navbar */}
+      <header className="hidden lg:block fixed top-0 left-0 right-0 z-50 h-16 border-b border-border bg-card shadow-sm">
+        <div className="h-full px-4">
+          <div className="flex items-center justify-between h-full px-6">
+            {/* Logo */}
+            <Link to="/home" className="flex items-center gap-3 flex-shrink-0">
+              <img 
+                src="/logo.png" 
+                alt="CoinZone Logo" 
+                className="h-8 w-8 object-contain"
+              />
+              <span className="text-lg font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+                CoinZone
+              </span>
+            </Link>
+
+            {/* Navigation Menu */}
+            <nav className="flex-1 flex items-center justify-center gap-1 h-full">
+              {categorizedMenus.map((category) => {
+                const CategoryIcon = category.icon;
+                
+                // ถ้ามีแค่ 1 item และเป็น "หน้าหลัก" ให้แสดงเป็น link ธรรมดา
+                if (category.items.length === 1 && category.items[0].name === "หน้าหลัก") {
+                  const item = category.items[0];
+                  const active = isActive(item.href);
+                  return (
+                    <Link
+                      key={category.name}
+                      to={item.href}
+                      className={cn(
+                        "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors h-10",
+                        active
+                          ? "bg-primary text-primary-foreground"
+                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      )}
+                    >
+                      <CategoryIcon className="h-4 w-4" />
+                      {item.name}
+                    </Link>
+                  );
+                }
+
+                // ถ้ามีหลาย items ให้แสดงเป็น dropdown
+                return (
+                  <DropdownMenu key={category.name}>
+                    <DropdownMenuTrigger
+                      className={cn(
+                        "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors h-10 outline-none",
+                        "text-muted-foreground hover:bg-muted hover:text-foreground",
+                        "data-[state=open]:bg-muted data-[state=open]:text-foreground"
+                      )}
+                    >
+                      <CategoryIcon className="h-4 w-4" />
+                      <span>{category.name}</span>
+                      <ChevronDown className="h-3 w-3 opacity-50" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="w-56">
+                      <DropdownMenuLabel className="flex items-center gap-2">
+                        <CategoryIcon className="h-4 w-4" />
+                        {category.name}
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      {category.items.map((item) => {
+                        const Icon = item.icon;
+                        const active = isActive(item.href);
+                        return (
+                          <DropdownMenuItem key={item.name} asChild>
+                            <Link
+                              to={item.href}
+                              className={cn(
+                                "flex items-center gap-2 cursor-pointer",
+                                active && "bg-muted"
+                              )}
+                            >
+                              <Icon className="h-4 w-4" />
+                              <span className="flex-1">{item.name}</span>
+                              {item.badge && (
+                                <Badge variant="destructive" className="h-5 min-w-5 px-1.5 text-xs font-bold">
+                                  {item.badge}
+                                </Badge>
+                              )}
+                            </Link>
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                );
+              })}
+            </nav>
+
+            {/* Right Side: Balance & User */}
+            <div className="flex items-center gap-4 flex-shrink-0">
+              {/* Balance */}
+              {userData && (
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-green-500/10 border border-green-500/20">
+                  <Wallet className="h-4 w-4 text-green-600" />
+                  <span className="text-sm font-semibold text-green-600">
+                    ฿{(userData.balance || 0).toLocaleString()}
+                  </span>
+                </div>
+              )}
+
+              {/* User Avatar Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-ring">
+                    <Avatar className="h-9 w-9">
+                      <AvatarImage 
+                        src={userData?.photoURL || undefined} 
+                        alt={user?.displayName || "User"} 
+                      />
+                      <AvatarFallback className="bg-gradient-secondary text-primary-foreground">
+                        {user?.displayName?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                    {userData?.role === 'admin' && (
+                      <div className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary border-2 border-card flex items-center justify-center">
+                        <Shield className="h-2.5 w-2.5 text-primary-foreground" />
+                      </div>
+                    )}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium">
+                        {user?.displayName || "ผู้ใช้"}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {user?.email || ""}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile" className="flex items-center gap-2 cursor-pointer">
+                      <User className="h-4 w-4" />
+                      โปรไฟล์
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem 
+                    onClick={handleSignOut}
+                    className="text-destructive focus:text-destructive cursor-pointer"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    ออกจากระบบ
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        </div>
+      </header>
 
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 h-16 border-b border-border bg-card shadow-sm">
         <div className="flex items-center justify-between h-full px-4">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/home" className="flex items-center gap-2">
             <img 
               src="/logo.png" 
               alt="CoinZone Logo" 
@@ -366,8 +626,8 @@ const Layout = ({ children }: LayoutProps) => {
       </div>
 
       {/* Main content */}
-      <main className="flex-1 lg:ml-64 pt-16 lg:pt-0 pb-4 lg:pb-8">
-        <div className="mx-auto w-full px-3 sm:px-4 lg:px-8 max-w-7xl">{children}</div>
+      <main className="flex-1 pt-16 lg:pt-16 pb-4 lg:pb-8">
+        <div className="w-full px-3 sm:px-4 lg:px-6 xl:px-8">{children}</div>
       </main>
     </div>
   );

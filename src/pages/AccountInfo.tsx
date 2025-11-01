@@ -133,8 +133,7 @@ const AccountInfo = () => {
   if (error && !accountInfo) {
     return (
       <Layout>
-        <div className="container mx-auto px-4 py-8">
-          <div className="max-w-4xl mx-auto">
+        <div className="w-full">
             <div className="mb-6">
               <h1 className="text-3xl font-bold text-gray-900">ข้อมูลบัญชี</h1>
               <p className="text-gray-600 mt-2">ข้อมูลบัญชีและโควต้าของคุณ</p>
@@ -160,7 +159,6 @@ const AccountInfo = () => {
                 )}
               </Button>
             </div>
-          </div>
         </div>
       </Layout>
     );
@@ -168,8 +166,7 @@ const AccountInfo = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
+      <div className="w-full">
           {/* Header */}
           <div className="mb-6">
             <div className="flex items-center justify-between">
@@ -479,7 +476,6 @@ const AccountInfo = () => {
               </AlertDescription>
             </Alert>
           )}
-        </div>
       </div>
     </Layout>
   );

@@ -1,27 +1,22 @@
-import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
-import { toast } from "sonner";
-import Layout from "@/components/Layout";
-import Home from "./Home";
+import { useAuth } from "@/contexts/AuthContext";
+import { Navigate } from "react-router-dom";
+import Landing from "./Landing";
 
 const Index = () => {
-  const location = useLocation();
+  const { user, userData, loading } = useAuth();
 
-  // แสดงข้อความเตือนเมื่อถูก redirect กลับเพราะไม่มีสิทธิ์
-  useEffect(() => {
-    const state = location.state as { error?: string } | null;
-    if (state?.error) {
-      toast.error(state.error);
-      // ล้าง state เพื่อไม่ให้แสดง toast ซ้ำเมื่อ refresh
-      window.history.replaceState({}, document.title);
-    }
-  }, [location]);
+  // ถ้ายังกำลังโหลด ให้แสดงหน้า Landing
+  if (loading) {
+    return <Landing />;
+  }
 
-  return (
-    <Layout>
-      <Home />
-    </Layout>
-  );
+  // ถ้าล็อกอินแล้ว redirect ไปหน้า Home
+  if (user && userData && user.emailVerified && userData.verified) {
+    return <Navigate to="/home" replace />;
+  }
+
+  // แสดงหน้า Landing สำหรับผู้ใช้ที่ไม่ล็อกอิน
+  return <Landing />;
 };
 
 export default Index;

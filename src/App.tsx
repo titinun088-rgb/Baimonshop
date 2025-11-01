@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Home from "./pages/Home";
+import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
 import Games from "./pages/Games";
 import GameDetail from "./pages/GameDetail";
@@ -55,6 +56,7 @@ const AppRoutes = () => {
     >
       <Routes>
         {/* Public Routes - ไม่ต้องล็อกอิน */}
+        <Route path="/" element={<Index />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -67,7 +69,7 @@ const AppRoutes = () => {
         
         {/* Protected Routes - ต้องล็อกอินและยืนยันอีเมล */}
         <Route
-          path="/"
+          path="/home"
           element={
             <ProtectedRoute requireEmailVerification={true}>
               <Home />

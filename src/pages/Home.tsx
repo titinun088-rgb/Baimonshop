@@ -43,27 +43,13 @@ const Home = () => {
       path: "/game-topup",
       gradient: "from-blue-500 to-cyan-500",
       image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400"
-    },
-    {
-      title: "บัตรเงินสด",
-      icon: CreditCard,
-      path: "/cash-card",
-      gradient: "from-purple-500 to-pink-500",
-      image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400"
-    },
-    {
-      title: "เติมเงินมือถือ",
-      icon: Smartphone,
-      path: "/card-topup",
-      gradient: "from-green-500 to-emerald-500",
-      image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400"
     }
   ];
 
   return (
     <Layout>
-      <div className="bg-gradient-to-b from-[#0f0f2d] to-[#1a0033] text-white min-h-screen font-['Kanit',sans-serif]">
-        <div className="max-w-7xl mx-auto py-8">
+      <div className="bg-gradient-to-b from-[#0f0f2d] to-[#1a0033] text-white min-h-screen font-['Kanit',sans-serif] -mx-3 sm:-mx-4 lg:-mx-6 xl:-mx-8 -mt-16 lg:-mt-16">
+        <div className="w-full py-8 px-3 sm:px-4 lg:px-6 xl:px-8">
           {/* Quick Menu Icons */}
           <div className="mb-8">
             <div className="flex items-center justify-center gap-4 flex-wrap">
