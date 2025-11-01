@@ -105,21 +105,23 @@ const Landing = () => {
             </div>
             
             {/* Login/Register Buttons */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <Button
                 variant="outline"
                 onClick={() => navigate("/login")}
-                className="border-purple-500/30 text-purple-300 hover:bg-purple-500/20 hover:text-white"
+                size="sm"
+                className="border-purple-500/30 text-purple-300 hover:bg-purple-500/20 hover:text-white text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2 h-8 sm:h-10"
               >
-                <LogIn className="mr-2 h-4 w-4" />
-                เข้าสู่ระบบ
+                <LogIn className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+                <span className="hidden sm:inline">เข้าสู่ระบบ</span>
               </Button>
               <Button
                 onClick={() => navigate("/register")}
-                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
+                size="sm"
+                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2 h-8 sm:h-10"
               >
-                <UserPlus className="mr-2 h-4 w-4" />
-                สมัครสมาชิก
+                <UserPlus className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+                <span className="hidden sm:inline">สมัครสมาชิก</span>
               </Button>
             </div>
           </div>

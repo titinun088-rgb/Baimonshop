@@ -119,7 +119,7 @@ const EditUserDialog = ({ open, onOpenChange, user, onSuccess }: EditUserDialogP
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="shopName">ชื่อร้าน *</Label>
+            <Label htmlFor="shopName">ชื่อแสดงในเว็บไซต์ *</Label>
             <Input
               id="shopName"
               type="text"

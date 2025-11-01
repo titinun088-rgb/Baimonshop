@@ -25,7 +25,7 @@ const Register = () => {
 
     // Validation
     if (!formData.shopName.trim()) {
-      toast.error("กรุณากรอกชื่อร้าน");
+      toast.error("กรุณากรอกชื่อแสดงในเว็บไซต์");
       return;
     }
 
@@ -98,7 +98,7 @@ const Register = () => {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="shopName">ชื่อร้าน *</Label>
+                <Label htmlFor="shopName">ชื่อแสดงในเว็บไซต์ *</Label>
                 <Input
                   id="shopName"
                   type="text"

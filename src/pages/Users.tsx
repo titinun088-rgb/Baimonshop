@@ -314,7 +314,7 @@ const Users = () => {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="ค้นหาผู้ใช้ (อีเมล, ชื่อร้าน)..."
+              placeholder="ค้นหาผู้ใช้ (อีเมล, ชื่อแสดงในเว็บไซต์)..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -344,7 +344,7 @@ const Users = () => {
                     <TableHeader>
                       <TableRow>
                         <TableHead>อีเมล</TableHead>
-                        <TableHead>ชื่อร้าน</TableHead>
+                        <TableHead>ชื่อแสดงในเว็บไซต์</TableHead>
                         <TableHead>บทบาท</TableHead>
                         <TableHead>ยอดเงิน</TableHead>
                         <TableHead>สถานะ</TableHead>

@@ -682,7 +682,7 @@ const TopUp = () => {
             {/* Top Up Form */}
             <Card className="bg-white shadow-xl">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-gray-900">
                   <DollarSign className="h-5 w-5" />
                   กรอกข้อมูลการเติมเงิน
                 </CardTitle>
@@ -793,7 +793,7 @@ const TopUp = () => {
             {/* Verification Result */}
             <Card className="bg-white shadow-xl">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-gray-900">
                   {verificationResult ? (
                     verificationResult.success ? (
                       <CheckCircle className="h-5 w-5 text-green-600" />
