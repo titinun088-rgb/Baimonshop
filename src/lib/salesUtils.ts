@@ -423,7 +423,7 @@ export function exportSalesToCSV(sales: Sale[], filename = "sales-export.csv") {
       "ส่วนลด",
       "ยอดสุทธิ",
       "กำไร",
-      "ร้านค้า",
+      "ผู้ใช้",
       "อีเมล",
     ];
 

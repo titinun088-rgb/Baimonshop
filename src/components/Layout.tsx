@@ -8,7 +8,6 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from 
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 import {
   LayoutDashboard,
-  Gamepad2,
   ShoppingCart,
   Users,
   User,
@@ -21,6 +20,17 @@ import {
   Menu,
   X,
   UserPlus,
+  Wallet,
+  History,
+  Receipt,
+  Building2,
+  Wifi,
+  Package,
+  CreditCard,
+  Gamepad2,
+  Smartphone,
+  Home,
+  DollarSign,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -43,22 +53,85 @@ const Layout = ({ children }: LayoutProps) => {
     roles: string[];
     badge?: number;
   }> = [
+    // เมนูหลักที่ต้องการให้อยู่บนสุด
+    { 
+      name: "หน้าหลัก", 
+      href: "/", 
+      icon: Home,
+      roles: ['admin', 'seller'] // ทุกคนเห็น
+    },
+    { 
+      name: "เติมเกม", 
+      href: "/game-topup", 
+      icon: Gamepad2,
+      roles: ['admin', 'seller'] // ทุกคนเห็น
+    },
+    { 
+      name: "แอปพรีเมียม", 
+      href: "/premium-app", 
+      icon: Package,
+      roles: ['admin', 'seller'] // ทุกคนเห็น
+    },
+    { 
+      name: "บัตรเติมเงิน", 
+      href: "/card-topup", 
+      icon: CreditCard,
+      roles: ['admin', 'seller'] // ทุกคนเห็น
+    },
+    {
+      name: "บัตรเงินสด",
+      href: "/cash-card",
+      icon: CreditCard,
+      roles: ['admin', 'seller'] // ทุกคนเห็น
+    },
+    {
+      name: "ประวัติการซื้อสินค้า",
+      href: "/purchase-history",
+      icon: Package,
+      roles: ['admin', 'seller'] // ทุกคนเห็น
+    },
+    
+    // เมนูอื่นๆ
     { 
       name: "Dashboard", 
-      href: "/", 
+      href: "/dashboard", 
       icon: LayoutDashboard,
-      roles: ['admin', 'seller'] // ทุกคนเห็น
+      roles: ['admin'] // เฉพาะแอดมิน
     },
     { 
       name: "เกม", 
       href: "/games", 
       icon: Gamepad2,
-      roles: ['admin', 'seller'] // ทุกคนเห็น
+      roles: ['admin'] // เฉพาะแอดมิน
     },
     { 
       name: "ยอดขาย", 
       href: "/sales", 
       icon: ShoppingCart,
+      roles: ['admin'] // เฉพาะแอดมิน
+    },
+    { 
+      name: "เติมเงิน", 
+      href: "/top-up", 
+      icon: Wallet,
+      roles: ['admin', 'seller'] // ทุกคนเห็น
+    },
+    { 
+      name: "ประวัติการเติมเงิน", 
+      href: "/top-up-history", 
+      icon: History,
+      roles: ['admin', 'seller'] // ทุกคนเห็น
+    },
+    { 
+      name: "ประวัติสลิป", 
+      href: "/slip-history", 
+      icon: Receipt,
+      roles: ['admin', 'seller'] // ทุกคนเห็น
+    },
+    { 
+      name: "ข้อมูลบัญชี", 
+      href: "/account-info", 
+      icon: Building2,
       roles: ['admin', 'seller'] // ทุกคนเห็น
     },
     { 
@@ -74,7 +147,7 @@ const Layout = ({ children }: LayoutProps) => {
       roles: ['admin'] // เฉพาะ Admin
     },
     { 
-      name: "แจ้งเตือน", 
+      name: "แจ้งเตือน",
       href: "/notifications", 
       icon: Bell,
       roles: ['admin', 'seller'] // ทุกคนเห็น
@@ -95,7 +168,7 @@ const Layout = ({ children }: LayoutProps) => {
       name: "คำขอผู้ดูแล", 
       href: "/invitations", 
       icon: UserPlus,
-      roles: ['admin', 'seller'], // ทุกคนเห็น
+      roles: ['admin'], // เฉพาะแอดมิน
       badge: invitationCount > 0 ? invitationCount : undefined // แสดง badge ถ้ามีคำขอ
     },
     { 
@@ -103,6 +176,18 @@ const Layout = ({ children }: LayoutProps) => {
       href: "/profile", 
       icon: User,
       roles: ['admin', 'seller'] // ทุกคนเห็น
+    },
+    { 
+      name: "Peamsub API", 
+      href: "/peamsub-api", 
+      icon: Wifi,
+      roles: ['admin'] // เฉพาะแอดมิน
+    },
+    { 
+      name: "จัดการราคา Peamsub", 
+      href: "/peamsub-price-management", 
+      icon: DollarSign,
+      roles: ['admin'] // เฉพาะแอดมิน
     },
   ];
 
@@ -140,6 +225,21 @@ const Layout = ({ children }: LayoutProps) => {
         </div>
       </div>
 
+      {/* Balance Display */}
+      {userData && (
+        <div className="border-b border-border px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Wallet className="h-4 w-4 text-green-600" />
+              <span className="text-sm text-gray-600">ยอดเงิน:</span>
+            </div>
+            <span className="font-semibold text-green-600">
+              ฿{(userData.balance || 0).toLocaleString()}
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Navigation */}
       <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
         {navigation.map((item) => {
@@ -149,7 +249,7 @@ const Layout = ({ children }: LayoutProps) => {
             <Link
               key={item.name}
               to={item.href}
-              onClick={onNavigate}
+              onClick={() => {}}
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
                 active
@@ -176,7 +276,7 @@ const Layout = ({ children }: LayoutProps) => {
       <div className="border-t border-border p-4">
         <Link 
           to="/profile" 
-          onClick={onNavigate}
+          onClick={() => {}}
           className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted transition-colors group"
         >
           <div className="relative">
@@ -211,24 +311,24 @@ const Layout = ({ children }: LayoutProps) => {
             </p>
           </div>
         </Link>
-        <button
-          onClick={() => {
-            handleSignOut();
-            onNavigate?.();
-          }}
-          className="w-full mt-2 flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+        
+        <Button
+          onClick={handleSignOut}
+          variant="ghost"
+          size="sm"
+          className="w-full mt-2 text-muted-foreground hover:text-destructive"
         >
-          <LogOut className="h-4 w-4" />
+          <LogOut className="mr-2 h-4 w-4" />
           ออกจากระบบ
-        </button>
+        </Button>
       </div>
     </div>
   );
 
   return (
-    <div className="flex min-h-screen w-full bg-background">
-      {/* Desktop Sidebar - ซ่อนใน mobile และ tablet */}
-      <aside className="hidden lg:fixed lg:left-0 lg:top-0 lg:z-40 lg:h-screen lg:w-64 lg:flex lg:flex-col border-r border-border bg-card shadow-card">
+    <div className="min-h-screen bg-background">
+      {/* Desktop Sidebar */}
+      <aside className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-64 lg:flex-col">
         <SidebarContent />
       </aside>
 
@@ -267,7 +367,7 @@ const Layout = ({ children }: LayoutProps) => {
 
       {/* Main content */}
       <main className="flex-1 lg:ml-64 pt-16 lg:pt-0">
-        <div className="container mx-auto p-4 sm:p-6 lg:p-8">{children}</div>
+        <div className="mx-auto w-full px-4 sm:px-6 lg:px-8">{children}</div>
       </main>
     </div>
   );

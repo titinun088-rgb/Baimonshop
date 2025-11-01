@@ -624,3 +624,5 @@ service cloud.firestore {
 
 ไปที่ `/sales` เพื่อเริ่มบันทึกยอดขาย หรือ `/` (Dashboard) เพื่อดูสถิติ!
 
+
+

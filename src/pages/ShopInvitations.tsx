@@ -58,7 +58,7 @@ const ShopInvitations = () => {
         
         // Navigate ไป Dashboard เพื่อแสดงข้อมูลร้าน
         console.log("✅ Navigating to dashboard...");
-        toast.success("คุณเป็นผู้ดูแลร้านค้าแล้ว!", { duration: 3000 });
+        toast.success("คุณเป็นผู้ดูแลผู้ใช้แล้ว!", { duration: 3000 });
         navigate("/");
       } else {
         toast.error(result.error || "เกิดข้อผิดพลาด");
@@ -105,10 +105,10 @@ const ShopInvitations = () => {
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-2">
             <Inbox className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold">คำขอเป็นผู้ดูแลร้านค้า</h1>
+            <h1 className="text-3xl font-bold">คำขอเป็นผู้ดูแลผู้ใช้</h1>
           </div>
           <p className="text-muted-foreground">
-            คำขอที่เจ้าของร้านส่งมาให้คุณเป็นผู้ดูแลร้านค้า
+            คำขอที่เจ้าของผู้ใช้ส่งมาให้คุณเป็นผู้ดูแลผู้ใช้
           </p>
         </div>
 
@@ -120,7 +120,7 @@ const ShopInvitations = () => {
                 <Inbox className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-xl font-semibold mb-2">ไม่มีคำขอใหม่</h3>
                 <p className="text-muted-foreground">
-                  คุณไม่มีคำขอเป็นผู้ดูแลร้านค้าในขณะนี้
+                  คุณไม่มีคำขอเป็นผู้ดูแลผู้ใช้ในขณะนี้
                 </p>
               </div>
             </CardContent>
@@ -157,7 +157,7 @@ const ShopInvitations = () => {
                     {/* รายละเอียด */}
                     <div className="rounded-lg bg-muted/30 p-4">
                       <p className="text-sm mb-2">
-                        <span className="font-medium">คำขอ:</span> เจ้าของร้าน "{invitation.shopName}" ต้องการเชิญคุณเป็นผู้ดูแลร้านค้า
+                        <span className="font-medium">คำขอ:</span> เจ้าของผู้ใช้ "{invitation.shopName}" ต้องการเชิญคุณเป็นผู้ดูแลผู้ใช้
                       </p>
                       <p className="text-xs text-muted-foreground">
                         ส่งเมื่อ:{" "}

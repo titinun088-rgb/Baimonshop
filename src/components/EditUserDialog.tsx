@@ -123,7 +123,7 @@ const EditUserDialog = ({ open, onOpenChange, user, onSuccess }: EditUserDialogP
             <Input
               id="shopName"
               type="text"
-              placeholder="ชื่อร้านค้า"
+              placeholder="ชื่อผู้ใช้"
               value={formData.shopName}
               onChange={(e) => setFormData({ ...formData, shopName: e.target.value })}
               required
@@ -152,7 +152,7 @@ const EditUserDialog = ({ open, onOpenChange, user, onSuccess }: EditUserDialogP
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="seller">ผู้ขาย (Seller)</SelectItem>
+                <SelectItem value="seller">ผู้ใช้ (Seller)</SelectItem>
                 <SelectItem value="admin">ผู้ดูแลระบบ (Admin)</SelectItem>
               </SelectContent>
             </Select>
@@ -219,4 +219,6 @@ const EditUserDialog = ({ open, onOpenChange, user, onSuccess }: EditUserDialogP
 };
 
 export default EditUserDialog;
+
+
 

@@ -30,6 +30,8 @@ export interface UserData {
   suspendReason?: string; // เหตุผลที่พักบัญชี
   createdAt: Date;
   photoURL?: string;
+  balance: number; // ยอดเงินในบัญชี
+  lastTopUp?: Date; // วันที่เติมเงินครั้งล่าสุด
 }
 
 interface AuthContextType {
@@ -47,6 +49,7 @@ interface AuthContextType {
   resetPassword: (email: string) => Promise<void>;
   refreshUser: () => Promise<void>;
   loadInvitationCount: () => Promise<void>; // โหลดจำนวนคำขอใหม่
+  updateBalance: (amount: number) => Promise<void>; // อัปเดตยอดเงิน
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -70,6 +73,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           ...data,
           createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
           suspendedUntil: data.suspendedUntil?.toDate ? data.suspendedUntil.toDate() : undefined,
+          balance: data.balance || 0,
+          lastTopUp: data.lastTopUp?.toDate ? data.lastTopUp.toDate() : undefined,
         } as UserData;
         setUserData(userData);
 
@@ -170,6 +175,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         emailVerified: false,
         suspended: false, // ไม่ถูกพัก
         createdAt: new Date(),
+        balance: 0, // ยอดเงินเริ่มต้น
       };
 
       await setDoc(doc(db, "users", user.uid), userData);
@@ -205,6 +211,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           suspended: false, // ไม่ถูกพัก
           createdAt: new Date(),
           photoURL: user.photoURL || undefined,
+          balance: 0, // ยอดเงินเริ่มต้น
         };
 
         await setDoc(doc(db, "users", user.uid), userData);
@@ -283,6 +290,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const updateBalance = async (amount: number) => {
+    try {
+      if (!user || !userData) {
+        throw new Error("User not authenticated");
+      }
+
+      const newBalance = (userData.balance || 0) + amount;
+      
+      // อัปเดตใน Firestore
+      await setDoc(
+        doc(db, "users", user.uid),
+        { 
+          balance: newBalance,
+          lastTopUp: new Date()
+        },
+        { merge: true }
+      );
+
+      // อัปเดต local state
+      setUserData(prev => prev ? {
+        ...prev,
+        balance: newBalance,
+        lastTopUp: new Date()
+      } : null);
+
+      console.log(`✅ Balance updated: +${amount} = ${newBalance}`);
+    } catch (error) {
+      console.error("❌ Error updating balance:", error);
+      throw error;
+    }
+  };
+
   const value = {
     user,
     userData,
@@ -298,6 +337,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     resetPassword,
     refreshUser,
     loadInvitationCount,
+    updateBalance,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

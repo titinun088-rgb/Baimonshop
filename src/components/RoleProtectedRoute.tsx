@@ -37,7 +37,8 @@ const RoleProtectedRoute = ({ children, allowedRoles }: RoleProtectedRouteProps)
   }
 
   // ยังไม่ได้รับการอนุมัติจาก admin (verified)
-  if (!userData?.verified) {
+  // ยกเว้น admin ที่สามารถเข้าถึงได้เสมอ
+  if (userData && userData.role !== 'admin' && !userData.verified) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background p-4">
         <Card className="w-full max-w-md border-border bg-card shadow-card">
@@ -102,14 +103,14 @@ const RoleProtectedRoute = ({ children, allowedRoles }: RoleProtectedRouteProps)
                 หน้านี้สำหรับ:{" "}
                 <strong className="text-foreground">
                   {allowedRoles.map(role => 
-                    role === 'admin' ? 'ผู้ดูแลระบบ' : 'ผู้ขาย'
+                    role === 'admin' ? 'ผู้ดูแลระบบ' : 'ผู้ใช้'
                   ).join(', ')}
                 </strong>
               </p>
               <p className="text-muted-foreground">
                 บทบาทของคุณ:{" "}
                 <strong className="text-foreground">
-                  {userData.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ผู้ขาย'}
+                  {userData.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ผู้ใช้'}
                 </strong>
               </p>
             </div>
@@ -132,4 +133,6 @@ const RoleProtectedRoute = ({ children, allowedRoles }: RoleProtectedRouteProps)
 };
 
 export default RoleProtectedRoute;
+
+
 

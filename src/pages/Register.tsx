@@ -102,7 +102,7 @@ const Register = () => {
                 <Input
                   id="shopName"
                   type="text"
-                  placeholder="ชื่อร้านค้าของคุณ"
+                  placeholder="ชื่อผู้ใช้ของคุณ"
                   value={formData.shopName}
                   onChange={(e) =>
                     setFormData({ ...formData, shopName: e.target.value })

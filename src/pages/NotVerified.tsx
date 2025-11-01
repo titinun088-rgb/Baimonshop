@@ -54,7 +54,7 @@ const NotVerified = () => {
             <div className="flex justify-between">
               <span className="text-muted-foreground">บทบาท:</span>
               <span className="font-medium">
-                {userData?.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ผู้ขาย'}
+                {userData?.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ผู้ใช้'}
               </span>
             </div>
           </div>
@@ -100,4 +100,6 @@ const NotVerified = () => {
 };
 
 export default NotVerified;
+
+
 

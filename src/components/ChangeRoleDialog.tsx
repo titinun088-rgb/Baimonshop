@@ -131,7 +131,7 @@ const ChangeRoleDialog = ({
                       className="font-medium cursor-pointer flex items-center gap-2"
                     >
                       <User className="h-4 w-4" />
-                      Seller (ร้านค้า)
+                      Seller (ผู้ใช้)
                     </Label>
                     <p className="text-xs text-muted-foreground">
                       จัดการเกม, รายการเติม, ยอดขาย, แจ้งปัญหา
@@ -191,4 +191,6 @@ const ChangeRoleDialog = ({
 };
 
 export default ChangeRoleDialog;
+
+
 

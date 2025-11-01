@@ -58,17 +58,13 @@ users/{uid}: {
 ```
 สมัครสมาชิก
    ↓
-verified = false (default)
+verified = true (auto-verified)
    ↓
 ยืนยันอีเมล (emailVerified = true)
    ↓
 เข้าสู่ระบบ
    ↓
-ตรวจสอบ verified?
-   ↓
-[false] → หน้า "รอการอนุมัติ" (/not-verified)
-   ↓
-[true] → เข้าใช้งานได้ ✅
+เข้าใช้งานได้ทันที ✅
 ```
 
 ### สำหรับ Admin
@@ -250,9 +246,9 @@ isVerified(userData: UserData | null): boolean
 
 #### ทดสอบ Seller
 
-1. สมัครสมาชิกใหม่ (จะเป็น seller + verified=false)
+1. สมัครสมาชิกใหม่ (จะเป็น seller + verified=true)
 2. ยืนยันอีเมล
-3. Login → ควรเจอหน้า "รอการอนุมัติ"
+3. Login → เข้าใช้งานได้ทันที
 4. Login ด้วย admin → อนุมัติ seller
 5. Login ด้วย seller อีกครั้ง → เข้าได้แล้ว ✅
 
@@ -385,9 +381,9 @@ service cloud.firestore {
 - ✅ ดูสถานะ emailVerified
 
 **Seller**
-- ✅ สมัครสมาชิก (verified=false default)
+- ✅ สมัครสมาชิก (verified=true auto-verified)
 - ✅ ยืนยันอีเมล
-- ✅ รอการอนุมัติจาก admin
+- ✅ เข้าใช้งานได้ทันที
 - ✅ หลังได้รับการอนุมัติ เข้าใช้งานได้
 - ✅ เข้าถึงหน้าที่ได้รับอนุญาตเท่านั้น
 
@@ -416,4 +412,6 @@ service cloud.firestore {
 ✅ **Security:** Firestore rules ที่ปลอดภัย  
 
 **พร้อมใช้งานจริง 100%!** 🚀
+
+
 

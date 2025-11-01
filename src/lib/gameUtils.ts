@@ -48,12 +48,16 @@ export interface GameItem {
  */
 export async function getAllGames(): Promise<Game[]> {
   try {
+    console.log("🔍 gameUtils: กำลังดึงรายการเกมทั้งหมด...");
     const gamesRef = collection(db, "games");
     // ใช้ query แบบง่ายๆ ที่ไม่ต้องใช้ Index
     const snapshot = await getDocs(gamesRef);
 
+    console.log("📊 gameUtils: พบเกมทั้งหมด", snapshot.size, "เกม");
+
     const games = snapshot.docs.map((doc) => {
       const data = doc.data();
+      console.log("📄 Game:", doc.id, data.name || "ไม่มีชื่อ");
       return {
         id: doc.id,
         name: data.name || "ไม่มีชื่อ",
@@ -69,9 +73,10 @@ export async function getAllGames(): Promise<Game[]> {
     // เรียงลำดับใน JavaScript แทน (ใหม่สุดก่อน)
     games.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
+    console.log("✅ gameUtils: คืนค่าเกม", games.length, "เกม");
     return games;
   } catch (error) {
-    console.error("Error getting games:", error);
+    console.error("❌ gameUtils: Error getting games:", error);
     return []; // คืนค่า array ว่างแทนการ throw error
   }
 }
@@ -81,14 +86,17 @@ export async function getAllGames(): Promise<Game[]> {
  */
 export async function getGamesByUser(userId: string): Promise<Game[]> {
   try {
+    console.log("🔍 gameUtils: กำลังดึงเกมของ user:", userId);
     const gamesRef = collection(db, "games");
     // ใช้ query แบบง่ายๆ ที่ไม่ต้องใช้ Index
     const q = query(gamesRef, where("createdBy", "==", userId));
     
     const snapshot = await getDocs(q);
+    console.log("📊 gameUtils: พบเกมของ user", snapshot.size, "เกม");
 
     const games = snapshot.docs.map((doc) => {
       const data = doc.data();
+      console.log("📄 User Game:", doc.id, data.name || "ไม่มีชื่อ");
       return {
         id: doc.id,
         name: data.name || "ไม่มีชื่อ",
@@ -104,9 +112,10 @@ export async function getGamesByUser(userId: string): Promise<Game[]> {
     // เรียงลำดับใน JavaScript แทน (ใหม่สุดก่อน)
     games.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
+    console.log("✅ gameUtils: คืนค่าเกมของ user", games.length, "เกม");
     return games;
   } catch (error) {
-    console.error("Error getting user games:", error);
+    console.error("❌ gameUtils: Error getting user games:", error);
     return []; // คืนค่า array ว่างแทนการ throw error
   }
 }
@@ -626,5 +635,56 @@ export async function importGameItemsFromExcel(
     console.error("❌ gameUtils: Error importing game items:", error);
     return { success: false, imported: 0, errors: [error.message] };
   }
+}
+
+/**
+ * ตรวจสอบและแก้ไขปัญหาการโหลดเกม
+ */
+export async function debugGameLoading(): Promise<{
+  totalGames: number;
+  gamesByUser: Record<string, number>;
+  gamesByCategory: Record<string, number>;
+  recentGames: Game[];
+  errors: string[];
+}> {
+  const result = {
+    totalGames: 0,
+    gamesByUser: {} as Record<string, number>,
+    gamesByCategory: {} as Record<string, number>,
+    recentGames: [] as Game[],
+    errors: [] as string[]
+  };
+
+  try {
+    console.log("🔍 gameUtils: เริ่มการตรวจสอบการโหลดเกม...");
+    
+    // โหลดเกมทั้งหมด
+    const allGames = await getAllGames();
+    result.totalGames = allGames.length;
+    
+    // วิเคราะห์ข้อมูล
+    allGames.forEach(game => {
+      // นับตามผู้สร้าง
+      result.gamesByUser[game.createdBy] = (result.gamesByUser[game.createdBy] || 0) + 1;
+      
+      // นับตามหมวดหมู่
+      result.gamesByCategory[game.category] = (result.gamesByCategory[game.category] || 0) + 1;
+    });
+    
+    // เกมล่าสุด 5 เกม
+    result.recentGames = allGames
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(0, 5);
+    
+    console.log("✅ gameUtils: การตรวจสอบเสร็จสิ้น");
+    console.log("📊 gameUtils: สถิติ:", result);
+    
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : "Unknown error";
+    result.errors.push(errorMsg);
+    console.error("❌ gameUtils: Error in debug:", error);
+  }
+  
+  return result;
 }
 

@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import Layout from "@/components/Layout";
-import Dashboard from "./Dashboard";
+import Home from "./Home";
 
 const Index = () => {
   const location = useLocation();
@@ -19,7 +19,7 @@ const Index = () => {
 
   return (
     <Layout>
-      <Dashboard />
+      <Home />
     </Layout>
   );
 };

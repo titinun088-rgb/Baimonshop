@@ -45,7 +45,7 @@ const Terms = () => {
                 <div>
                   <h2 className="text-xl font-semibold mb-2">คำนำ</h2>
                   <p className="text-muted-foreground leading-relaxed">
-                    ยินดีต้อนรับสู่ Game Nexus Dashboard ซึ่งเป็นระบบจัดการร้านค้าเกมออนไลน์
+                    ยินดีต้อนรับสู่ Game Nexus Dashboard ซึ่งเป็นระบบจัดการผู้ใช้เกมออนไลน์
                     การใช้บริการของเราแสดงว่าคุณยอมรับข้อกำหนดและเงื่อนไขเหล่านี้ 
                     กรุณาอ่านอย่างละเอียดก่อนใช้งาน
                   </p>
@@ -269,4 +269,6 @@ const Terms = () => {
 };
 
 export default Terms;
+
+
 

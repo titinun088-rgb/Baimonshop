@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
-import { updateUserProfile, changePassword, isValidImageUrl } from "@/lib/profileUtils";
+import { updateUserProfile, changePassword, isValidImageUrl, checkProblematicImageSource } from "@/lib/profileUtils";
 import { User, Store, Shield, Mail, Calendar, Loader2, Lock, Image as ImageIcon, UserPlus, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { th } from "date-fns/locale";
@@ -26,6 +26,7 @@ const Profile = () => {
   const [shopName, setShopName] = useState("");
   const [photoURL, setPhotoURL] = useState("");
   const [profileLoading, setProfileLoading] = useState(false);
+  const [imageSourceWarnings, setImageSourceWarnings] = useState<string[]>([]);
 
   // Password Change
   const [currentPassword, setCurrentPassword] = useState("");
@@ -86,6 +87,19 @@ const Profile = () => {
     if (photoURL && !isValidImageUrl(photoURL)) {
       toast.error("URL รูปภาพไม่ถูกต้อง กรุณาใช้ URL ที่ขึ้นต้นด้วย http:// หรือ https://");
       return;
+    }
+
+    // ตรวจสอบว่า URL มาจากแหล่งที่อาจเกิด CORS issues
+    if (photoURL) {
+      const sourceCheck = checkProblematicImageSource(photoURL);
+      if (sourceCheck.blocked) {
+        toast.error(sourceCheck.reason || "URL รูปภาพไม่ถูกต้อง");
+        return;
+      }
+      if (sourceCheck.reason) {
+        // เตือน แต่อนุญาตให้ดำเนินการต่อ
+        console.warn(sourceCheck.reason);
+      }
     }
 
     setProfileLoading(true);
@@ -323,7 +337,7 @@ const Profile = () => {
                       </Label>
                       <Input
                         id="shopName"
-                        placeholder="ชื่อร้านค้าของคุณ"
+                        placeholder="ชื่อผู้ใช้ของคุณ"
                         value={shopName}
                         onChange={(e) => setShopName(e.target.value)}
                         disabled={profileLoading}
@@ -342,12 +356,35 @@ const Profile = () => {
                         type="url"
                         placeholder="https://example.com/avatar.jpg"
                         value={photoURL}
-                        onChange={(e) => setPhotoURL(e.target.value)}
+                        onChange={(e) => {
+                          const url = e.target.value;
+                          setPhotoURL(url);
+                          // ตรวจสอบเงื่อนไขของ URL แบบ real-time
+                          const warnings: string[] = [];
+                          if (url) {
+                            const sourceCheck = checkProblematicImageSource(url);
+                            if (sourceCheck.blocked || sourceCheck.reason) {
+                              warnings.push(sourceCheck.reason || "");
+                            }
+                          }
+                          setImageSourceWarnings(warnings);
+                        }}
                         disabled={profileLoading}
                       />
                       <p className="text-xs text-muted-foreground">
                         ใส่ URL รูปภาพจากอินเทอร์เน็ต (เช่น จาก Imgur, Cloudinary, หรือ Firebase Storage)
                       </p>
+                      
+                      {/* แสดงคำเตือน */}
+                      {imageSourceWarnings.length > 0 && (
+                        <div className="rounded-lg border border-orange-500/30 bg-orange-500/10 p-2">
+                          {imageSourceWarnings.map((warning, idx) => (
+                            <p key={idx} className="text-xs text-orange-600 dark:text-orange-400">
+                              {warning}
+                            </p>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     {/* Preview */}
@@ -389,10 +426,10 @@ const Profile = () => {
                       <div>
                         <CardTitle className="flex items-center gap-2">
                           <UserPlus className="h-5 w-5" />
-                          ผู้ดูแลร้านค้า
+                          ผู้ดูแลผู้ใช้
                         </CardTitle>
                         <CardDescription>
-                          เชิญผู้ใช้อื่นเป็นผู้ดูแลร้านค้าของคุณ
+                          เชิญผู้ใช้อื่นเป็นผู้ดูแลผู้ใช้ของคุณ
                         </CardDescription>
                       </div>
                       <Button
@@ -412,7 +449,7 @@ const Profile = () => {
                     ) : shopMembers.length === 0 ? (
                       <div className="text-center py-8 text-muted-foreground">
                         <UserPlus className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                        <p>ยังไม่มีผู้ดูแลร้านค้า</p>
+                        <p>ยังไม่มีผู้ดูแลผู้ใช้</p>
                         <p className="text-sm">คลิก "เพิ่มผู้ดูแล" เพื่อเชิญผู้ใช้อื่น</p>
                       </div>
                     ) : (

@@ -52,7 +52,7 @@ const Suspended = () => {
             {userData.shopName && (
               <div className="flex items-start gap-3">
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-foreground">ร้านค้า</p>
+                  <p className="text-sm font-medium text-foreground">ผู้ใช้</p>
                   <p className="text-sm text-muted-foreground">{userData.shopName}</p>
                 </div>
               </div>
@@ -122,4 +122,6 @@ const Suspended = () => {
 };
 
 export default Suspended;
+
+
 

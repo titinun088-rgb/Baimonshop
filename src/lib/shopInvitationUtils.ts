@@ -19,7 +19,7 @@ import { ShopInvitation, ShopMember } from "@/types/shopInvitation";
 // ================================
 
 /**
- * ส่งคำขอเพิ่มผู้ดูแลร้านค้า
+ * ส่งคำขอเพิ่มผู้ดูแลผู้ใช้
  */
 export const sendShopInvitation = async (
   shopOwnerId: string,

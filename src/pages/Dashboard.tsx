@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import Layout from "@/components/Layout";
 import StatCard from "@/components/StatCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -102,23 +103,26 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary" />
-          <p className="mt-4 text-muted-foreground">กำลังโหลดข้อมูล...</p>
+      <Layout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary" />
+            <p className="mt-4 text-muted-foreground">กำลังโหลดข้อมูล...</p>
+          </div>
         </div>
-      </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <Layout>
+      <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Dashboard</h1>
           <p className="text-muted-foreground">
-            {isAdmin ? "ภาพรวมทั้งหมดในระบบ" : "ภาพรวมยอดขายและสถิติร้านค้า"}
+            {isAdmin ? "ภาพรวมทั้งหมดในระบบ" : "ภาพรวมยอดขายและสถิติผู้ใช้"}
           </p>
         </div>
         <Button
@@ -299,7 +303,8 @@ const Dashboard = () => {
           )}
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </Layout>
   );
 };
 

@@ -77,10 +77,10 @@ const InviteShopManagerDialog = ({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <UserPlus className="h-5 w-5" />
-            เพิ่มผู้ดูแลร้านค้า
+            เพิ่มผู้ดูแลผู้ใช้
           </DialogTitle>
           <DialogDescription>
-            ค้นหาผู้ใช้ด้วย email เพื่อส่งคำขอเป็นผู้ดูแลร้านค้าของคุณ
+            ค้นหาผู้ใช้ด้วย email เพื่อส่งคำขอเป็นผู้ดูแลผู้ใช้ของคุณ
           </DialogDescription>
         </DialogHeader>
 
@@ -101,13 +101,13 @@ const InviteShopManagerDialog = ({
               />
             </div>
             <p className="text-xs text-muted-foreground">
-              ผู้ใช้จะได้รับคำขอและสามารถเข้าถึงข้อมูลร้านค้าของคุณเมื่อตอบรับ
+              ผู้ใช้จะได้รับคำขอและสามารถเข้าถึงข้อมูลผู้ใช้ของคุณเมื่อตอบรับ
             </p>
           </div>
 
-          {/* ข้อมูลร้านค้า */}
+          {/* ข้อมูลผู้ใช้ */}
           <div className="rounded-lg border border-border bg-muted/30 p-3 space-y-1">
-            <p className="text-sm font-medium">ร้านค้าของคุณ:</p>
+            <p className="text-sm font-medium">ผู้ใช้ของคุณ:</p>
             <p className="text-sm text-muted-foreground">{shopName}</p>
           </div>
 

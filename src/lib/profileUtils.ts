@@ -136,3 +136,80 @@ export function isValidImageUrl(url: string): boolean {
   }
 }
 
+/**
+ * ตรวจสอบว่า URL มาจากแหล่งที่อาจเกิด CORS/Hotlinking issues
+ * @returns { blocked: boolean; reason?: string }
+ */
+export function checkProblematicImageSource(url: string): { blocked: boolean; reason?: string } {
+  if (!url) return { blocked: false };
+  
+  try {
+    const urlObj = new URL(url);
+    const hostname = urlObj.hostname.toLowerCase();
+    const pathname = urlObj.pathname.toLowerCase();
+
+    // Facebook CDN - อาจโดน 403 Forbidden
+    if (hostname.includes('fbcdn') || hostname.includes('facebook.com') || hostname.includes('fb.com')) {
+      return {
+        blocked: true,
+        reason: '⚠️ Facebook CDN มักจะถูกบล็อค (403 Forbidden) เนื่องจากการป้องกัน hotlinking'
+      };
+    }
+
+    // Instagram CDN - อาจโดน 403 Forbidden
+    if (hostname.includes('instagram.com') || hostname.includes('igcdn')) {
+      return {
+        blocked: true,
+        reason: '⚠️ Instagram CDN มักจะถูกบล็อค (403 Forbidden) เนื่องจากการป้องกัน hotlinking'
+      };
+    }
+
+    // Private/Local URLs
+    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168') || hostname.startsWith('10.')) {
+      return {
+        blocked: true,
+        reason: '⚠️ ใช้ URL จากเครื่องคอมพิวเตอร์ของคุณไม่ได้ (localhost/private IP) - ใช้ public URL แทน'
+      };
+    }
+
+    // ข้อมูล URL ที่ได้รับการรับรอง
+    const trustedDomains = [
+      'unsplash.com',
+      'images.unsplash.com',
+      'imgur.com',
+      'i.imgur.com',
+      'cloudinary.com',
+      'firebasestorage.googleapis.com',
+      'drive.google.com',
+      'lh3.googleusercontent.com',
+      'pbs.twimg.com',
+      'cdn.discordapp.com',
+      'avatars.githubusercontent.com',
+      'gravatar.com',
+      'steampowered.com',
+      'steamstatic.com',
+      'igdb.com',
+      'raw.githubusercontent.com',
+    ];
+
+    const isTrusted = trustedDomains.some(domain => hostname.includes(domain));
+    if (isTrusted) {
+      return { blocked: false };
+    }
+
+    // สำหรับ CDN อื่น ๆ ให้คำเตือน
+    if (hostname.includes('cdn') || hostname.includes('content') || hostname.includes('static')) {
+      return {
+        blocked: false,
+        reason: 'ℹ️ หากรูปไม่แสดง โปรดลองใช้ URL จากแหล่งที่เชื่อถือได้ (Unsplash, Imgur, Cloudinary)'
+      };
+    }
+
+    return { blocked: false };
+  } catch {
+    return { blocked: false };
+  }
+}
+
+
+

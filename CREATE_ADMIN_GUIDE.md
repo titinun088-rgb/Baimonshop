@@ -42,7 +42,7 @@
 3. แก้ไข 2 fields:
    
    role: "seller" → "admin"
-   verified: false → true
+   verified: true (ไม่ต้องเปลี่ยน เพราะ auto-verified แล้ว)
    
 4. คลิก "Update" หรือ "Save"
 ```
@@ -311,4 +311,6 @@ node scripts/create-admin.js
 - ✅ ใช้งานระบบเต็มรูปแบบ
 
 **Happy Managing! 🚀**
+
+
 

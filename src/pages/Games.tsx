@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, MoreVertical, Edit, Trash2, Loader2, Eye } from "lucide-react";
+import { Plus, Search, MoreVertical, Edit, Trash2, Loader2, Eye, CreditCard, FileCheck, RefreshCw } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,7 +24,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { getAllGames, getGamesByUser, deleteGame, Game, countGameItems } from "@/lib/gameUtils";
+import { getAllGames, getGamesByUser, deleteGame, Game, countGameItems, debugGameLoading } from "@/lib/gameUtils";
 import { useAuth } from "@/contexts/AuthContext";
 import CreateGameDialog from "@/components/CreateGameDialog";
 import EditGameDialog from "@/components/EditGameDialog";
@@ -82,6 +82,18 @@ const Games = () => {
 
       setGames(gamesData);
       setFilteredGames(gamesData);
+
+      // แสดงข้อมูลสถิติใน console
+      console.log("📈 Games: Statistics:");
+      console.log("  - Total games loaded:", gamesData.length);
+      console.log("  - Games by category:", gamesData.reduce((acc, game) => {
+        acc[game.category] = (acc[game.category] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>));
+      console.log("  - Games by creator:", gamesData.reduce((acc, game) => {
+        acc[game.createdBy] = (acc[game.createdBy] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>));
 
       // โหลดจำนวนรายการเติมของแต่ละเกม
       const counts: Record<string, number> = {};
@@ -159,6 +171,27 @@ const Games = () => {
     }
   };
 
+  // Debug function
+  const handleDebugGames = async () => {
+    try {
+      console.log("🔍 Games: เริ่มการตรวจสอบการโหลดเกม...");
+      const debugResult = await debugGameLoading();
+      
+      console.log("📊 Games: ผลการตรวจสอบ:", debugResult);
+      
+      // แสดงผลใน toast
+      toast.success(`พบเกม ${debugResult.totalGames} เกม, หมวดหมู่ ${Object.keys(debugResult.gamesByCategory).length} หมวด`);
+      
+      if (debugResult.errors.length > 0) {
+        console.error("❌ Games: พบข้อผิดพลาด:", debugResult.errors);
+        toast.error(`พบข้อผิดพลาด ${debugResult.errors.length} รายการ`);
+      }
+    } catch (error) {
+      console.error("❌ Games: Error in debug:", error);
+      toast.error("เกิดข้อผิดพลาดในการตรวจสอบ");
+    }
+  };
+
   return (
     <Layout>
       <div className="space-y-6">
@@ -171,14 +204,61 @@ const Games = () => {
                 ? "จัดการเกมทั้งหมดในระบบ"
                 : "เพิ่มและจัดการเกมและรายการเติมเงิน"}
             </p>
+            {/* แสดงสถิติเกม */}
+            <div className="mt-2 flex gap-4 text-sm text-muted-foreground">
+              <span>📊 รวม {games.length} เกม</span>
+              <span>🔍 แสดง {filteredGames.length} เกม</span>
+              {games.length > 0 && (
+                <span>📅 ล่าสุด: {new Date(Math.max(...games.map(g => g.createdAt.getTime()))).toLocaleDateString('th-TH')}</span>
+              )}
+            </div>
           </div>
-          <Button
-            onClick={() => setCreateDialogOpen(true)}
-            className="bg-gradient-primary shadow-glow"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            เพิ่มเกมใหม่
-          </Button>
+          <div className="flex gap-2 flex-wrap">
+            <Button
+              onClick={() => {
+                const paymentData = {
+                  amount: 1500,
+                  description: "ทดสอบการชำระเงิน - Game Item Package",
+                  orderId: `ORDER-${Date.now()}`
+                };
+                navigate("/payment", { state: paymentData });
+              }}
+              variant="outline"
+            >
+              <CreditCard className="mr-2 h-4 w-4" />
+              ทดสอบการชำระเงิน
+            </Button>
+            <Button
+              onClick={() => navigate("/slip-verification")}
+              variant="outline"
+            >
+              <FileCheck className="mr-2 h-4 w-4" />
+              ตรวจสอบสลิป
+            </Button>
+            <Button
+              onClick={handleDebugGames}
+              variant="outline"
+              className="text-orange-600 border-orange-300 hover:bg-orange-50"
+            >
+              <Search className="mr-2 h-4 w-4" />
+              Debug
+            </Button>
+            <Button
+              onClick={loadGames}
+              variant="outline"
+              disabled={loading}
+            >
+              <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              รีเฟรช
+            </Button>
+            <Button
+              onClick={() => setCreateDialogOpen(true)}
+              className="bg-gradient-primary shadow-glow"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              เพิ่มเกมใหม่
+            </Button>
+          </div>
         </div>
 
         {/* Search */}
@@ -205,6 +285,16 @@ const Games = () => {
                   ? "ไม่พบเกมที่ค้นหา"
                   : "ยังไม่มีเกมในระบบ คลิก 'เพิ่มเกมใหม่' เพื่อเริ่มต้น"}
               </p>
+              {/* แสดงข้อมูล debug เมื่อไม่มีเกม */}
+              {!searchQuery && games.length === 0 && (
+                <div className="mt-4 text-xs text-muted-foreground">
+                  <p>🔍 Debug Info:</p>
+                  <p>• User ID: {user?.uid || 'ไม่พบ'}</p>
+                  <p>• Shop Owner ID: {currentShopOwnerId || 'ไม่พบ'}</p>
+                  <p>• Is Admin: {isAdmin ? 'ใช่' : 'ไม่'}</p>
+                  <p>• Loading Mode: {isAdmin ? 'All Games' : 'User Games'}</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         ) : (
