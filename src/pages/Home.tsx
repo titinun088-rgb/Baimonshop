@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import Layout from "@/components/Layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,16 @@ const Home = () => {
 
   return (
     <Layout>
+      <Helmet>
+        <title>CoinZone — ระบบเติมเงินเกมออนไลน์ และแอปพรีเมียม</title>
+        <meta name="description" content="บริการเติมเงินเกมออนไลน์ เติมแอปพรีเมียม รวดเร็ว ปลอดภัย ใช้งานง่าย ราคาถูก บริการตลอด 24 ชั่วโมง" />
+        <meta property="og:title" content="CoinZone — ระบบเติมเงินเกมออนไลน์ และแอปพรีเมียม" />
+        <meta property="og:description" content="บริการเติมเงินเกมออนไลน์ เติมแอปพรีเมียม รวดเร็ว ปลอดภัย ใช้งานง่าย ราคาถูก บริการตลอด 24 ชั่วโมง" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://www.coin-zone.shop/logo.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <link rel="canonical" href="https://www.coin-zone.shop/" />
+      </Helmet>
       <div className="bg-gradient-to-b from-[#0f0f2d] to-[#1a0033] text-white min-h-screen font-['Kanit',sans-serif] -mx-3 sm:-mx-4 lg:-mx-6 xl:-mx-8 -mt-16 lg:-mt-16">
         <div className="w-full py-8 px-3 sm:px-4 lg:px-6 xl:px-8">
           {/* Quick Menu Icons */}
