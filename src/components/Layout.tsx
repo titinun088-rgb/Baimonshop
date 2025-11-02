@@ -629,6 +629,22 @@ const Layout = ({ children }: LayoutProps) => {
       <main className="flex-1 pt-16 lg:pt-16 pb-4 lg:pb-8">
         <div className="w-full px-3 sm:px-4 lg:px-6 xl:px-8">{children}</div>
       </main>
+
+      {/* Contact Admin Button */}
+      <a
+        href="https://www.facebook.com/share/1S5gFd4AuU/?mibextid=wwXIfr"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-4 right-4 z-50"
+      >
+        <Button 
+          size="icon" 
+          className="lg:size-auto lg:px-4 lg:py-2 bg-blue-600 hover:bg-blue-700 text-white shadow-lg flex items-center gap-2 rounded-full lg:rounded-md"
+        >
+          <MessageSquare className="h-5 w-5" />
+          <span className="hidden lg:inline">ติดต่อแอดมิน</span>
+        </Button>
+      </a>
     </div>
   );
 };

@@ -24,7 +24,7 @@ import {
   Copy,
   ExternalLink
 } from "lucide-react";
-import { PeamsubPurchaseHistory } from "@/lib/peamsubUtils";
+import type { PeamsubPurchaseHistory } from "@/lib/peamsubUtils";
 import { toast } from "sonner";
 
 interface ProductDetailsDialogProps {

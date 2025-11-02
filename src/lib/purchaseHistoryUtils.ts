@@ -20,17 +20,51 @@ import {
   PeamsubCashCardHistory 
 } from "./peamsubUtils";
 
-export interface FirestorePurchaseHistory {
-  id?: string;
-  userId: string;
+// ประเภทที่ใช้ร่วมกันระหว่าง API และ Firestore
+export type PurchaseType = 'premium' | 'game' | 'mobile' | 'cashcard';
+
+// interface สำหรับ Firestore
+// Basic purchase history interface
+export interface BasePurchaseHistory {
+  id?: string | number;
   type: 'premium' | 'game' | 'mobile' | 'cashcard';
+  price: string | number;
+  status: string;
+  date: string;
+  createdAt?: string;
+  info?: string;
+  resellerId: string;
+  sellPrice?: number;
+  recommendedPrice?: string;
+  reference?: string;
+  refId?: string;
+}
+
+// Firestore purchase history interface
+export interface FirestorePurchaseHistory extends BasePurchaseHistory {
+  userId: string;
+  peamsubId: number;
+  productName?: string;
+  productId?: string;
+  syncedAt?: Date;
+  sellPrice?: number;
+  recommendedPrice?: string;
+  info?: string;
+}
+
+// Peamsub history union type
+export type PeamsubHistory = PeamsubPurchaseHistory | PeamsubGameHistory | PeamsubMobileHistory | PeamsubCashCardHistory;
+
+// Common Peamsub history interface
+export interface PeamsubHistoryBase {
   peamsubId: number; // ID จาก Peamsub API
   reference: string;
   productName?: string; // สำหรับ premium
   productId?: string; // สำหรับ premium
   info?: string; // สำหรับ game, mobile, cashcard
   price: string | number; // ราคาจาก API (ราคาทุน)
-  sellPrice: number; // ราคาที่จ่ายให้เว็บไซต์ (ราคาขาย)
+  recommendedPrice?: string; // ราคาแนะนำจาก API (ราคาขายแนะนำ)
+  sellPrice: number; // ราคาที่จ่ายให้เว็บไซต์ (ราคาขายจริง)
   status: string;
   date: string;
   resellerId: string;
@@ -49,19 +83,21 @@ export async function storePurchaseHistory(
     console.log('💾 กำลังเก็บประวัติการซื้อลง Firestore...', { userId, type, history });
     
     // ใช้ reference + type เป็น unique key เพื่อไม่ให้ duplicate
-    const uniqueKey = `${type}_${('refId' in history ? history.refId : history.reference)}`;
+    const reference = 'refId' in history ? history.refId : history.reference;
+    const uniqueKey = `${type}_${reference}`;
     
     // ดึงราคาขายที่บันทึกไว้ก่อน (จาก reference)
     // ถ้าไม่มี ให้ลองดึงจาก history ที่มี sellPrice หรือใช้ราคาจาก API
     let sellPrice = 0;
     
-    // 1. ตรวจสอบว่ามี sellPrice ใน history หรือไม่
-    if ('sellPrice' in history && typeof history.sellPrice === 'number' && history.sellPrice > 0) {
-      sellPrice = history.sellPrice;
+    // 1. ตรวจสอบว่ามี recommendedPrice หรือ sellPrice ใน history หรือไม่
+    if ('recommendedPrice' in history && (history as any).recommendedPrice) {
+      sellPrice = parseFloat((history as any).recommendedPrice);
+    } else if ('sellPrice' in history && typeof (history as any).sellPrice === 'number' && (history as any).sellPrice > 0) {
+      sellPrice = (history as any).sellPrice;
     } else {
-      // 2. ถ้าไม่มี ลองดึงจาก reference ที่บันทึกไว้
       try {
-        const refKey = `${userId}_${type}_${'refId' in history ? history.refId : history.reference}`;
+        const refKey = `${userId}_${type}_${reference}`;
         const refDocRef = doc(db, "user_purchase_references", refKey);
         const refDoc = await getDoc(refDocRef);
         if (refDoc.exists() && refDoc.data().sellPrice) {
@@ -73,22 +109,22 @@ export async function storePurchaseHistory(
       
       // 3. ถ้ายังไม่มี ให้ใช้ราคาจาก API
       if (sellPrice === 0) {
-        const apiPrice = 'price' in history ? history.price : history.price;
+        const apiPrice = (history as { price: string | number }).price;
         sellPrice = typeof apiPrice === 'string' ? parseFloat(apiPrice) : apiPrice;
       }
     }
     
     // สร้าง object โดยไม่ใส่ undefined values (Firestore ไม่รองรับ)
-    const historyRecord: any = {
+    const historyRecord: Omit<FirestorePurchaseHistory, 'id'> = {
       userId,
       type,
-      peamsubId: history.id,
-      reference: 'refId' in history ? history.refId : history.reference,
-      price: 'price' in history ? history.price : history.price,
+      peamsubId: (history as any).id,
+      reference: 'refId' in history ? (history as any).refId : (history as any).reference,
+      price: (history as { price: string | number }).price,
       sellPrice: typeof sellPrice === 'number' && !isNaN(sellPrice) ? sellPrice : 0,
-      status: history.status || '',
-      date: history.date || '',
-      resellerId: history.resellerId || '',
+      status: (history as any).status || '',
+      date: (history as any).date || '',
+      resellerId: (history as any).resellerId || '',
       syncedAt: new Date()
     };
     
@@ -321,6 +357,9 @@ export async function getUserPurchaseReferences(
 export function convertFirestoreToAPI(
   firestoreHistory: FirestorePurchaseHistory
 ): PeamsubPurchaseHistory | PeamsubGameHistory | PeamsubMobileHistory | PeamsubCashCardHistory {
+  // ใช้ recommendedPrice ถ้ามี ถ้าไม่มีให้ใช้ sellPrice
+  const recommendedPrice = firestoreHistory.recommendedPrice || firestoreHistory.sellPrice?.toString() || '0';
+
   if (firestoreHistory.type === 'premium') {
     return {
       id: firestoreHistory.peamsubId,
@@ -329,6 +368,7 @@ export function convertFirestoreToAPI(
       prize: firestoreHistory.info || '',
       img: '', // ไม่มีใน Firestore
       price: firestoreHistory.price as string,
+      recommendedPrice, // เพิ่มราคาขาย
       refId: firestoreHistory.reference,
       resellerId: firestoreHistory.resellerId,
       status: firestoreHistory.status,
@@ -341,6 +381,7 @@ export function convertFirestoreToAPI(
       reference: firestoreHistory.reference,
       info: firestoreHistory.info || '',
       price: firestoreHistory.price as number,
+      recommendedPrice, // เพิ่มราคาขาย
       status: firestoreHistory.status,
       date: firestoreHistory.date,
       resellerId: firestoreHistory.resellerId

@@ -31,23 +31,80 @@ import { useAuth } from "@/contexts/AuthContext";
 import { getPeamsubPurchaseHistory, getPeamsubGameHistory, getPeamsubCashCardHistory, getPeamsubMobileHistory, PeamsubPurchaseHistory, PeamsubGameHistory, PeamsubCashCardHistory, PeamsubMobileHistory, ClaimRequest, ClaimStatus } from "@/lib/peamsubUtils";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { syncPurchaseHistoryFromAPI, getUserPurchaseHistory, convertFirestoreToAPI, addUserPurchaseReference, getUserPurchaseReferences, FirestorePurchaseHistory } from "@/lib/purchaseHistoryUtils";
+import { 
+  syncPurchaseHistoryFromAPI, 
+  getUserPurchaseHistory, 
+  convertFirestoreToAPI, 
+  addUserPurchaseReference, 
+  getUserPurchaseReferences, 
+  FirestorePurchaseHistory
+} from "@/lib/purchaseHistoryUtils";
+
+// Define combined history type
+type HistoryWithType = (PeamsubPurchaseHistory | PeamsubGameHistory | PeamsubCashCardHistory | PeamsubMobileHistory) & {
+  type: 'premium' | 'game' | 'mobile' | 'cashcard';
+  createdAt?: string;
+};
 
 const PurchaseHistory = () => {
   const { user, userData } = useAuth();
   const navigate = useNavigate();
+  // Define types for history items
+  type PurchaseType = 'premium' | 'game' | 'mobile' | 'cashcard';
+
+  interface BaseHistoryItem {
+    id: string | number;
+    type: PurchaseType;
+    status: string;
+    date: string;
+    createdAt?: string;
+    price: string | number;
+    sellPrice?: number;
+    recommendedPrice?: string;
+    resellerId: string;
+  }
+
+  interface PremiumHistoryItem extends BaseHistoryItem {
+    type: 'premium';
+    productName: string;
+    productId: string;
+    prize: string;
+    img: string;
+    refId: string;
+  }
+
+  interface GameHistoryItem extends BaseHistoryItem {
+    type: 'game';
+    info: string;
+    reference: string;
+  }
+
+  interface MobileHistoryItem extends BaseHistoryItem {
+    type: 'mobile';
+    info: string;
+    reference: string;
+  }
+
+  interface CashCardHistoryItem extends BaseHistoryItem {
+    type: 'cashcard';
+    info: string;
+    reference: string;
+  }
+
+  type HistoryItem = PremiumHistoryItem | GameHistoryItem | MobileHistoryItem | CashCardHistoryItem;
+
   const [purchaseHistory, setPurchaseHistory] = useState<PeamsubPurchaseHistory[]>([]);
   const [gameHistory, setGameHistory] = useState<PeamsubGameHistory[]>([]);
   const [cardHistory, setCardHistory] = useState<PeamsubCashCardHistory[]>([]);
   const [mobileHistory, setMobileHistory] = useState<PeamsubMobileHistory[]>([]);
-  const [filteredHistory, setFilteredHistory] = useState<(PeamsubPurchaseHistory | PeamsubGameHistory | PeamsubCashCardHistory | PeamsubMobileHistory)[]>([]);
+  const [filteredHistory, setFilteredHistory] = useState<HistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all"); // เพิ่ม filter สำหรับประเภท
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
-  const [selectedItem, setSelectedItem] = useState<PeamsubPurchaseHistory | null>(null);
+  const [selectedItem, setSelectedItem] = useState<PremiumHistoryItem | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
 
   // ตรวจสอบว่าเป็นแอดมินหรือไม่
@@ -183,39 +240,59 @@ const PurchaseHistory = () => {
       filtered = filtered.filter(item => item.type === typeFilter);
     }
 
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter(item => {
-        const productName = 'productName' in item ? item.productName : item.info;
-        const reference = 'refId' in item ? item.refId : item.reference;
-        
-        return productName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-               reference?.toLowerCase().includes(searchTerm.toLowerCase());
-      });
-    }
+    // Define type guards
+  function isPeamsubPurchaseHistory(item: any): item is PeamsubPurchaseHistory {
+    return 'productName' in item && 'refId' in item;
+  }
 
-    // Filter by status
-    if (statusFilter !== "all") {
-      filtered = filtered.filter(item => {
-        switch (statusFilter) {
-          case "success":
-            return item.status === "success" || item.status === "completed";
-          case "pending":
-            return item.status === "pending" || item.status === "processing";
-          case "failed":
-            return item.status === "failed" || item.status === "error";
-          default:
-            return true;
-        }
-      });
-    }
+  function isPeamsubGameHistory(item: any): item is PeamsubGameHistory {
+    return 'reference' in item && !('productName' in item);
+  }
 
-    // เรียงตามวันที่ใหม่สุดไปเก่าสุด
-    filtered = filtered.sort((a, b) => {
-      const dateA = new Date(a.createdAt || a.date || 0).getTime();
-      const dateB = new Date(b.createdAt || b.date || 0).getTime();
-      return dateB - dateA; // ใหม่สุดก่อน
+  // Filter by search term
+  if (searchTerm) {
+    filtered = filtered.filter(item => {
+      let name = '';
+      let reference = '';
+      
+      if (isPeamsubPurchaseHistory(item)) {
+        name = item.productName;
+        reference = item.refId;
+      } else if (isPeamsubGameHistory(item)) {
+        name = item.info || '';
+        reference = item.reference;
+      } else {
+        name = item.info || '';
+        reference = item.reference;
+      }
+      
+      return name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+             reference.toLowerCase().includes(searchTerm.toLowerCase());
     });
+  }
+
+  // Filter by status
+  if (statusFilter !== "all") {
+    filtered = filtered.filter(item => {
+      switch (statusFilter) {
+        case "success":
+          return item.status === "success" || item.status === "completed";
+        case "pending":
+          return item.status === "pending" || item.status === "processing";
+        case "failed":
+          return item.status === "failed" || item.status === "error";
+        default:
+          return true;
+      }
+    });
+  }
+
+  // เรียงตามวันที่ใหม่สุดไปเก่าสุด
+  filtered = filtered.sort((a, b) => {
+    const dateA = new Date(a.date || 0).getTime();
+    const dateB = new Date(b.date || 0).getTime();
+    return dateB - dateA; // ใหม่สุดก่อน
+  });
 
     setFilteredHistory(filtered);
     setCurrentPage(1); // Reset to first page when filtering
@@ -257,17 +334,28 @@ const PurchaseHistory = () => {
     return isNaN(numAmount) ? '0.00' : numAmount.toFixed(2);
   };
 
-  // ฟังก์ชันสำหรับแสดงราคา - แสดงราคาที่จ่ายให้เว็บไซต์
-  const getDisplayPrice = (item: PeamsubPurchaseHistory | PeamsubGameHistory | PeamsubCashCardHistory | PeamsubMobileHistory) => {
-    // ใช้ราคาขายที่จ่ายให้เว็บไซต์ (sellPrice) ถ้ามี, ถ้าไม่มีให้ใช้ราคาจาก API
-    const sellPrice = (item as any).sellPrice;
-    const apiPrice = getItemPrice(item);
-    
-    const finalPrice = sellPrice && sellPrice > 0 ? sellPrice : apiPrice;
-    
+    // ฟังก์ชันสำหรับแสดงราคา - แสดงราคาที่จ่ายให้เว็บไซต์
+  interface DisplayPrice {
+    price: string;
+    label: string;
+    color: string;
+  }
+
+  const getDisplayPrice = (item: HistoryItem): DisplayPrice => {
+    let priceToShow = 0;
+
+    // ใช้ recommendedPrice หรือ sellPrice แล้วแต่ว่าจะมีอันไหน
+    if (item.recommendedPrice) {
+      priceToShow = parseFloat(item.recommendedPrice);
+    } else if (item.sellPrice) {
+      priceToShow = item.sellPrice;
+    } else {
+      priceToShow = typeof item.price === 'string' ? parseFloat(item.price) : item.price;
+    }
+
     return {
-      price: formatAmount(finalPrice),
-      label: "ราคาที่จ่ายให้เว็บไซต์",
+      price: formatAmount(priceToShow),
+      label: "ราคา",
       color: "text-green-600"
     };
   };
@@ -276,19 +364,36 @@ const PurchaseHistory = () => {
     return 'price' in item ? item.price : item.price;
   };
 
-  const getItemName = (item: PeamsubPurchaseHistory | PeamsubGameHistory | PeamsubCashCardHistory | PeamsubMobileHistory) => {
-    return 'productName' in item ? item.productName : item.info;
+  const getItemName = (item: HistoryItem) => {
+    switch (item.type) {
+      case 'premium':
+        return item.productName;
+      case 'game':
+      case 'mobile':
+      case 'cashcard':
+        return item.info;
+    }
   };
 
-  const getItemReference = (item: PeamsubPurchaseHistory | PeamsubGameHistory | PeamsubCashCardHistory | PeamsubMobileHistory) => {
-    return 'refId' in item ? item.refId : item.reference;
+  const getItemReference = (item: HistoryItem) => {
+    switch (item.type) {
+      case 'premium':
+        return item.refId;
+      case 'game':
+      case 'mobile':
+      case 'cashcard':
+        return item.reference;
+    }
   };
 
-  const handleClaimProduct = async (item: PeamsubPurchaseHistory) => {
+  const handleClaimProduct = async (item: HistoryItem) => {
     try {
-      // TODO: Implement claim product functionality with proper UI
-      // For now, show a placeholder message
-      toast.info("ฟีเจอร์เคลมสินค้าจะเปิดใช้งานเร็วๆ นี้");
+      if (item.type !== 'premium') {
+        toast.error("เฉพาะสินค้าประเภท Premium เท่านั้นที่สามารถเคลมได้");
+        return;
+      }
+
+      window.open('https://www.facebook.com/share/1S5gFd4AuU/?mibextid=wwXIfr', '_blank');
       
       // Example of how to use the new claim API:
       // const claimRequest: ClaimRequest = {
@@ -305,9 +410,13 @@ const PurchaseHistory = () => {
     }
   };
 
-  const handleViewDetails = (item: PeamsubPurchaseHistory) => {
-    setSelectedItem(item);
-    setDetailsDialogOpen(true);
+  const handleViewDetails = (item: HistoryItem) => {
+    if (item.type === 'premium') {
+      setSelectedItem(item);
+      setDetailsDialogOpen(true);
+    } else {
+      toast.info("ดูรายละเอียดได้เฉพาะสินค้าประเภท Premium เท่านั้น");
+    }
   };
 
   // Pagination
@@ -515,7 +624,7 @@ const PurchaseHistory = () => {
                         </div>
                         <div className="flex items-center justify-between pt-2 border-t">
                           <div>
-                            <p className="text-xs text-muted-foreground">ราคา</p>
+                            <p className="text-xs text-muted-foreground">{getDisplayPrice(item).label}</p>
                             <p className={`font-semibold ${getDisplayPrice(item).color}`}>
                               {getDisplayPrice(item).price} บาท
                             </p>

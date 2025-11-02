@@ -12,7 +12,8 @@ import {
   serverTimestamp,
   Timestamp,
   getDoc,
-  increment
+  increment,
+  runTransaction
 } from "firebase/firestore";
 
 export interface TopUpTransaction {
@@ -47,6 +48,22 @@ export async function createTopUpTransaction(
   slipData?: any
 ): Promise<string> {
   try {
+    // ตรวจสอบข้อมูลผู้ใช้และยอดเงินในระบบก่อน
+    const userRef = doc(db, "users", userId);
+    const userDoc = await getDoc(userRef);
+    
+    if (!userDoc.exists()) {
+      console.error('❌ ไม่พบข้อมูลผู้ใช้:', userId);
+      throw new Error('User not found in database');
+    }
+
+    const currentBalance = userDoc.data().balance || 0;
+    console.log('💰 ตรวจสอบยอดเงินในระบบ:', currentBalance);
+    
+    if (currentBalance === undefined) {
+      console.error('❌ ไม่พบข้อมูลยอดเงินในระบบ');
+      throw new Error('Balance not found in database');
+    }
     const transactionData = {
       userId,
       amount,
@@ -94,30 +111,15 @@ export async function completeTopUpTransaction(
     });
     console.log('✅ อัปเดตสถานะธุรกรรมเป็น completed แล้ว');
 
-    // ดึงข้อมูลผู้ใช้ก่อนอัปเดต
-    const userRef = doc(db, "users", userId);
-    const userDoc = await getDoc(userRef);
+    // เติมเงินเข้าบัญชีผู้ใช้
+    const topUpResult = await topUpBalance(userId, amount);
     
-    if (!userDoc.exists()) {
-      console.error('❌ ไม่พบข้อมูลผู้ใช้:', userId);
-      throw new Error('User not found');
+    if (!topUpResult.success) {
+      console.error('❌ เกิดข้อผิดพลาดในการเติมเงิน:', topUpResult.error);
+      throw new Error(topUpResult.error || 'เกิดข้อผิดพลาดในการเติมเงิน');
     }
     
-    const currentBalance = userDoc.data().balance || 0;
-    console.log('💰 ยอดเงินปัจจุบันใน Firestore:', currentBalance);
-    console.log('➕ จะเพิ่ม:', amount);
-    console.log('🎯 ยอดเงินที่คาดหวัง:', currentBalance + amount);
-    
-    // อัปเดตยอดเงินในบัญชีผู้ใช้
-    await updateDoc(userRef, {
-      balance: increment(amount),
-      lastTopUp: serverTimestamp()
-    });
-    
-    // ตรวจสอบยอดเงินหลังอัปเดต
-    const updatedUserDoc = await getDoc(userRef);
-    const newBalance = updatedUserDoc.data()?.balance || 0;
-    console.log('✅ ยอดเงินใหม่ใน Firestore:', newBalance);
+    console.log('✅ เติมเงินสำเร็จ ยอดเงินใหม่:', topUpResult.newBalance);
 
     console.log("✅ Completed top-up transaction:", transactionId);
     console.log("💰 Added", amount, "to user balance");
@@ -250,5 +252,102 @@ export async function checkDuplicateTopUp(referenceId: string): Promise<boolean>
     console.error("❌ Error checking duplicate top-up:", error);
     return false;
   }
+}
+
+/**
+ * ตรวจสอบยอดเงินของผู้ใช้ในฐานข้อมูล
+ */
+export async function checkUserBalance(userId: string): Promise<number | null> {
+  try {
+    console.log('🔍 กำลังตรวจสอบยอดเงินของผู้ใช้:', userId);
+    
+    const userRef = doc(db, "users", userId);
+    const userDoc = await getDoc(userRef);
+    
+    if (!userDoc.exists()) {
+      console.error('❌ ไม่พบข้อมูลผู้ใช้:', userId);
+      return null;
+    }
+    
+    const currentBalance = userDoc.data().balance || 0;
+    console.log('💰 ยอดเงินปัจจุบันในระบบ:', currentBalance);
+    
+    return currentBalance;
+  } catch (error) {
+    console.error("❌ Error checking user balance:", error);
+    return null;
+  }
+}
+
+/**
+ * อัพเดทยอดเงินในบัญชีผู้ใช้
+ */
+export async function updateUserBalance(userId: string, amount: number, isTopUp: boolean = true): Promise<{
+  success: boolean;
+  newBalance: number | null;
+  error?: string;
+}> {
+  try {
+    console.log(`${isTopUp ? '💰 กำลังเติมเงิน' : '💸 กำลังหักเงิน'} จำนวน:`, amount, 'สำหรับผู้ใช้:', userId);
+    
+    const userRef = doc(db, "users", userId);
+    
+    // ใช้ transaction เพื่อให้แน่ใจว่าการอัพเดทยอดเงินถูกต้อง
+    const newBalance = await runTransaction(db, async (transaction) => {
+      const userDoc = await transaction.get(userRef);
+      
+      if (!userDoc.exists()) {
+        throw new Error('ไม่พบข้อมูลผู้ใช้');
+      }
+      
+      const currentBalance = userDoc.data().balance || 0;
+      
+      // ถ้าเป็นการหักเงิน ต้องตรวจสอบยอดก่อน
+      if (!isTopUp && currentBalance < amount) {
+        throw new Error('ยอดเงินไม่เพียงพอ');
+      }
+      
+      const newBalance = isTopUp ? currentBalance + amount : currentBalance - amount;
+      
+      transaction.update(userRef, {
+        balance: newBalance,
+        lastUpdated: serverTimestamp()
+      });
+      
+      console.log(`✅ ${isTopUp ? 'เติมเงิน' : 'หักเงิน'}สำเร็จ ยอดเงินคงเหลือ:`, newBalance);
+      return newBalance;
+    });
+
+    return {
+      success: true,
+      newBalance: newBalance
+    };
+    
+  } catch (error) {
+    console.error(`❌ Error ${isTopUp ? 'adding to' : 'deducting from'} balance:`, error);
+    return {
+      success: false,
+      newBalance: null,
+      error: error instanceof Error ? error.message : 'เกิดข้อผิดพลาดในการอัพเดทยอดเงิน'
+    };
+  }
+}
+
+// ฟังก์ชั่นสำหรับเติมเงิน
+export async function topUpBalance(userId: string, amount: number): Promise<{
+  success: boolean;
+  newBalance: number | null;
+  error?: string;
+}> {
+  return updateUserBalance(userId, amount, true);
+}
+
+// ฟังก์ชั่นสำหรับหักเงิน
+export async function deductBalance(userId: string, amount: number): Promise<{
+  success: boolean;
+  newBalance: number | null;
+  error?: string;
+}> {
+  return updateUserBalance(userId, amount, false);
 }
 

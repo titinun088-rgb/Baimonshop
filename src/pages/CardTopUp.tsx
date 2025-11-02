@@ -192,6 +192,8 @@ const CardTopUp = () => {
       return;
     }
     
+    // ตรวจสอบ balance จากฐานข้อมูลเว็บ (Firebase)
+    const webBalance = userData?.balance || 0;
     const userBalance = parseFloat(userInfo.balance) || 0;
     
     // ดึงราคาขาย (จาก admin price หรือ recommended price หรือ API price)
@@ -199,8 +201,15 @@ const CardTopUp = () => {
     const recommendedPrice = parseFloat(selectedMobileProduct.recommendedPrice) || 0; // ราคาแนะนำ (ราคาขายเริ่มต้น)
     const sellPrice = await getProductSellPrice(selectedMobileProduct.id, 'mobile', apiPrice, recommendedPrice);
     
-    if (userBalance < sellPrice) {
-      toast.error("ไม่สามารถเติมเงินได้ กรุณาเติมเงินเข้าสู่ระบบ");
+    // ตรวจสอบ balance จากฐานข้อมูลเว็บก่อน
+    if (webBalance < sellPrice) {
+      toast.error(`ยอดเงินในระบบไม่พอ (ยอดเงิน: ${webBalance.toLocaleString()} บาท, ราคา: ${sellPrice.toLocaleString()} บาท) กรุณาเติมเงินก่อน`);
+      return;
+    }
+    
+    // ตรวจสอบ balance จาก Peamsub API
+    if (userBalance < apiPrice) {
+      toast.error(`ยอดเงินใน Peamsub ไม่พอ (ยอดเงิน: ${userBalance.toLocaleString()} บาท, ราคา: ${apiPrice.toLocaleString()} บาท) กรุณาเติมเงินก่อน`);
       return;
     }
 
@@ -281,14 +290,24 @@ const CardTopUp = () => {
       return;
     }
     
+    // ตรวจสอบ balance จากฐานข้อมูลเว็บ (Firebase)
+    const webBalance = userData?.balance || 0;
+    const userBalance = parseFloat(userInfo.balance) || 0;
+    
     // ดึงราคาขาย (จาก admin price หรือ recommended price หรือ API price)
     const apiPrice = parseFloat(selectedCashCardProduct.price) || 0; // ราคา API (ราคาทุน)
     const recommendedPrice = parseFloat(selectedCashCardProduct.recommendedPrice) || 0; // ราคาแนะนำ (ราคาขายเริ่มต้น)
     const sellPrice = await getProductSellPrice(selectedCashCardProduct.id, 'cashcard', apiPrice, recommendedPrice);
-    const userBalance = parseFloat(userInfo.balance) || 0;
     
-    if (userBalance < sellPrice) {
-      toast.error("ไม่สามารถซื้อสินค้าได้ กรุณาเติมเงินเข้าสู่ระบบ");
+    // ตรวจสอบ balance จากฐานข้อมูลเว็บก่อน
+    if (webBalance < sellPrice) {
+      toast.error(`ยอดเงินในระบบไม่พอ (ยอดเงิน: ${webBalance.toLocaleString()} บาท, ราคา: ${sellPrice.toLocaleString()} บาท) กรุณาเติมเงินก่อน`);
+      return;
+    }
+    
+    // ตรวจสอบ balance จาก Peamsub API
+    if (userBalance < apiPrice) {
+      toast.error(`ยอดเงินใน Peamsub ไม่พอ (ยอดเงิน: ${userBalance.toLocaleString()} บาท, ราคา: ${apiPrice.toLocaleString()} บาท) กรุณาเติมเงินก่อน`);
       return;
     }
 

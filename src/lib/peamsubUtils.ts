@@ -331,27 +331,25 @@ export const getPeamsubPreorderProducts = async (): Promise<PeamsubPreorderProdu
 export const getPeamsubGameProducts = async (): Promise<PeamsubGameProduct[]> => {
   try {
     console.log('🎮 กำลังดึงรายการสินค้าเติมเกม Peamsub...');
-    
-    // ลองดึงแบบ pagination ก่อน
-    let allProducts: PeamsubGameProduct[] = [];
-    let page = 1;
-    let hasMore = true;
-    const limit = 1000;
-    let lastPageCount = 0;
-    
-    // ดึงข้อมูลแบบ pagination จนกว่าจะหมด
-    while (hasMore && page <= 100) { // จำกัดสูงสุด 100 หน้าเพื่อป้องกัน infinite loop
+
+    // ทำ retry ในกรณีที่เกิด rate limit หรือ network error
+    let retryCount = 0;
+    const maxRetries = 3;
+    const retryDelay = 1000; // 1 วินาที
+
+    while (retryCount < maxRetries) {
       try {
-        // ลองดึงแบบมี pagination parameters
-        const endpoint = `/v2/game?page=${page}&limit=${limit}`;
-        const response = await makeApiRequest<PeamsubGameProduct[] | { data: PeamsubGameProduct[]; total?: number; page?: number; limit?: number }>(
-          endpoint,
-          { method: 'GET' }
-        );
-        
+        // ดึงข้อมูลโดยตรงจาก endpoint โดยไม่ใช้ pagination
+        const response = await makeApiRequest<PeamsubGameProduct[]>('/v2/game', {
+          method: 'GET',
+          headers: {
+            'Cache-Control': 'no-cache', // ป้องกัน cache
+          }
+        });
+
         if (response.statusCode === 200) {
           let products: PeamsubGameProduct[] = [];
-          
+
           // ตรวจสอบรูปแบบ response
           if (Array.isArray(response.data)) {
             products = response.data;
@@ -362,89 +360,56 @@ export const getPeamsubGameProducts = async (): Promise<PeamsubGameProduct[]> =>
             } else if (Array.isArray(responseData)) {
               products = responseData;
             }
-            
-            // ตรวจสอบ total count
-            if (responseData.total !== undefined) {
-              const total = responseData.total;
-              const currentLimit = responseData.limit || limit;
-              if (page * currentLimit >= total) {
-                hasMore = false;
-              }
-            }
           }
+
+          // ตรวจสอบความถูกต้องของข้อมูล
+          const validProducts = products.filter(product => 
+            product && 
+            typeof product === 'object' &&
+            'id' in product &&
+            'category' in product
+          );
+
+          // ลบข้อมูลซ้ำ
+          const uniqueProducts = validProducts.filter((product, index, self) => 
+            index === self.findIndex((p) => p.id === product.id)
+          );
+
+          console.log(`✅ ดึงรายการสินค้าเติมเกม Peamsub สำเร็จ: ${uniqueProducts.length} รายการ`);
           
-          if (products.length > 0) {
-            // ตรวจสอบว่ามีข้อมูลซ้ำกับหน้าก่อนหรือไม่
-            if (products.length === lastPageCount && page > 1) {
-              // ถ้าจำนวนเท่ากัน อาจเป็นข้อมูลซ้ำหรือ API ไม่รองรับ pagination
-              console.warn(`⚠️ ได้ข้อมูลจำนวนเท่ากัน (${products.length}) อาจไม่มีข้อมูลเพิ่มเติม`);
-              hasMore = false;
-            } else {
-              allProducts = [...allProducts, ...products];
-              lastPageCount = products.length;
-              console.log(`📦 หน้า ${page}: ${products.length} รายการ (รวม: ${allProducts.length})`);
-              
-              // ถ้าได้ข้อมูลน้อยกว่า limit แสดงว่าไม่มีข้อมูลเพิ่มเติมแล้ว
-              if (products.length < limit) {
-                hasMore = false;
-              } else {
-                page++;
-                // หน่วงเวลาเล็กน้อยเพื่อป้องกัน rate limit
-                await new Promise(resolve => setTimeout(resolve, 300));
-              }
-            }
-          } else {
-            // ถ้าได้ข้อมูลว่างในหน้าแรก ลอง fallback
-            if (page === 1) {
-              console.log('⚠️ ไม่ได้ข้อมูลจาก pagination ลองดึงแบบเดิม...');
-              break; // ออกจาก loop เพื่อไป fallback
-            }
-            hasMore = false;
+          // Log warning ถ้าได้ข้อมูลน้อยผิดปกติ
+          if (uniqueProducts.length < 10) {
+            console.warn('⚠️ Warning: ได้รับข้อมูลเกมน้อยกว่าที่ควร อาจมีปัญหากับ API');
           }
+
+          return uniqueProducts;
         } else {
-          // ถ้า status code ไม่ใช่ 200 ในหน้าแรก ให้ fallback
-          if (page === 1) {
-            break; // ออกจาก loop เพื่อไป fallback
-          }
-          hasMore = false;
+          throw new Error(`API returned status code: ${response.statusCode}`);
         }
-      } catch (pageError: any) {
-        console.warn(`⚠️ Error ดึงหน้า ${page}:`, pageError.message);
+      } catch (error: any) {
+        retryCount++;
         
-        // ถ้าเป็น error ในหน้าแรก ให้ fallback
-        if (page === 1) {
-          break; // ออกจาก loop เพื่อไป fallback
-        }
-        hasMore = false;
-      }
-    }
-    
-    // Fallback: ถ้ายังไม่มีข้อมูลหรือหน้าแรก error ให้ดึงแบบเดิม (ไม่มี pagination)
-    if (allProducts.length === 0) {
-      console.log('🔄 ใช้วิธี fallback: ดึงข้อมูลแบบเดิม...');
-      try {
-        const fallbackResponse = await makeApiRequest<PeamsubGameProduct[]>('/v2/game');
-        if (fallbackResponse.statusCode === 200) {
-          if (Array.isArray(fallbackResponse.data)) {
-            allProducts = fallbackResponse.data;
+        // ถ้าเป็น rate limit หรือ network error ให้ retry
+        if (error.message.includes('429') || error.message.includes('network')) {
+          if (retryCount < maxRetries) {
+            console.warn(`⚠️ Retry ${retryCount}/${maxRetries} after ${retryDelay}ms...`);
+            await new Promise(resolve => setTimeout(resolve, retryDelay));
+            continue;
           }
         }
-      } catch (fallbackError) {
-        console.error('❌ Error getting game products (fallback):', fallbackError);
-        throw fallbackError;
+        
+        // ถ้าเป็น error อื่นๆ หรือ retry ครบแล้ว ให้ throw
+        throw error;
       }
     }
-    
-    // ลบข้อมูลซ้ำ (กรณี API ส่งซ้ำ)
-    const uniqueProducts = allProducts.filter((product, index, self) => 
-      index === self.findIndex((p) => p.id === product.id)
-    );
-    
-    console.log(`✅ ดึงรายการสินค้าเติมเกม Peamsub สำเร็จ: ${uniqueProducts.length} รายการ (${uniqueProducts.length !== allProducts.length ? `ลบซ้ำ ${allProducts.length - uniqueProducts.length} รายการ` : ''})`);
-    return uniqueProducts;
+
+    throw new Error('Max retries exceeded');
   } catch (error) {
     console.error('❌ Error getting Peamsub game products:', error);
-    throw error;
+    
+    // Return empty array instead of throwing error for graceful degradation
+    console.warn('⚠️ Returning empty array for graceful degradation');
+    return [];
   }
 };
 
@@ -681,6 +646,26 @@ export const getPeamsubCashCardProducts = async (): Promise<PeamsubCashCardProdu
 export const purchasePeamsubCashCard = async (id: number, reference: string): Promise<string> => {
   try {
     console.log('💳 กำลังซื้อบัตรเงินสด...', { id, reference });
+
+    // Get user info
+    const userInfo = await getPeamsubUserInfo();
+    const userBalance = parseFloat(userInfo.balance) || 0;
+
+    // Get product info
+    const products = await getPeamsubCashCardProducts();
+    const product = products.find(p => p.id === id);
+
+    if (!product) {
+      throw new Error(`Product with id ${id} not found`);
+    }
+
+    const productPrice = parseFloat(product.recommendedPrice) || 0;
+
+    // Check balance
+    if (userBalance < productPrice) {
+      throw new Error("Insufficient balance");
+    }
+
     const response = await makeApiRequest<{ statusCode: number }>('/v2/cashcard', {
       method: 'POST',
       body: JSON.stringify({ id, reference })

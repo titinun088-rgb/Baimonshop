@@ -43,7 +43,7 @@ import { doc, updateDoc, increment } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 const GameTopUp = () => {
-  const { user } = useAuth();
+  const { user, userData } = useAuth();
   
   // User Info
   const [userInfo, setUserInfo] = useState<PeamsubUserData | null>(null);
@@ -554,14 +554,14 @@ const GameTopUp = () => {
                 }
 
                 return (
-                  <div className="grid grid-cols-1 gap-6">
+                    <div className="grid grid-cols-1 gap-6">
                     {groups.map(group => (
                       <div 
                         key={group.key}
                         className="group bg-black/30 backdrop-blur-sm rounded-2xl shadow-lg p-6 transition-all duration-300 hover:bg-black/40 hover:shadow-purple-500/25 border border-purple-500/30"
                       >
                         {/* Game Image */}
-                        <div className="w-full h-48 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl mb-4 flex items-center justify-center overflow-hidden">
+                        <div className="w-48 h-48 mx-auto bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl mb-4 flex items-center justify-center overflow-hidden">
                           {group.img ? (
                             <img 
                               src={group.img} 
@@ -576,15 +576,13 @@ const GameTopUp = () => {
                           <div className="w-full h-full flex items-center justify-center" style={{display: group.img ? 'none' : 'flex'}}>
                             <Gamepad2 className="h-20 w-20 text-white opacity-70" />
                           </div>
-                        </div>
-
-                        {/* Game Info */}
+                        </div>                        {/* Game Info */}
                         <div className="text-center">
-                          <h2 className="text-xl font-bold text-white mb-2 group-hover:text-purple-300 transition-colors">
+                          <h2 className="text-xl font-bold text-white mb-2 group-hover:text-purple-300 transition-colors text-center">
                             {group.category}
                           </h2>
                           {group.infoSample && (
-                            <p className="text-purple-300 text-xs mb-3 whitespace-pre-line">{formatGameInfo(group.infoSample)}</p>
+                            <p className="text-purple-300 text-sm mb-3 whitespace-pre-line text-center">{formatGameInfo(group.infoSample)}</p>
                           )}
                         </div>
 
@@ -651,7 +649,7 @@ const GameTopUp = () => {
                 }
 
                 return (
-                  <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
+                      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
                     {apiCategories.map((category) => (
                       <div 
                         key={category.name}
@@ -659,7 +657,7 @@ const GameTopUp = () => {
                         className="group bg-black/30 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg p-3 sm:p-4 md:p-6 cursor-pointer hover:bg-black/40 transition-all duration-300 hover:scale-105 hover:shadow-purple-500/25 border border-purple-500/30"
                       >
                         {/* Category Image */}
-                        <div className="w-full h-32 sm:h-40 md:h-48 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg sm:rounded-xl mb-2 sm:mb-4 flex items-center justify-center overflow-hidden">
+                        <div className="aspect-square bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg sm:rounded-xl mb-2 sm:mb-4 flex items-center justify-center overflow-hidden">
                           {category.img ? (
                             <img 
                               src={category.img} 
@@ -669,9 +667,7 @@ const GameTopUp = () => {
                           ) : (
                             <Gamepad2 className="h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 text-white opacity-70" />
                           )}
-                        </div>
-
-                        {/* Category Info */}
+                        </div>                        {/* Category Info */}
                         <div className="text-center">
                           <h2 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold text-white mb-1 sm:mb-2 md:mb-4 group-hover:text-purple-300 transition-colors line-clamp-2">
                             {category.name}
@@ -763,6 +759,8 @@ const GameTopUp = () => {
                     return;
                   }
                   
+                  // ตรวจสอบ balance จากฐานข้อมูลเว็บ (Firebase)
+                  const webBalance = userData?.balance || 0;
                   const userBalance = parseFloat(userInfo.balance) || 0;
                   
                   // ดึงราคาขาย (จาก admin price หรือ recommended price หรือ API price)
@@ -770,8 +768,15 @@ const GameTopUp = () => {
                   const recommendedPrice = parseFloat(selectedGameProduct.recommendedPrice) || 0; // ราคาแนะนำ (ราคาขายเริ่มต้น)
                   const sellPrice = await getProductSellPrice(selectedGameProduct.id, 'game', apiPrice, recommendedPrice);
                   
-                  if (userBalance < sellPrice) {
-                    toast.error("ไม่สามารถเติมเงินได้ กรุณาเติมเงินเข้าสู่ระบบ");
+                  // ตรวจสอบ balance จากฐานข้อมูลเว็บก่อน
+                  if (webBalance < sellPrice) {
+                    toast.error(`ยอดเงินในระบบไม่พอ (ยอดเงิน: ${webBalance.toLocaleString()} บาท, ราคา: ${sellPrice.toLocaleString()} บาท) กรุณาเติมเงินก่อน`);
+                    return;
+                  }
+                  
+                  // ตรวจสอบ balance จาก Peamsub API
+                  if (userBalance < apiPrice) {
+                    toast.error(`ยอดเงินใน Peamsub ไม่พอ (ยอดเงิน: ${userBalance.toLocaleString()} บาท, ราคา: ${apiPrice.toLocaleString()} บาท) กรุณาเติมเงินก่อน`);
                     return;
                   }
                   

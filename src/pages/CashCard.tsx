@@ -85,11 +85,23 @@ const CashCard = () => {
       return;
     }
     
+    // ตรวจสอบ balance จากฐานข้อมูลเว็บ (Firebase)
+    const webBalance = userData?.balance || 0;
     const userBalance = parseFloat(userInfo.balance) || 0;
-    const productPrice = parseFloat(product.recommendedPrice) || 0;
     
-    if (userBalance < productPrice) {
-      toast.error("ไม่สามารถเติมเงินได้ กรุณาเติมเงินเข้าสู่ระบบ");
+    // ดึงราคาขายจากราคาแนะนำหรือราคาปกติ
+    const apiPrice = parseFloat(product.price) || 0;
+    const sellPrice = parseFloat(product.recommendedPrice) || apiPrice;
+    
+    // ตรวจสอบ balance จากฐานข้อมูลเว็บก่อน
+    if (webBalance < sellPrice) {
+      toast.error(`ยอดเงินในระบบไม่พอ (ยอดเงิน: ${webBalance.toLocaleString()} บาท, ราคา: ${sellPrice.toLocaleString()} บาท) กรุณาเติมเงินก่อน`);
+      return;
+    }
+    
+    // ตรวจสอบ balance จาก Peamsub API
+    if (userBalance < apiPrice) {
+      toast.error(`ยอดเงินใน Peamsub ไม่พอ (ยอดเงิน: ${userBalance.toLocaleString()} บาท, ราคา: ${apiPrice.toLocaleString()} บาท) กรุณาเติมเงินก่อน`);
       return;
     }
 
@@ -97,24 +109,51 @@ const CashCard = () => {
     try {
       const reference = `CASH_CARD_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
-      await purchasePeamsubCashCard(product.id, reference);
+      // เรียก API ซื้อบัตรเงินสด
+      const result = await purchasePeamsubCashCard(product.id, reference);
       
-      // บันทึก reference ลง Firebase
-      if (user) {
-        try {
-          await addUserPurchaseReference(user.uid, 'cashcard', reference);
-        } catch (refError) {
-          console.warn('⚠️ ไม่สามารถบันทึก reference ได้:', refError);
-        }
+      // หักเงินจาก balance ในฐานข้อมูล
+      try {
+        const userRef = doc(db, "users", user.uid);
+        await updateDoc(userRef, {
+          balance: increment(-sellPrice) // หักเงิน
+        });
+        console.log(`✅ หักเงิน ${sellPrice} บาทจาก balance สำเร็จ`);
+        
+        // รีเฟรชข้อมูลผู้ใช้เพื่ออัปเดต balance
+        await loadData();
+      } catch (balanceError) {
+        console.error('❌ ไม่สามารถหักเงินได้:', balanceError);
+        toast.error("เงินหักจาก API แล้วแต่ไม่สามารถหักเงินจากระบบได้ กรุณาติดต่อผู้ดูแล");
       }
       
-      toast.success("ซื้อบัตรเงินสดสำเร็จ!");
+      // บันทึกการซื้อพร้อมราคาขายที่จ่ายจริง
+      try {
+        await recordPurchaseWithSellPrice(
+          user.uid,
+          'cashcard',
+          reference,
+          product.id,
+          sellPrice, // ราคาที่จ่ายให้เว็บไซต์
+          apiPrice, // ราคาจาก API
+          product.info || product.category || 'บัตรเงินสด',
+          product.id.toString()
+        );
+      } catch (recordError) {
+        console.warn('⚠️ ไม่สามารถบันทึกราคาขายได้:', recordError);
+        // Fallback: บันทึก reference ธรรมดา
+        await addUserPurchaseReference(user.uid, 'cashcard', reference);
+      }
       
-      // Reload data
-      await loadData();
-    } catch (error) {
+      toast.success(`ซื้อบัตรเงินสดสำเร็จ! ${result || ''}`);
+      
+    } catch (error: any) {
       console.error("Error purchasing cash card:", error);
-      toast.error("ไม่สามารถซื้อบัตรเงินสดได้");
+      if (error.message === "Insufficient balance") {
+        toast.error("ยอดเงินคงเหลือไม่เพียงพอ กรุณาเติมเงิน");
+      } else {
+        toast.error("ไม่สามารถซื้อบัตรเงินสดได้");
+      }
     } finally {
       setPurchasing(false);
     }

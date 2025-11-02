@@ -467,6 +467,9 @@ const PremiumApp = () => {
       toast.error("ไม่สามารถตรวจสอบยอดเงินได้");
       return;
     }
+    
+    // ตรวจสอบ balance จากฐานข้อมูลเว็บ (Firebase)
+    const webBalance = userData?.balance || 0;
     const userBalance = parseFloat(userInfo.balance) || 0;
     const userRank = userInfo.rank || 0;
     
@@ -475,8 +478,15 @@ const PremiumApp = () => {
     const apiPrice = getProductPriceByRank(selectedProduct, userRank);
     const sellPrice = await getProductSellPrice(selectedProduct.id, 'premium', apiPrice);
     
-    if (userBalance < sellPrice) {
-      toast.error("ไม่สามารถซื้อสินค้าได้ กรุณาเติมเงินเข้าสู่ระบบ");
+    // ตรวจสอบ balance จากฐานข้อมูลเว็บก่อน
+    if (webBalance < sellPrice) {
+      toast.error(`ยอดเงินในระบบไม่พอ (ยอดเงิน: ${webBalance.toLocaleString()} บาท, ราคา: ${sellPrice.toLocaleString()} บาท) กรุณาเติมเงินก่อน`);
+      return;
+    }
+    
+    // ตรวจสอบ balance จาก Peamsub API
+    if (userBalance < apiPrice) {
+      toast.error(`ยอดเงินใน Peamsub ไม่พอ (ยอดเงิน: ${userBalance.toLocaleString()} บาท, ราคา: ${apiPrice.toLocaleString()} บาท) กรุณาเติมเงินก่อน`);
       return;
     }
 
@@ -751,12 +761,6 @@ const PremiumApp = () => {
                   <div>
                     <p className="text-sm text-muted-foreground">ชื่อผู้ใช้</p>
                     <p className="font-semibold">{userInfo.username}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">ยอดเงินคงเหลือ</p>
-                    <p className="font-semibold text-green-600">
-                      {parseFloat(userInfo.balance).toLocaleString()} บาท
-                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">ยศ</p>
@@ -1248,12 +1252,6 @@ const PremiumApp = () => {
                             {getProductPriceByRank(selectedProduct, userInfo.rank)} บาท
                           </span>
                         </p>
-                        <p className="text-sm">
-                          <span className="text-muted-foreground">ยอดเงินคงเหลือ:</span> 
-                          <span className="font-semibold ml-2 text-green-600">
-                            {parseFloat(userInfo.balance).toLocaleString()} บาท
-                          </span>
-                        </p>
                       </div>
                     </div>
                   </div>
@@ -1398,12 +1396,6 @@ const PremiumApp = () => {
                           <span className="text-muted-foreground">ราคา:</span> 
                           <span className="font-semibold ml-2">
                             {getPreorderProductPriceByRank(selectedPreorderProduct, userInfo.rank)} บาท
-                          </span>
-                        </p>
-                        <p className="text-sm">
-                          <span className="text-muted-foreground">ยอดเงินคงเหลือ:</span> 
-                          <span className="font-semibold ml-2 text-green-600">
-                            {parseFloat(userInfo.balance).toLocaleString()} บาท
                           </span>
                         </p>
                       </div>
