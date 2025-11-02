@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { Helmet } from "react-helmet-async";
  
 import {
   getPeamsubUserInfo,
@@ -314,6 +315,15 @@ const GameTopUp = () => {
 
   return (
     <Layout>
+      <Helmet>
+        <title>เติมเกม — CoinZone | เติมเกมออนไลน์ รวดเร็ว ปลอดภัย</title>
+        <meta name="description" content="เติมเกมออนไลน์กับ CoinZone — บริการเติมเกมและแอปพรีเมียม รวดเร็ว ปลอดภัย ใช้งานง่าย" />
+        <meta property="og:title" content="เติมเกม — CoinZone | เติมเกมออนไลน์ รวดเร็ว ปลอดภัย" />
+        <meta property="og:description" content="เติมเกมออนไลน์กับ CoinZone — บริการเติมเกมและแอปพรีเมียม รวดเร็ว ปลอดภัย ใช้งานง่าย" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="/logo.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+      </Helmet>
         <div className="bg-gradient-to-b from-[#0f0f2d] to-[#1a0033] text-white min-h-screen font-['Kanit',sans-serif] -mx-3 sm:-mx-4 lg:-mx-6 xl:-mx-8 -mt-16 lg:-mt-16">
           {/* Header */}
           <header className="bg-black/20 backdrop-blur-sm border-b border-purple-500/30 p-4 sm:p-6">
@@ -376,7 +386,8 @@ const GameTopUp = () => {
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
-                        e.currentTarget.nextElementSibling.style.display = 'flex';
+                        const _sibling = e.currentTarget.nextElementSibling as HTMLElement | null;
+                        if (_sibling) _sibling.style.display = 'flex';
                       }}
                     />
                   ) : null}
@@ -430,14 +441,15 @@ const GameTopUp = () => {
                     {/* Game Image */}
                     <div className="flex justify-center">
                       <div className="w-48 h-48 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center overflow-hidden">
-                        {selectedGame.img ? (
+                          {selectedGame.img ? (
                           <img 
                             src={selectedGame.img} 
                             alt={selectedGame.category}
                             className="w-full h-full object-cover"
                             onError={(e) => {
                               e.currentTarget.style.display = 'none';
-                              e.currentTarget.nextElementSibling.style.display = 'flex';
+                              const _sibling = e.currentTarget.nextElementSibling as HTMLElement | null;
+                              if (_sibling) _sibling.style.display = 'flex';
                             }}
                           />
                         ) : null}
@@ -569,7 +581,8 @@ const GameTopUp = () => {
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                               onError={(e) => {
                                 e.currentTarget.style.display = 'none';
-                                e.currentTarget.nextElementSibling.style.display = 'flex';
+                                const _sibling = e.currentTarget.nextElementSibling as HTMLElement | null;
+                                if (_sibling) _sibling.style.display = 'flex';
                               }}
                             />
                           ) : null}
