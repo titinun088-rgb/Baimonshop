@@ -1,6 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 import Landing from "./Landing";
+import Seo from '@/components/Seo';
 
 const Index = () => {
   const { user, userData, loading } = useAuth();
@@ -16,7 +17,12 @@ const Index = () => {
   }
 
   // แสดงหน้า Landing สำหรับผู้ใช้ที่ไม่ล็อกอิน
-  return <Landing />;
+  return (
+    <>
+      <Seo title="CoinZone" description="บริการเติมเงินเกมและแอปพรีเมียม รวดเร็ว ปลอดภัย" />
+      <Landing />
+    </>
+  );
 };
 
 export default Index;

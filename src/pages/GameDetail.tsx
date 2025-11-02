@@ -33,6 +33,7 @@ import { Plus, ArrowLeft, MoreVertical, Edit, Trash2, Loader2, Upload, Download 
 import { toast } from "sonner";
 import { getGameById, getGameItems, deleteGameItem, exportGameItemsToCSV, importGameItemsFromExcel, Game, GameItem } from "@/lib/gameUtils";
 import { useAuth } from "@/contexts/AuthContext";
+import Seo from '@/components/Seo';
 import CreateGameItemDialog from "@/components/CreateGameItemDialog";
 import EditGameItemDialog from "@/components/EditGameItemDialog";
 import ImportDialog from "@/components/ImportDialog";
@@ -209,6 +210,12 @@ const GameDetail = () => {
 
   return (
     <Layout>
+      <Seo
+        title={game.name}
+        description={game.description || `จัดการรายการเติม ${game.name}`}
+        image={game.imageUrl}
+        canonical={`https://www.coin-zone.shop/games/${id}`}
+      />
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-start gap-4">

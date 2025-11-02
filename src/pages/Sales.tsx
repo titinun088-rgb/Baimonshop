@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import Layout from "@/components/Layout";
+import Seo from '@/components/Seo';
 import CreateSaleDialog from "@/components/CreateSaleDialog";
 import EditSaleDialog from "@/components/EditSaleDialog";
 import ImportDialog from "@/components/ImportDialog";
@@ -215,6 +216,7 @@ const Sales = () => {
 
   return (
     <Layout>
+      <Seo title="ยอดขาย — CoinZone" description="ดูและจัดการยอดขายของคุณ" />
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

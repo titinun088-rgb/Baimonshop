@@ -15,3 +15,15 @@ Allow: /
  
 # Sitemap
 Sitemap: https://www.coin-zone.shop/sitemap.xml
+
+# Block admin-only areas from crawlers
+# These routes are backend/admin interfaces and should not be indexed
+Disallow: /dashboard
+Disallow: /users
+Disallow: /activity
+Disallow: /reports
+Disallow: /peamsub-api
+Disallow: /qr-code-manager
+Disallow: /category-management
+Disallow: /peamsub-price-management
+Disallow: /sales

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
+import Seo from '@/components/Seo';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -699,6 +700,7 @@ const PremiumApp = () => {
 
   return (
     <Layout>
+        <Seo title="แอปพรีเมียม — CoinZone" description="จัดการแอปพรีเมียมและประวัติการซื้อ" />
         <div className="space-y-6">
           {/* Header */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
