@@ -197,6 +197,41 @@ export async function getUserPurchaseHistory(
 }
 
 /**
+ * ดึงประวัติการซื้อทั้งหมด (สำหรับ Admin)
+ */
+export async function getAllPurchaseHistory(): Promise<FirestorePurchaseHistory[]> {
+  try {
+    console.log('📋 กำลังดึงประวัติการซื้อทั้งหมดจาก Firestore...');
+
+    const q = query(collection(db, 'peamsub_purchases'));
+    const querySnapshot = await getDocs(q);
+    const history: FirestorePurchaseHistory[] = [];
+
+    querySnapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+      history.push({
+        id: docSnap.id,
+        ...data,
+        syncedAt: (data as any).syncedAt?.toDate ? (data as any).syncedAt.toDate() : new Date((data as any).syncedAt)
+      } as FirestorePurchaseHistory);
+    });
+
+    // เรียงลำดับใหม่สุดก่อน
+    history.sort((a, b) => {
+      const dateA = new Date(a.date || a.syncedAt || 0).getTime();
+      const dateB = new Date(b.date || b.syncedAt || 0).getTime();
+      return dateB - dateA;
+    });
+
+    console.log('✅ ดึงประวัติการซื้อทั้งหมดสำเร็จ:', history.length, 'รายการ');
+    return history;
+  } catch (error) {
+    console.error('❌ Error getting all purchase history:', error);
+    throw error;
+  }
+}
+
+/**
  * Sync ประวัติจาก API ลง Firestore
  * ใช้เพื่อ sync ประวัติใหม่ๆ จาก API มาเก็บใน Firestore
  * แต่จะเก็บเฉพาะ reference ที่ user นี้เคยซื้อจริงๆ

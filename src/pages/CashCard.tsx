@@ -285,8 +285,7 @@ const CashCard = () => {
   // Filter history
   const filteredHistory = history.filter(item => {
     const matchesSearch = !searchTerm || 
-      item.info?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.reference?.toLowerCase().includes(searchTerm.toLowerCase());
+      item.info?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesStatus = statusFilter === "all" || item.status === statusFilter;
     
@@ -350,7 +349,7 @@ const CashCard = () => {
                 <Package className="h-8 w-8 text-blue-600" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">จำนวนการซื้อทั้งหมด</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats.totalPurchases}</p>
+                  <p className="text-2xl font-bold text-blue-600">{stats.totalPurchases}</p>
                 </div>
               </div>
             </CardContent>
@@ -575,7 +574,6 @@ const CashCard = () => {
                       <th className="text-left p-3 font-medium">บัตรเงินสด</th>
                       <th className="text-left p-3 font-medium">จำนวน</th>
                       <th className="text-left p-3 font-medium">สถานะ</th>
-                      <th className="text-left p-3 font-medium">Reference</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -591,11 +589,6 @@ const CashCard = () => {
                         <td className="p-3 font-medium">{item.info || "ไม่ระบุ"}</td>
                         <td className="p-3">{formatAmount(item.price)} บาท</td>
                         <td className="p-3">{getStatusBadge(item.status)}</td>
-                        <td className="p-3">
-                          <code className="text-xs bg-gray-100 px-2 py-1 rounded">
-                            {item.reference || "ไม่ระบุ"}
-                          </code>
-                        </td>
                       </tr>
                     ))}
                   </tbody>

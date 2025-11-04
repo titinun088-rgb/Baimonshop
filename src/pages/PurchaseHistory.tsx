@@ -489,7 +489,7 @@ const PurchaseHistory = () => {
                 <ShoppingCart className="h-8 w-8 text-blue-600" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-muted-foreground">การซื้อทั้งหมด</p>
-                  <p className="text-2xl font-bold">{stats.totalPurchases}</p>
+                  <p className="text-2xl font-bold text-blue-600">{stats.totalPurchases}</p>
                 </div>
               </div>
             </CardContent>

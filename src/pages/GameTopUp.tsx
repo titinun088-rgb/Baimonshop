@@ -329,7 +329,7 @@ const GameTopUp = () => {
           <header className="bg-black/20 backdrop-blur-sm border-b border-purple-500/30 p-4 sm:p-6">
             <div className="flex flex-col gap-4">
               <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">
                   เติมเกม
                 </h1>
                 <p className="text-purple-300 mt-1 sm:mt-2 text-sm sm:text-base">เติมเงินเกมออนไลน์</p>

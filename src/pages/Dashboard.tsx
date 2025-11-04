@@ -34,6 +34,7 @@ import {
 } from "recharts";
 import { Badge } from "@/components/ui/badge";
 import { getDashboardStats, getDailyChartData, getSalesByUser, getAllSales } from "@/lib/salesUtils";
+import { getUserPurchaseHistory, getAllPurchaseHistory, FirestorePurchaseHistory } from "@/lib/purchaseHistoryUtils";
 import { getAllGames, getGamesByUser } from "@/lib/gameUtils";
 import { Sale } from "@/types/sale";
 
@@ -56,6 +57,8 @@ const Dashboard = () => {
   const [chartData, setChartData] = useState<any[]>([]);
   const [recentSales, setRecentSales] = useState<Sale[]>([]);
   const [gamesCount, setGamesCount] = useState(0);
+  const [apiHistory, setApiHistory] = useState<FirestorePurchaseHistory[]>([]);
+  const [apiTotals, setApiTotals] = useState({ totalSell: 0, totalCost: 0, totalProfit: 0 });
 
   const isAdmin = userData?.role === "admin";
 
@@ -89,6 +92,32 @@ const Dashboard = () => {
         // โหลดจำนวนเกม
         const gamesData = isAdmin ? await getAllGames() : await getGamesByUser(ownerId);
         setGamesCount(gamesData.length);
+
+        // โหลดประวัติการขายจาก API (Firestore peamsub_purchases)
+        const purchases = isAdmin ? await getAllPurchaseHistory() : await getUserPurchaseHistory(ownerId);
+        setApiHistory(purchases);
+
+        // คำนวณยอดขาย/ต้นทุน/กำไรรวมจากข้อมูล API
+        const parseNumber = (value: any): number => {
+          if (typeof value === "number") return isNaN(value) ? 0 : value;
+          if (typeof value === "string") {
+            const n = parseFloat(value);
+            return isNaN(n) ? 0 : n;
+          }
+          return 0;
+        };
+        const totals = purchases.reduce(
+          (acc, item) => {
+            const apiPrice = parseNumber(item.price);
+            const sell = parseNumber(item.sellPrice);
+            acc.totalSell += sell;
+            acc.totalCost += apiPrice;
+            acc.totalProfit += sell - apiPrice;
+            return acc;
+          },
+          { totalSell: 0, totalCost: 0, totalProfit: 0 }
+        );
+        setApiTotals(totals);
 
         console.log("✅ Dashboard: โหลดข้อมูลเสร็จสิ้น");
       } catch (error) {
@@ -165,6 +194,38 @@ const Dashboard = () => {
           trend="neutral"
         />
       </div>
+
+      {/* API Aggregates (Site-wide) */}
+      <Card className="border-border bg-card shadow-card">
+        <CardHeader>
+          <CardTitle>{isAdmin ? "สรุปภาพรวมทั้งเว็บไซต์ (จาก API)" : "สรุปภาพรวมของคุณ (จาก API)"}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+            <StatCard
+              title="ยอดขายรวม (เว็บ)"
+              value={`฿${apiTotals.totalSell.toFixed(2)}`}
+              change={`ทั้งหมด ${apiHistory.length} รายการ`}
+              icon={ShoppingCart}
+              trend={apiTotals.totalSell > 0 ? "up" : "neutral"}
+            />
+            <StatCard
+              title="ต้นทุนรวม (API)"
+              value={`฿${apiTotals.totalCost.toFixed(2)}`}
+              change="ราคาตาม API"
+              icon={DollarSign}
+              trend={apiTotals.totalCost > 0 ? "neutral" : "neutral"}
+            />
+            <StatCard
+              title="กำไรรวม"
+              value={`฿${apiTotals.totalProfit.toFixed(2)}`}
+              change={apiTotals.totalProfit >= 0 ? "กำไรสุทธิ" : "ขาดทุนสุทธิ"}
+              icon={TrendingUp}
+              trend={apiTotals.totalProfit > 0 ? "up" : apiTotals.totalProfit < 0 ? "down" : "neutral"}
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Charts */}
       <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
@@ -297,6 +358,72 @@ const Dashboard = () => {
                       </TableCell>
                     </TableRow>
                   ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* All Sales from API History */}
+      <Card className="border-border bg-card shadow-card">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>{isAdmin ? "รายการขายทั้งหมด (จาก API)" : "รายการขายของคุณ (จาก API)"}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {apiHistory.length === 0 ? (
+            <div className="text-center py-12">
+              <ShoppingCart className="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
+              <p className="mt-4 text-muted-foreground">ยังไม่มีประวัติการขายจาก API</p>
+            </div>
+          ) : (
+            <div className="table-container">
+              <Table className="table-compact">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="whitespace-nowrap">วันที่</TableHead>
+                    {isAdmin && <TableHead className="hide-mobile">ผู้ใช้</TableHead>}
+                    <TableHead>ประเภท</TableHead>
+                    <TableHead className="hide-mobile">สินค้า/รายละเอียด</TableHead>
+                    <TableHead className="text-right">ราคา API</TableHead>
+                    <TableHead className="text-right">ราคาขายเว็บ</TableHead>
+                    <TableHead className="text-right">กำไร</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {apiHistory.map((item, idx) => {
+                    const parseNumber = (value: any): number => {
+                      if (typeof value === 'number') return isNaN(value) ? 0 : value;
+                      if (typeof value === 'string') {
+                        const n = parseFloat(value);
+                        return isNaN(n) ? 0 : n;
+                      }
+                      return 0;
+                    };
+                    const apiPrice = parseNumber(item.price);
+                    const sellPrice = parseNumber(item.sellPrice);
+                    const profit = sellPrice - apiPrice;
+                    const dateStr = (item.date ? new Date(item.date) : item.syncedAt || new Date()).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+                    const typeLabel = item.type === 'premium' ? 'แอพพรีเมียม' : item.type === 'game' ? 'เติมเกม' : item.type === 'mobile' ? 'เติมมือถือ' : 'บัตรเงินสด';
+                    const name = item.productName || item.info || '-';
+                    return (
+                      <TableRow key={item.id || idx}>
+                        <TableCell className="whitespace-nowrap text-xs sm:text-sm">{dateStr}</TableCell>
+                        {isAdmin && (
+                          <TableCell className="font-medium hide-mobile">{item.userId}</TableCell>
+                        )}
+                        <TableCell className="text-xs sm:text-sm">{typeLabel}</TableCell>
+                        <TableCell className="hide-mobile">{name}</TableCell>
+                        <TableCell className="text-right">฿{apiPrice.toFixed(2)}</TableCell>
+                        <TableCell className="text-right font-semibold text-xs sm:text-sm">฿{sellPrice.toFixed(2)}</TableCell>
+                        <TableCell className="text-right">
+                          <Badge variant={profit >= 0 ? 'default' : 'destructive'} className={profit >= 0 ? 'bg-green-500' : ''}>
+                            {profit >= 0 ? '+' : ''}฿{profit.toFixed(2)}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
