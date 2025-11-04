@@ -116,7 +116,7 @@ export const GeneratePromptPayQR = ({
               value={promptPayCode}
               onChange={(e) => setPromptPayCode(e.target.value)}
               disabled={loading}
-              className="text-gray-900 font-bold text-base bg-gray-50 border-2 border-gray-300 placeholder:text-gray-500"
+              className="text-black font-bold text-base bg-white border-2 border-gray-300 placeholder:text-black"
             />
             <p className="text-xs text-gray-700 font-medium">เบอร์โทร/เลขประชาชน/E-wallet</p>
           </div>
@@ -128,7 +128,7 @@ export const GeneratePromptPayQR = ({
             </Label>
             <select
               id="promptPayType"
-              className="w-full px-3 py-2 border-2 border-gray-300 rounded-md text-gray-900 bg-gray-50 font-bold text-base"
+              className="w-full px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-black font-bold text-base"
               value={promptPayType}
               onChange={(e) => setPromptPayType(e.target.value as any)}
               disabled={loading}
@@ -150,7 +150,7 @@ export const GeneratePromptPayQR = ({
               value={accountName}
               onChange={(e) => setAccountName(e.target.value)}
               disabled={loading}
-              className="text-gray-900 font-bold text-base bg-gray-50 border-2 border-gray-300 placeholder:text-gray-500"
+              className="text-black font-bold text-base bg-white border-2 border-gray-300 placeholder:text-black"
             />
           </div>
 
@@ -167,7 +167,7 @@ export const GeneratePromptPayQR = ({
               onChange={(e) => setAmount(e.target.value)}
               disabled={loading}
               step="0.01"
-              className="text-gray-900 font-bold text-lg bg-gray-50 border-2 border-gray-300 placeholder:text-gray-500"
+              className="text-black font-bold text-lg bg-white border-2 border-gray-300 placeholder:text-black"
             />
           </div>
         </div>

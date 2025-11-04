@@ -973,7 +973,7 @@ const PremiumApp = () => {
                         <select
                           value={sortBy}
                           onChange={(e) => setSortBy(e.target.value as 'price' | 'stock' | 'name')}
-                          className="px-3 py-1 border rounded-md"
+                          className="px-3 py-1 border rounded-md bg-white text-black"
                         >
                           <option value="name">ชื่อสินค้า</option>
                           <option value="price">ราคา</option>
@@ -985,7 +985,7 @@ const PremiumApp = () => {
                         <select
                           value={sortOrder}
                           onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
-                          className="px-3 py-1 border rounded-md"
+                          className="px-3 py-1 border rounded-md bg-white text-black"
                         >
                           <option value="asc">น้อยไปมาก</option>
                           <option value="desc">มากไปน้อย</option>
