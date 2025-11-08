@@ -64,7 +64,7 @@ const VerifyEmail = () => {
   const handleCheckVerification = async () => {
     setChecking(true);
     try {
-      console.log("🔍 กำลังตรวจสอบสถานะการยืนยัน...");
+  console.log("� กำลังโหลด...");
       
       await refreshUser();
       

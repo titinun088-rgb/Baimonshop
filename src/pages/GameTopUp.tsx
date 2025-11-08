@@ -90,6 +90,24 @@ const GameTopUp = () => {
     loadData();
   }, []);
 
+  // Helper: format price for display and detect fractional baht (.01)
+  const formatPriceDisplay = (value: string | number | undefined | null) => {
+    if (value === undefined || value === null) return { text: '0', hasFraction: false };
+    const n = typeof value === 'string' ? parseFloat(value) : Number(value);
+    if (isNaN(n)) return { text: String(value), hasFraction: false };
+
+    const frac = Math.abs(n - Math.round(n));
+    const hasFraction = frac > 1e-9 && Math.round(frac * 100) > 0; // detect non-zero cents (e.g., .01)
+
+    if (hasFraction) {
+      // show two decimal places for fractional prices
+      return { text: new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n), hasFraction: true };
+    }
+
+    // otherwise show as whole baht
+    return { text: new Intl.NumberFormat('th-TH', { maximumFractionDigits: 0 }).format(n), hasFraction: false };
+  };
+
   const loadData = async () => {
     setLoading(true);
     try {
@@ -420,7 +438,12 @@ const GameTopUp = () => {
                       
                       <div className="flex items-center justify-between">
                         <span className="text-gray-400">ราคาขาย:</span>
-                        <span className="text-green-400 font-bold text-lg">{selectedGame.recommendedPrice} บาท</span>
+                        {(() => {
+                          const { text, hasFraction } = formatPriceDisplay(selectedGame.recommendedPrice);
+                          return (
+                            <span className="text-green-400 font-bold text-lg">{text} บาท</span>
+                          );
+                        })()}
                       </div>
                       
                       {selectedGame.format_id && (
@@ -607,7 +630,19 @@ const GameTopUp = () => {
                               <div key={variant.id} className="flex flex-col gap-2 rounded-xl border border-purple-500/30 bg-black/20 p-3 md:p-4">
                                 <div className="min-w-0">
                                   <div className="text-xs text-gray-400">ราคาขาย</div>
-                                  <div className="font-semibold text-green-400 truncate">{variant.recommendedPrice} บาท</div>
+                                  <div className="relative">
+                                    {(() => {
+                                      const { text, hasFraction } = formatPriceDisplay(variant.recommendedPrice);
+                                      return (
+                                        <>
+                                          <div className="font-semibold text-green-400 truncate">{text} บาท</div>
+                                          {hasFraction && (
+                                            <span className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 h-3 w-3 rounded-full bg-green-400 ring-2 ring-black" />
+                                          )}
+                                        </>
+                                      );
+                                    })()}
+                                  </div>
                                 </div>
                                 {variant.info && (
                                   <div className="text-xs text-gray-400 whitespace-pre-line">{formatGameInfo(variant.info)}</div>
@@ -655,7 +690,7 @@ const GameTopUp = () => {
                       <div className="w-32 h-32 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
                         <Gamepad2 className="h-16 w-16 text-purple-400" />
                       </div>
-                      <h3 className="text-2xl font-bold text-white mb-4">ยังไม่มีข้อมูลเกมจาก API</h3>
+                      <h3 className="text-2xl font-bold text-white mb-4">ยังไม่มีข้อมูลเกม</h3>
                       <p className="text-purple-300">โปรดลองรีเฟรชหรือกลับมาใหม่ภายหลัง</p>
                     </div>
                   );
@@ -732,7 +767,17 @@ const GameTopUp = () => {
                   <p className="text-sm text-muted-foreground whitespace-pre-line">
                     {formatGameInfo(selectedGameProduct.info)}
                   </p>
-                  <p className="text-lg font-bold text-green-600">{selectedGameProduct.recommendedPrice} บาท</p>
+                  {(() => {
+                    const { text, hasFraction } = formatPriceDisplay(selectedGameProduct.recommendedPrice);
+                    return (
+                      <div className="relative">
+                        <p className="text-lg font-bold text-green-600">{text} บาท</p>
+                        {hasFraction && (
+                          <span className="absolute top-2 right-2 h-3 w-3 rounded-full bg-green-400 ring-2 ring-black" />
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
               
