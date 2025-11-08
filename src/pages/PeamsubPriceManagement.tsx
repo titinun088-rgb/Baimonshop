@@ -146,14 +146,14 @@ const PeamsubPriceManagement = () => {
     productId: number,
     type: 'premium' | 'game' | 'mobile' | 'cashcard',
     name: string,
-    apiPrice: number,
-    recommendedPrice?: number,
+    apiPrice: number, // ราคาต้นทุน (agent_price)
+    recommendedPrice?: number, // ราคาขายปกติ (price)
     currentSellPrice?: number
   ) => {
     setEditingProduct({ id: productId, type, name, apiPrice, recommendedPrice, currentSellPrice });
-    // ใช้ราคาขายที่แอดมินตั้งไว้ ถ้าไม่มีให้ใช้ราคาแนะนำ
-    const defaultPrice = currentSellPrice || recommendedPrice || apiPrice;
-    setEditSellPrice(defaultPrice.toString());
+    // ใช้ราคาขายที่แอดมินตั้งไว้ ถ้าไม่มีให้ใช้ราคาแนะนำ (ราคาขายปกติ)
+    const defaultPrice = currentSellPrice || recommendedPrice;
+    setEditSellPrice(defaultPrice ? defaultPrice.toString() : '');
     setEditDialogOpen(true);
   };
 
@@ -301,8 +301,9 @@ const PeamsubPriceManagement = () => {
                     <div className="block md:hidden space-y-3">
                       {getFilteredPremiumProducts().map((product) => {
                         const priceInfo = premiumPrices.get(product.id);
-                        const apiPrice = product.price || 0;
-                        const recommendedPrice = apiPrice;
+                        const apiPrice = product.agent_price || 0; // ราคาต้นทุน (ราคาถูกที่สุด)
+                        const apiSellPrice = product.price || 0; // ราคาขายปกติ (ราคาแพงที่สุด)
+                        const recommendedPrice = apiSellPrice; // ใช้ราคาขายปกติเป็นราคาแนะนำ
                         const sellPrice = priceInfo?.sellPrice || recommendedPrice;
                         const profit = sellPrice - apiPrice;
 
@@ -393,8 +394,9 @@ const PeamsubPriceManagement = () => {
                         <TableBody>
                           {getFilteredPremiumProducts().map((product) => {
                             const priceInfo = premiumPrices.get(product.id);
-                            const apiPrice = product.price || 0;
-                            const recommendedPrice = apiPrice;
+                            const apiPrice = product.agent_price || 0; // ราคาต้นทุน (ราคาถูกที่สุด)
+                            const apiSellPrice = product.price || 0; // ราคาขายปกติ (ราคาแพงที่สุด)
+                            const recommendedPrice = apiSellPrice; // ใช้ราคาขายปกติเป็นราคาแนะนำ
                             const sellPrice = priceInfo?.sellPrice || recommendedPrice;
                             const profit = sellPrice - apiPrice;
 

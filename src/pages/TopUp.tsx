@@ -24,7 +24,9 @@ import {
   verifySlipByImage, 
   formatAmount, 
   formatDate,
-  createCheckCondition
+  createCheckCondition,
+  createCheckReceiver,
+  ACCOUNT_TYPES
 } from "@/lib/slip2goUtils";
 import { useAuth } from "@/contexts/AuthContext";
 import { 
@@ -119,7 +121,19 @@ const TopUp = () => {
     setIsVerifying(true);
     setVerificationResult(null);
     try {
-      const checkCondition = createCheckCondition({ checkDuplicate: true });
+      // สร้างเงื่อนไขการตรวจสอบทั้งการตรวจสอบซ้ำและการตรวจสอบบัญชีปลายทาง
+      const checkReceiver = createCheckReceiver({
+        accountType: ACCOUNT_TYPES.KASIKORN_BANK,
+        accountNumber: '0912552233',
+        accountNameTH: 'พงศกร แก้วดำ',
+        accountNameEN: 'Phongsakon Kaeodam'
+      });
+
+      const checkCondition = createCheckCondition({
+        checkDuplicate: true,
+        checkReceiver: [checkReceiver]
+      });
+
       const result = await verifySlipByImage(imageFile, checkCondition);
       if (result.success && result.data) {
         if (!result.data.referenceId) {

@@ -1491,13 +1491,13 @@ const PremiumApp = () => {
                             <span>ราคาปกติ:</span>
                             <span className="font-semibold">{selectedProductDetails.price} บาท</span>
                           </div>
-                          {selectedProductDetails.pricevip && (
+                          {isAdmin && selectedProductDetails.pricevip && (
                             <div className="flex justify-between">
                               <span>ราคา VIP:</span>
                               <span className="font-semibold text-green-600">{selectedProductDetails.pricevip} บาท</span>
                             </div>
                           )}
-                          {selectedProductDetails.agent_price && (
+                          {isAdmin && selectedProductDetails.agent_price && (
                             <div className="flex justify-between">
                               <span>ราคา Agent:</span>
                               <span className="font-semibold text-blue-600">{selectedProductDetails.agent_price} บาท</span>

@@ -218,56 +218,66 @@ const Layout = ({ children }: LayoutProps) => {
     },
   ];
 
-  // กรองเมนูตาม role
-  const navigation = allNavigation.filter(item => 
-    item.roles.includes(userData?.role || 'seller')
+  // กรองเมนูตาม role (ให้ role 'user' ได้เมนูเหมือน 'seller')
+  const userRoleRaw = userData?.role || 'seller';
+  const effectiveRole = String(userRoleRaw) === 'user' ? 'seller' : userRoleRaw;
+  const navigation = allNavigation.filter(item =>
+    item.roles.includes(effectiveRole)
   );
 
   // จัดหมวดหมู่เมนู
   const getCategorizedMenus = (): NavCategory[] => {
+  const userRole = effectiveRole; // ใช้ role ที่แมปแล้ว (user -> seller)
     const categories: NavCategory[] = [
       {
         name: "หลัก",
         icon: Home,
-        items: navigation.filter(item => item.name === "หน้าหลัก")
+        items: navigation.filter(item => 
+          item.name === "หน้าหลัก" && item.roles.includes(userRole)
+        )
       },
       {
         name: "ซื้อ/เติม",
         icon: ShoppingCart,
         items: navigation.filter(item => 
-          ["เติมเกม", "แอปพรีเมียม", "บัตรเติมเงิน", "บัตรเงินสด"].includes(item.name)
+          ["เติมเกม", "แอปพรีเมียม", "บัตรเติมเงิน", "บัตรเงินสด"].includes(item.name) && 
+          item.roles.includes(userRole)
         )
       },
       {
         name: "ประวัติ",
         icon: History,
         items: navigation.filter(item => 
-          ["ประวัติการซื้อสินค้า", "ประวัติการเติมเงิน", "ประวัติสลิป"].includes(item.name)
+          ["ประวัติการซื้อสินค้า", "ประวัติการเติมเงิน", "ประวัติสลิป"].includes(item.name) && 
+          item.roles.includes(userRole)
         )
       },
       {
         name: "การเงิน",
         icon: Wallet,
         items: navigation.filter(item => 
-          ["เติมเงิน", "ข้อมูลบัญชี"].includes(item.name)
+          ["เติมเงิน", "ข้อมูลบัญชี"].includes(item.name) && 
+          item.roles.includes(userRole)
         )
       },
       {
         name: "แจ้งเตือน",
         icon: Bell,
         items: navigation.filter(item => 
-          ["แจ้งเตือน", "แจ้งปัญหา"].includes(item.name)
+          ["แจ้งเตือน", "แจ้งปัญหา"].includes(item.name) && 
+          item.roles.includes(userRole)
         )
       },
     ];
 
     // เพิ่มหมวดจัดการสำหรับ Admin
-    if (userData?.role === 'admin') {
+    if (userRole === 'admin') {
       categories.push({
         name: "จัดการ",
         icon: LayoutDashboard,
         items: navigation.filter(item => 
-          ["Dashboard", "เกม", "ยอดขาย", "ผู้ใช้", "กิจกรรม", "รายงานปัญหา", "คำขอผู้ดูแล", "Peamsub API", "จัดการราคา Peamsub"].includes(item.name)
+          ["Dashboard", "เกม", "ยอดขาย", "ผู้ใช้", "กิจกรรม", "รายงานปัญหา", "คำขอผู้ดูแล", "Peamsub API", "จัดการราคา Peamsub"].includes(item.name) && 
+          item.roles.includes('admin')
         )
       });
     }
@@ -332,50 +342,54 @@ const Layout = ({ children }: LayoutProps) => {
       {/* Navigation with Categories */}
       <nav className="flex-1 space-y-2 px-2 lg:px-3 py-3 lg:py-4 overflow-y-auto">
         {categorizedMenus.map((category) => {
-          const CategoryIcon = category.icon;
-          return (
-            <div key={category.name} className="space-y-1">
-              {/* Category Header */}
-              <div className="flex items-center gap-2 px-2 lg:px-3 py-1.5 text-sm font-bold text-white uppercase tracking-wider">
-                <CategoryIcon className="h-3 w-3 lg:h-4 lg:w-4" />
-                <span>{category.name}</span>
+          // แสดงเฉพาะหมวดหมู่ที่มี items
+          if (category.items && category.items.length > 0) {
+            const CategoryIcon = category.icon;
+            return (
+              <div key={category.name} className="space-y-1">
+                {/* Category Header */}
+                <div className="flex items-center gap-2 px-2 lg:px-3 py-1.5 text-sm font-bold text-white uppercase tracking-wider">
+                  <CategoryIcon className="h-3 w-3 lg:h-4 lg:w-4" />
+                  <span>{category.name}</span>
+                </div>
+                
+                {/* Category Items */}
+                <div className="space-y-0.5">
+                  {category.items.map((item) => {
+                    const Icon = item.icon;
+                    const active = isActive(item.href);
+                    return (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        onClick={() => {
+                          if (onNavigate) onNavigate();
+                        }}
+                        className={cn(
+                          "flex items-center gap-2 lg:gap-3 rounded-lg px-2 lg:px-3 py-2 lg:py-2.5 text-xs lg:text-sm font-medium transition-all",
+                          active
+                            ? "bg-primary text-primary-foreground shadow-sm"
+                            : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                        )}
+                      >
+                        <Icon className="h-4 w-4 lg:h-5 lg:w-5 flex-shrink-0" />
+                        <span className="flex-1 truncate">{item.name}</span>
+                        {item.badge && (
+                          <Badge 
+                            variant="destructive" 
+                            className="ml-auto h-4 lg:h-5 min-w-4 lg:min-w-5 px-1 lg:px-1.5 text-[10px] lg:text-xs font-bold flex-shrink-0"
+                          >
+                            {item.badge}
+                          </Badge>
+                        )}
+                      </Link>
+                    );
+                  })}
+                </div>
               </div>
-              
-              {/* Category Items */}
-              <div className="space-y-0.5">
-                {category.items.map((item) => {
-          const Icon = item.icon;
-          const active = isActive(item.href);
-          return (
-            <Link
-              key={item.name}
-              to={item.href}
-                      onClick={() => {
-                        if (onNavigate) onNavigate();
-                      }}
-              className={cn(
-                        "flex items-center gap-2 lg:gap-3 rounded-lg px-2 lg:px-3 py-2 lg:py-2.5 text-xs lg:text-sm font-medium transition-all",
-                active
-                          ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
-              )}
-            >
-                      <Icon className="h-4 w-4 lg:h-5 lg:w-5 flex-shrink-0" />
-                      <span className="flex-1 truncate">{item.name}</span>
-              {item.badge && (
-                <Badge 
-                  variant="destructive" 
-                          className="ml-auto h-4 lg:h-5 min-w-4 lg:min-w-5 px-1 lg:px-1.5 text-[10px] lg:text-xs font-bold flex-shrink-0"
-                >
-                  {item.badge}
-                </Badge>
-              )}
-            </Link>
-                  );
-                })}
-              </div>
-            </div>
-          );
+            );
+          }
+          return null; // ไม่แสดงหมวดหมู่ที่ไม่มี items
         })}
       </nav>
 
@@ -437,7 +451,7 @@ const Layout = ({ children }: LayoutProps) => {
   return (
     <div className="min-h-screen bg-background">
       {/* Desktop Top Navbar */}
-      <header className="hidden lg:block fixed top-0 left-0 right-0 z-50 h-16 border-b border-border bg-card shadow-sm">
+      <header className="fixed top-0 left-0 right-0 z-50 h-16 border-b border-border bg-card shadow-sm">
         <div className="h-full px-4">
           <div className="flex items-center justify-between h-full px-6">
             {/* Logo */}
@@ -479,51 +493,55 @@ const Layout = ({ children }: LayoutProps) => {
                 }
 
                 // ถ้ามีหลาย items ให้แสดงเป็น dropdown
-                return (
-                  <DropdownMenu key={category.name}>
-                    <DropdownMenuTrigger
-                      className={cn(
-                        "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors h-10 outline-none",
-                        "text-muted-foreground hover:bg-muted hover:text-foreground",
-                        "data-[state=open]:bg-muted data-[state=open]:text-foreground"
-                      )}
-                    >
-                      <CategoryIcon className="h-4 w-4" />
-                      <span>{category.name}</span>
-                      <ChevronDown className="h-3 w-3 opacity-50" />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-56">
-                      <DropdownMenuLabel className="flex items-center gap-2">
+                // แสดงเมนูเฉพาะเมื่อมี items
+                if (category.items && category.items.length > 0) {
+                  return (
+                    <DropdownMenu key={category.name}>
+                      <DropdownMenuTrigger
+                        className={cn(
+                          "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors h-10 outline-none",
+                          "text-muted-foreground hover:bg-muted hover:text-foreground",
+                          "data-[state=open]:bg-muted data-[state=open]:text-foreground"
+                        )}
+                      >
                         <CategoryIcon className="h-4 w-4" />
-                        {category.name}
-                      </DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      {category.items.map((item) => {
-                        const Icon = item.icon;
-                        const active = isActive(item.href);
-                        return (
-                          <DropdownMenuItem key={item.name} asChild>
-                            <Link
-                              to={item.href}
-                              className={cn(
-                                "flex items-center gap-2 cursor-pointer",
-                                active && "bg-muted"
-                              )}
-                            >
-                              <Icon className="h-4 w-4" />
-                              <span className="flex-1">{item.name}</span>
-                              {item.badge && (
-                                <Badge variant="destructive" className="h-5 min-w-5 px-1.5 text-xs font-bold">
-                                  {item.badge}
-                                </Badge>
-                              )}
-                            </Link>
-                          </DropdownMenuItem>
-                        );
-                      })}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                );
+                        <span>{category.name}</span>
+                        <ChevronDown className="h-3 w-3 opacity-50" />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start" className="w-56">
+                        <DropdownMenuLabel className="flex items-center gap-2">
+                          <CategoryIcon className="h-4 w-4" />
+                          {category.name}
+                        </DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        {category.items.map((item) => {
+                          const Icon = item.icon;
+                          const active = isActive(item.href);
+                          return (
+                            <DropdownMenuItem key={item.name} asChild>
+                              <Link
+                                to={item.href}
+                                className={cn(
+                                  "flex items-center gap-2 cursor-pointer",
+                                  active && "bg-muted"
+                                )}
+                              >
+                                <Icon className="h-4 w-4" />
+                                <span className="flex-1">{item.name}</span>
+                                {item.badge && (
+                                  <Badge variant="destructive" className="h-5 min-w-5 px-1.5 text-xs font-bold">
+                                    {item.badge}
+                                  </Badge>
+                                )}
+                              </Link>
+                            </DropdownMenuItem>
+                          );
+                        })}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  );
+                }
+                return null; // ไม่แสดงเมนูถ้าไม่มี items
               })}
             </nav>
 

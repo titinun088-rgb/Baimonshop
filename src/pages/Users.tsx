@@ -366,7 +366,7 @@ const Users = () => {
                                 Admin
                               </Badge>
                             ) : (
-                              <Badge variant="secondary">Seller</Badge>
+                              <Badge variant="secondary">ผู้ใช้</Badge>
                             )}
                           </TableCell>
                           <TableCell>

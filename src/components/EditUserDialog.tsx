@@ -111,7 +111,7 @@ const EditUserDialog = ({ open, onOpenChange, user, onSuccess }: EditUserDialogP
               type="email"
               value={user.email}
               disabled
-              className="bg-muted"
+              className="bg-muted text-white"
             />
             <p className="text-xs text-muted-foreground">
               ไม่สามารถแก้ไขอีเมลได้
@@ -152,7 +152,7 @@ const EditUserDialog = ({ open, onOpenChange, user, onSuccess }: EditUserDialogP
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="seller">ผู้ใช้ (Seller)</SelectItem>
+                <SelectItem value="seller">ผู้ใช้ (๊User)</SelectItem>
                 <SelectItem value="admin">ผู้ดูแลระบบ (Admin)</SelectItem>
               </SelectContent>
             </Select>
