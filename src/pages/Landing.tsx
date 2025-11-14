@@ -95,7 +95,7 @@ const Landing = () => {
             {/* Logo */}
             <div className="flex items-center gap-3">
               <img 
-                src="/Logo CoinZone.png" 
+                src="/logo.png" 
                 alt="CoinZone Logo" 
                 className="h-10 w-10 object-contain"
               />

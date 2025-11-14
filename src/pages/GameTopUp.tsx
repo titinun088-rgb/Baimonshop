@@ -340,7 +340,7 @@ const GameTopUp = () => {
         <meta property="og:title" content="เติมเกม — CoinZone | เติมเกมออนไลน์ รวดเร็ว ปลอดภัย" />
         <meta property="og:description" content="เติมเกมออนไลน์กับ CoinZone — บริการร้านเติมเกม, แอพพรีเมียม, เติมเงินมือถือ และบัตรเงินสด รวดเร็ว ปลอดภัย ใช้งานง่าย" />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="/Logo CoinZone.png" />
+        <meta property="og:image" content="/logo.png" />
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
         <div className="bg-gradient-to-b from-[#0f0f2d] to-[#1a0033] text-white min-h-screen font-['Kanit',sans-serif] -mx-3 sm:-mx-4 lg:-mx-6 xl:-mx-8 -mt-16 lg:-mt-16">

@@ -176,8 +176,8 @@ const ProductDetailsDialog = ({ isOpen, onClose, purchaseItem }: ProductDetailsD
 
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-600">ชื่อสินค้า</label>
-                  <p className="text-lg font-semibold text-black">{purchaseItem.productName}</p>
+                  <label className="text-sm font-medium text-white">ชื่อสินค้า</label>
+                  <p className="text-lg font-semibold text-white">{purchaseItem.productName}</p>
                 </div>
                 
                 <div className="space-y-2">
@@ -254,10 +254,10 @@ const ProductDetailsDialog = ({ isOpen, onClose, purchaseItem }: ProductDetailsD
                 </div>
                 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-600">วันที่ซื้อ</label>
+                  <label className="text-sm font-medium text-white">วันที่ซื้อ</label>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-gray-400" />
-                    <p className="text-sm text-black">{formatDate(purchaseItem.date)}</p>
+                    <p className="text-sm text-white">{formatDate(purchaseItem.date)}</p>
                   </div>
                 </div>
               </div>
@@ -284,8 +284,8 @@ const ProductDetailsDialog = ({ isOpen, onClose, purchaseItem }: ProductDetailsD
                 <Separator />
                 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-600">วันที่สร้าง</label>
-                  <p className="text-sm text-black">{formatDate(purchaseItem.date)}</p>
+                  <label className="text-sm font-medium text-white">วันที่สร้าง</label>
+                  <p className="text-sm text-white">{formatDate(purchaseItem.date)}</p>
                 </div>
               </div>
             </CardContent>

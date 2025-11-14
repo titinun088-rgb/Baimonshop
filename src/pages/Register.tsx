@@ -77,7 +77,7 @@ const Register = () => {
         <div className="mb-8 text-center">
             <div className="flex items-center justify-center gap-3 mb-2">
             <img 
-              src="/Logo CoinZone.png" 
+              src="/logo.png" 
               alt="CoinZone Logo" 
               className="h-12 w-12 object-contain"
             />

@@ -333,10 +333,11 @@ const CashCard = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">บัตรเงินสด</h1>
+            <h1 className="text-3xl font-bold text-white">บัตรเงินสด</h1>
             <p className="text-gray-600 mt-1">ซื้อและจัดการบัตรเงินสด</p>
           </div>
           <div className="flex items-center gap-2">
+
             <CreditCard className="h-8 w-8 text-blue-600" />
           </div>
         </div>
