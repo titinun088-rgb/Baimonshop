@@ -75,9 +75,9 @@ const Register = () => {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="mb-8 text-center">
-          <div className="flex items-center justify-center gap-3 mb-2">
+            <div className="flex items-center justify-center gap-3 mb-2">
             <img 
-              src="/logo.png" 
+              src="/Logo CoinZone.png" 
               alt="CoinZone Logo" 
               className="h-12 w-12 object-contain"
             />

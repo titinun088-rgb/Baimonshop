@@ -55,7 +55,7 @@ const Home = () => {
         <meta property="og:title" content="CoinZone — ระบบเติมเงินเกมออนไลน์ และแอปพรีเมียม" />
         <meta property="og:description" content="บริการเติมเงินเกมออนไลน์ เติมแอปพรีเมียม รวดเร็ว ปลอดภัย ใช้งานง่าย ราคาถูก บริการตลอด 24 ชั่วโมง" />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://www.coin-zone.shop/logo.png" />
+        <meta property="og:image" content="https://www.coin-zone.shop/Logo%20CoinZone.png" />
         <meta name="twitter:card" content="summary_large_image" />
         <link rel="canonical" href="https://www.coin-zone.shop/" />
       </Helmet>

@@ -15,7 +15,8 @@ const DEFAULT_TITLE = 'CoinZone - เติมเกมและแอปพร�
 const DEFAULT_DESCRIPTION = 'รับเติมเกมและแอปพรีเมียม รวดเร็ว ปลอดภัย ใช้งานง่าย';
 const DEFAULT_URL = 'https://www.coin-zone.shop/';
 // Use the site logo as the default social preview image (absolute URL preferred for crawlers)
-const DEFAULT_IMAGE = `${DEFAULT_URL}logo.png`;
+// Use URL-encoded filename to be safe for crawlers
+const DEFAULT_IMAGE = `${DEFAULT_URL}Logo%20CoinZone.png`;
 
 export default function Seo({ title, description, image, url, canonical }: SeoProps) {
   const fullTitle = title ? `${title}` : DEFAULT_TITLE;

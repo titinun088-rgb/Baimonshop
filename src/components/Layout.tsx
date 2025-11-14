@@ -314,7 +314,7 @@ const Layout = ({ children }: LayoutProps) => {
       <div className="flex h-16 items-center border-b border-border px-6">
         <div className="flex items-center gap-3">
           <img 
-            src="/logo.png" 
+            src="/Logo CoinZone.png" 
             alt="CoinZone Logo" 
             className="h-10 w-10 object-contain"
           />
@@ -457,7 +457,7 @@ const Layout = ({ children }: LayoutProps) => {
             {/* Logo */}
             <Link to="/home" className="flex items-center gap-3 flex-shrink-0">
               <img 
-                src="/logo.png" 
+                src="/Logo CoinZone.png" 
                 alt="CoinZone Logo" 
                 className="h-8 w-8 object-contain"
               />
@@ -616,7 +616,7 @@ const Layout = ({ children }: LayoutProps) => {
           {/* Logo */}
           <Link to="/home" className="flex items-center gap-2">
             <img 
-              src="/logo.png" 
+              src="/Logo CoinZone.png" 
               alt="CoinZone Logo" 
               className="h-8 w-8 object-contain"
             />

@@ -800,7 +800,7 @@ const PremiumApp = () => {
                     <p className="text-2xl font-bold text-orange-600">
                       {purchaseHistory.filter(item => item.status === 'success').length}
                     </p>
-                    <p className="text-sm text-muted-foreground">การซื้อสำเร็จ</p>
+                    <p className="text-sm text-muted-foreground">การซื้อสำเร็จตรวจสอบได้ในประวัติการซื้อ</p>
                   </div>
                 </div>
               </CardContent>
