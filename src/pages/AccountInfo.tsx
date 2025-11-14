@@ -135,7 +135,7 @@ const AccountInfo = () => {
       <Layout>
         <div className="w-full">
             <div className="mb-6">
-              <h1 className="text-3xl font-bold text-gray-900">ข้อมูลบัญชี</h1>
+              <h1 className="text-3xl font-bold text-white">ข้อมูลบัญชี</h1>
               <p className="text-gray-600 mt-2">ข้อมูลบัญชีและโควต้าของคุณ</p>
             </div>
             
@@ -171,8 +171,8 @@ const AccountInfo = () => {
           <div className="mb-6">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">ข้อมูลบัญชี</h1>
-                <p className="text-gray-600 mt-2">ข้อมูลบัญชีและโควต้าของคุณ</p>
+                <h1 className="text-3xl font-bold text-white">ข้อมูลบัญชี</h1>
+                <p className="text-white-600 mt-2">ข้อมูลบัญชีและโควต้าของคุณ</p>
               </div>
               <Button 
                 onClick={fetchAccountInfo} 

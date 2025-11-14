@@ -178,23 +178,10 @@ const Layout = ({ children }: LayoutProps) => {
       roles: ['admin']
     },
     { 
-      name: "กิจกรรม", 
-      href: "/activity", 
-      icon: Activity,
-      roles: ['admin']
-    },
-    { 
       name: "รายงานปัญหา", 
       href: "/reports", 
       icon: AlertCircle,
       roles: ['admin']
-    },
-    { 
-      name: "คำขอผู้ดูแล", 
-      href: "/invitations", 
-      icon: UserPlus,
-      roles: ['admin'],
-      badge: invitationCount > 0 ? invitationCount : undefined
     },
     { 
       name: "Peamsub API", 
@@ -276,7 +263,7 @@ const Layout = ({ children }: LayoutProps) => {
         name: "จัดการ",
         icon: LayoutDashboard,
         items: navigation.filter(item => 
-          ["Dashboard", "เกม", "ยอดขาย", "ผู้ใช้", "กิจกรรม", "รายงานปัญหา", "คำขอผู้ดูแล", "Peamsub API", "จัดการราคา Peamsub"].includes(item.name) && 
+          ["Dashboard", "เกม", "ยอดขาย", "ผู้ใช้", "รายงานปัญหา", "Peamsub API", "จัดการราคา Peamsub"].includes(item.name) && 
           item.roles.includes('admin')
         )
       });

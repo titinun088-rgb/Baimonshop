@@ -102,7 +102,7 @@ const TopUpHistoryContent = ({ userId }: { userId: string }) => {
                   {format(transaction.createdAt, "d MMM yyyy HH:mm", { locale: th })}
                 </span>
               </div>
-              <p className="font-semibold">
+              <p className="font-semibold text-black">
                 {transaction.paymentMethod === 'admin' ? 'เติมเงินโดยแอดมิน' :
                  transaction.paymentMethod === 'promptpay' ? 'PromptPay' :
                  transaction.paymentMethod === 'bank_transfer' ? 'โอนเงินธนาคาร' :
@@ -370,11 +370,9 @@ const Users = () => {
                             )}
                           </TableCell>
                           <TableCell>
-                            <div className="text-right">
-                              <span className="font-semibold text-green-600">
-                                {(user.balance || 0).toLocaleString()} บาท
-                              </span>
-                            </div>
+                            <span className="font-semibold text-green-600">
+                              {(user.balance || 0).toLocaleString()} บาท
+                            </span>
                           </TableCell>
                           <TableCell>
                             <div className="flex flex-col gap-1">
@@ -412,7 +410,12 @@ const Users = () => {
                             </div>
                           </TableCell>
                           <TableCell className="text-sm text-muted-foreground">
-                            {format(user.createdAt, "d MMM yyyy", { locale: th })}
+                            <div>
+                              {format(user.createdAt, "d MMM yyyy", { locale: th })}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {format(user.createdAt, "HH:mm:ss", { locale: th })}
+                            </div>
                           </TableCell>
                           <TableCell className="text-right">
                             <DropdownMenu>
