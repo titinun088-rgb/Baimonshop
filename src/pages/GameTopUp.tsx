@@ -734,7 +734,7 @@ const GameTopUp = () => {
                           }}
                           className="w-full mt-2 sm:mt-4 py-2 sm:py-3 px-2 sm:px-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/25"
                         >
-                          <span className="hidden sm:inline">ดูเกมในหมวดหมู่</span>
+                          <span className="hidden sm:inline">ดูแพ็คในเกม</span>
                           <span className="sm:hidden">ดูเกม</span>
                         </button>
                       </div>
