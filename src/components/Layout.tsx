@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import Footer from "@/components/Footer";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import {
   DropdownMenu,
@@ -42,6 +43,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+
 import { toast } from "sonner";
 
 interface LayoutProps {
@@ -630,10 +632,14 @@ const Layout = ({ children }: LayoutProps) => {
         </div>
       </div>
 
+
       {/* Main content */}
       <main className="flex-1 pt-16 lg:pt-16 pb-4 lg:pb-8">
         <div className="w-full px-3 sm:px-4 lg:px-6 xl:px-8">{children}</div>
       </main>
+
+      {/* Footer */}
+      <Footer />
 
       {/* Contact Admin Button */}
       <a
