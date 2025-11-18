@@ -216,14 +216,6 @@ const makeApiRequest = async <T>(
   const url = `${PEAMSUB_API_BASE_URL}${endpoint}`;
   const authHeader = `Basic ${btoa(PEAMSUB_API_KEY)}`;
   
-  // Debug: Log API key info (first 3 and last 3 chars only for security)
-  const keyPreview = PEAMSUB_API_KEY.length > 6 
-    ? `${PEAMSUB_API_KEY.substring(0, 3)}...${PEAMSUB_API_KEY.substring(PEAMSUB_API_KEY.length - 3)}`
-    : '***';
-  console.log(`🔑 Peamsub API Request: ${endpoint}`);
-  console.log(`   API Key: ${keyPreview} (length: ${PEAMSUB_API_KEY.length})`);
-  console.log(`   Auth Header: ${authHeader.substring(0, 20)}...`);
-  
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
       const response = await fetch(url, {
