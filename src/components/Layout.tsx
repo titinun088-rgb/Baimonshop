@@ -191,12 +191,6 @@ const Layout = ({ children }: LayoutProps) => {
       icon: Wifi,
       roles: ['admin']
     },
-    { 
-      name: "จัดการราคา Peamsub", 
-      href: "/peamsub-price-management", 
-      icon: DollarSign,
-      roles: ['admin']
-    },
     
     // โปรไฟล์
     { 

@@ -347,7 +347,7 @@ const GameTopUp = () => {
         <meta name="twitter:description" content="รับเติมเกม CoinZone เว็บเติมเกม เติมเกมออนไลน์ ROV Free Fire PUBG ราคาถูก รวดเร็ว ปลอดภัย" />
         <link rel="canonical" href="https://www.coin-zone.shop/game-topup" />
       </Helmet>
-        <div className="bg-gradient-to-b from-[#0f0f2d] to-[#1a0033] text-white min-h-screen font-['Kanit',sans-serif] -mx-3 sm:-mx-4 lg:-mx-6 xl:-mx-8 -mt-16 lg:-mt-16">
+        <div className="bg-gradient-to-b from-[#0f0f2d] to-[#1a0033] text-white min-h-screen font-['Kanit',sans-serif] -mx-3 sm:-mx-4 lg:-mx-6 xl:-mx-8">
           {/* Header */}
           <header className="bg-black/20 backdrop-blur-sm border-b border-purple-500/30 p-4 sm:p-6">
             <div className="flex flex-col gap-4">

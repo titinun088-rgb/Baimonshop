@@ -152,6 +152,10 @@ const PremiumApp = () => {
   const [sortBy, setSortBy] = useState<'price' | 'stock' | 'name'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   
+  // Category States
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [showCategoryProducts, setShowCategoryProducts] = useState(false);
+  
   // Purchase Dialog
   const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<PeamsubProduct | null>(null);
@@ -323,6 +327,17 @@ const PremiumApp = () => {
 
     setFilteredPreorderHistory(filtered);
   }, [preorderHistory, preorderStatusFilter, preorderSearchQuery]);
+
+  // Category Functions
+  const openCategory = (categoryName: string) => {
+    setSelectedCategory(categoryName);
+    setShowCategoryProducts(true);
+  };
+
+  const backToCategories = () => {
+    setShowCategoryProducts(false);
+    setSelectedCategory(null);
+  };
 
   // เริ่มต้นข้อมูล
   const initializeData = async () => {
@@ -798,7 +813,7 @@ const PremiumApp = () => {
                     <p className="text-sm text-muted-foreground">จำนวนการซื้อ</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-green-600">{totalPurchaseAmount.toLocaleString()}</p>
+                    <p className="text-2xl font-bold text-green-600">{Number(totalPurchaseAmount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</p>
                     <p className="text-sm text-muted-foreground">ยอดเงินรวม (บาท)</p>
                   </div>
                   <div className="text-center">
@@ -828,7 +843,7 @@ const PremiumApp = () => {
                     <p className="text-sm text-muted-foreground">จำนวนพรีออเดอร์</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-indigo-600">{totalPreorderAmount.toLocaleString()}</p>
+                    <p className="text-2xl font-bold text-indigo-600">{Number(totalPreorderAmount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</p>
                     <p className="text-sm text-muted-foreground">ยอดเงินรวม (บาท)</p>
                   </div>
                   <div className="text-center">
@@ -862,7 +877,7 @@ const PremiumApp = () => {
                     <p className="text-sm text-muted-foreground">สต็อกทั้งหมด</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-pink-600">{preorderProductSummary.averagePrice}</p>
+                    <p className="text-2xl font-bold text-pink-600">{Number(preorderProductSummary.averagePrice).toFixed(2)}</p>
                     <p className="text-sm text-muted-foreground">ราคาเฉลี่ย (บาท)</p>
                   </div>
                   <div className="text-center">
@@ -890,7 +905,7 @@ const PremiumApp = () => {
                     <p className="text-sm text-muted-foreground">สินค้าทั้งหมด</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-emerald-600">{gameProductSummary.averagePrice}</p>
+                    <p className="text-2xl font-bold text-emerald-600">{Number(gameProductSummary.averagePrice).toFixed(2)}</p>
                     <p className="text-sm text-muted-foreground">ราคาเฉลี่ย (บาท)</p>
                   </div>
                   <div className="text-center">
@@ -902,8 +917,8 @@ const PremiumApp = () => {
                       {gameProductSummary.cheapestProduct ? 
                         (() => {
                           const price = parseFloat(gameProductSummary.cheapestProduct.price);
-                          return isNaN(price) ? 0 : price;
-                        })() : 0
+                          return isNaN(price) ? '0.00' : price.toFixed(2);
+                        })() : '0.00'
                       }
                     </p>
                     <p className="text-sm text-muted-foreground">ราคาต่ำสุด (บาท)</p>
@@ -922,152 +937,198 @@ const PremiumApp = () => {
 
             {/* Products Tab */}
             <TabsContent value="products" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <ShoppingBag className="h-5 w-5" />
-                    รายการสินค้า ({filteredProducts.length} รายการ)
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {/* Filters */}
-                  <div className="space-y-4 mb-6">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                      <div>
-                        <label className="text-sm font-medium">ค้นหาสินค้า</label>
-                        <Input
-                          placeholder="ค้นหาตามชื่อหรือคำอธิบาย"
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">ราคาสูงสุด (บาท)</label>
-                        <Input
-                          type="number"
-                          placeholder="ไม่จำกัด"
-                          value={maxPrice || ""}
-                          onChange={(e) => setMaxPrice(e.target.value ? Number(e.target.value) : null)}
-                        />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">สต็อกขั้นต่ำ</label>
-                        <Input
-                          type="number"
-                          value={minStock}
-                          onChange={(e) => setMinStock(Number(e.target.value))}
-                          min="0"
-                        />
-                      </div>
-                      <div className="flex items-end">
-                        <Button
-                          onClick={handleResetFilters}
-                          variant="outline"
-                          className="w-full"
-                        >
-                          <Filter className="mr-2 h-4 w-4" />
-                          รีเซ็ตตัวกรอง
-                        </Button>
-                      </div>
-                    </div>
+              {showCategoryProducts && selectedCategory ? (
+                /* Category Products Page - แสดงสินค้าในหมวดหมู่ */
+                <section className="p-3 sm:p-4 md:p-6">
+                  {/* Back Button */}
+                  <div className="mb-6 flex items-center justify-between">
+                    <button 
+                      onClick={backToCategories}
+                      className="text-purple-400 hover:text-purple-300 flex items-center gap-2 transition-colors"
+                    >
+                      <Gamepad2 className="h-5 w-5" />
+                      กลับไปหน้ารวมหมวดหมู่
+                    </button>
+                  </div>
 
-                    {/* Sort Options */}
-                    <div className="flex gap-4 items-center">
-                      <div className="flex items-center gap-2">
-                        <label className="text-sm font-medium">เรียงตาม:</label>
-                        <select
-                          value={sortBy}
-                          onChange={(e) => setSortBy(e.target.value as 'price' | 'stock' | 'name')}
-                          className="px-3 py-1 border rounded-md bg-white text-black"
-                        >
-                          <option value="name">ชื่อสินค้า</option>
-                          <option value="price">ราคา</option>
-                          <option value="stock">สต็อก</option>
-                        </select>
+                  {/* Category Header */}
+                  <div className="text-center mb-8">
+                    <div className="w-32 h-32 mx-auto mb-4 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center overflow-hidden shadow-2xl">
+                      <ShoppingBag className="h-16 w-16 text-white" />
+                    </div>
+                    <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                      {selectedCategory}
+                    </h2>
+                    <p className="text-purple-300 mt-2">เลือกแพ็คเกจในหมวดหมู่นี้</p>
+                  </div>
+
+                  {/* Products in Category */}
+                  {(() => {
+                    // กรองสินค้าตามหมวดหมู่
+                    const filtered = products.filter(product => product.type_app === selectedCategory);
+
+                    if (filtered.length === 0) {
+                      return (
+                        <div className="text-center text-purple-300">ไม่พบสินค้าในหมวดหมู่นี้</div>
+                      );
+                    }
+
+                    return (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {filtered.map((product) => {
+                          const canPurchase = userInfo ? canPurchaseProduct(product, parseFloat(userInfo.balance), userInfo.rank) : { canPurchase: false, price: product.price };
+                          
+                          return (
+                            <Card key={product.id} className="overflow-hidden group bg-black/30 backdrop-blur-sm border-purple-500/20 hover:border-purple-500/50 transition-all duration-300 hover:scale-105">
+                              <div className="aspect-square overflow-hidden">
+                                <img
+                                  src={product.img}
+                                  alt={product.name}
+                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                  onError={(e) => {
+                                    e.currentTarget.src = '/placeholder.svg';
+                                  }}
+                                />
+                              </div>
+                              <CardContent className="p-4">
+                                <h3 className="font-semibold mb-2 text-white">{product.name}</h3>
+                                
+                                <div className="space-y-2 mb-4">
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-sm text-purple-300">ราคา:</span>
+                                    <span className="font-semibold text-lg text-white">
+                                      {canPurchase.canPurchase ? `${canPurchase.price} บาท` : 'ไม่สามารถซื้อได้'}
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-sm text-purple-300">สต็อก:</span>
+                                    <Badge variant={product.stock > 0 ? "default" : "destructive"}>
+                                      {product.stock} ชิ้น
+                                    </Badge>
+                                  </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                  <Button
+                                    onClick={() => openPurchaseDialog(product)}
+                                    disabled={!canPurchase.canPurchase}
+                                    className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+                                  >
+                                    <ShoppingCart className="mr-2 h-4 w-4" />
+                                    ซื้อสินค้า
+                                  </Button>
+                                  <Button
+                                    onClick={() => setShowProductDetails(product)}
+                                    variant="outline"
+                                    className="w-full border-purple-500/50 text-purple-300 hover:bg-purple-500/10"
+                                  >
+                                    <Eye className="mr-2 h-4 w-4" />
+                                    ดูรายละเอียด
+                                  </Button>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          );
+                        })}
                       </div>
-                      <div className="flex items-center gap-2">
-                        <label className="text-sm font-medium">ลำดับ:</label>
-                        <select
-                          value={sortOrder}
-                          onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
-                          className="px-3 py-1 border rounded-md bg-white text-black"
-                        >
-                          <option value="asc">น้อยไปมาก</option>
-                          <option value="desc">มากไปน้อย</option>
-                        </select>
-                      </div>
+                    );
+                  })()}
+                </section>
+              ) : (
+                /* Categories Page - แสดงหมวดหมู่ทั้งหมด */
+                <section className="p-6">
+                  {/* Search Bar */}
+                  <div className="mb-6 max-w-md mx-auto">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-400 h-5 w-5" />
+                      <Input
+                        placeholder="ค้นหาหมวดหมู่แอปพรีเมียม..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10 bg-black/30 border-purple-500/30 text-white placeholder:text-purple-300/50"
+                      />
                     </div>
                   </div>
 
-                  {/* Products Grid */}
-                  {filteredProducts.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      {searchQuery || maxPrice || minStock > 1 ? 
-                        "ไม่พบสินค้าตามเงื่อนไขที่กำหนด" : 
-                        "ยังไม่มีข้อมูลสินค้า"
+                  {(() => {
+                    // สร้างหมวดหมู่จาก type_app
+                    const map = new Map<string, { name: string; img?: string; count: number }>();
+                    for (const p of products) {
+                      const name = p.type_app || "อื่นๆ";
+                      if (!map.has(name)) {
+                        map.set(name, { name, img: p.img, count: 1 });
+                      } else {
+                        const c = map.get(name)!;
+                        c.count += 1;
+                        if (!c.img && p.img) c.img = p.img;
                       }
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {filteredProducts.map((product) => {
-                        const canPurchase = userInfo ? canPurchaseProduct(product, parseFloat(userInfo.balance), userInfo.rank) : { canPurchase: false, price: product.price };
-                        
-                        return (
-                          <Card key={product.id} className="overflow-hidden">
-                            <div className="aspect-square overflow-hidden">
-                              <img
-                                src={product.img}
-                                alt={product.name}
-                                className="w-full h-full object-cover hover:scale-105 transition-transform"
-                                onError={(e) => {
-                                  e.currentTarget.src = '/placeholder.svg';
-                                }}
-                              />
-                            </div>
-                            <CardContent className="p-4">
-                              <h3 className="font-semibold mb-2">{product.name}</h3>
-                              
-                              <div className="space-y-2 mb-4">
-                                <div className="flex justify-between items-center">
-                                  <span className="text-sm text-muted-foreground">ราคา:</span>
-                                  <span className="font-semibold text-lg">
-                                    {canPurchase.canPurchase ? `${canPurchase.price} บาท` : 'ไม่สามารถซื้อได้'}
-                                  </span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                  <span className="text-sm text-muted-foreground">สต็อก:</span>
-                                  <Badge variant={product.stock > 0 ? "default" : "destructive"}>
-                                    {product.stock} ชิ้น
-                                  </Badge>
-                                </div>
-                              </div>
+                    }
+                    const apiCategories = Array.from(map.values())
+                      .filter(c => !searchQuery || c.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                      .sort((a, b) => a.name.localeCompare(b.name));
 
-                              <div className="space-y-2">
-                                <Button
-                                  onClick={() => openPurchaseDialog(product)}
-                                  disabled={!canPurchase.canPurchase}
-                                  className="w-full"
-                                >
-                                  <ShoppingCart className="mr-2 h-4 w-4" />
-                                  ซื้อสินค้า
-                                </Button>
-                                <Button
-                                  onClick={() => setShowProductDetails(product)}
-                                  variant="outline"
-                                  className="w-full"
-                                >
-                                  <Eye className="mr-2 h-4 w-4" />
-                                  ดูรายละเอียด
-                                </Button>
+                    if (apiCategories.length === 0) {
+                      return (
+                        <div className="text-center py-16">
+                          <div className="w-32 h-32 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <ShoppingBag className="h-16 w-16 text-purple-400" />
+                          </div>
+                          <h3 className="text-2xl font-bold text-white mb-4">ยังไม่มีข้อมูลแอปพรีเมียม</h3>
+                          <p className="text-purple-300">โปรดลองรีเฟรชหรือกลับมาใหม่ภายหลัง</p>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
+                        {apiCategories.map((category) => (
+                          <div 
+                            key={category.name}
+                            onClick={() => openCategory(category.name)}
+                            className="group bg-black/30 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg p-3 sm:p-4 md:p-6 cursor-pointer hover:bg-black/40 transition-all duration-300 hover:scale-105 hover:shadow-purple-500/25 border border-purple-500/30"
+                          >
+                            {/* Category Image */}
+                            <div className="aspect-square bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg sm:rounded-xl mb-2 sm:mb-4 flex items-center justify-center overflow-hidden">
+                              {category.img ? (
+                                <img 
+                                  src={category.img} 
+                                  alt={category.name}
+                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                />
+                              ) : (
+                                <ShoppingBag className="h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 text-white opacity-70" />
+                              )}
+                            </div>
+                            {/* Category Info */}
+                            <div className="text-center">
+                              <h2 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold text-white mb-1 sm:mb-2 md:mb-4 group-hover:text-purple-300 transition-colors line-clamp-2">
+                                {category.name}
+                              </h2>
+                              <div className="flex items-center justify-center mb-2 sm:mb-0">
+                                <Badge variant="secondary" className="text-[10px] sm:text-xs">
+                                  {category.count} รายการ
+                                </Badge>
                               </div>
-                            </CardContent>
-                          </Card>
-                        );
-                      })}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                            </div>
+
+                            {/* Action Button */}
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openCategory(category.name);
+                              }}
+                              className="w-full mt-2 sm:mt-4 py-2 sm:py-3 px-2 sm:px-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/25"
+                            >
+                              <span className="hidden sm:inline">ดูสินค้าในหมวดนี้</span>
+                              <span className="sm:hidden">ดูสินค้า</span>
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                </section>
+              )}
             </TabsContent>
 
             {/* Preorder Products Tab */}
@@ -1464,11 +1525,11 @@ const PremiumApp = () => {
               </AlertDialogHeader>
               {selectedProductDetails && (
                 <div className="space-y-6">
-                  <div className="flex gap-6">
+                  <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
                     <img
                       src={selectedProductDetails.img}
                       alt={selectedProductDetails.name || selectedProductDetails.category}
-                      className="w-32 h-32 object-cover rounded-lg"
+                      className="w-full sm:w-32 h-32 object-cover rounded-lg"
                       onError={(e) => {
                         e.currentTarget.src = '/placeholder.svg';
                       }}
@@ -1477,12 +1538,16 @@ const PremiumApp = () => {
                       <h3 className="text-xl font-bold mb-2">
                         {selectedProductDetails.name || selectedProductDetails.category}
                       </h3>
-                      {selectedProductDetails.des && (
-                        <p className="text-muted-foreground mb-4">{selectedProductDetails.des}</p>
-                      )}
-                      {selectedProductDetails.info && (
-                        <p className="text-muted-foreground mb-4">{selectedProductDetails.info}</p>
-                      )}
+                      
+                      {/* กรอบเลื่อนข้อความรายละเอียด (เฉพาะมือถือ) */}
+                      <div className="max-h-40 sm:max-h-none overflow-y-auto sm:overflow-y-visible border sm:border-0 rounded-lg p-3 sm:p-0 bg-muted/30 sm:bg-transparent">
+                        {selectedProductDetails.des && (
+                          <p className="text-muted-foreground mb-4 text-sm sm:text-base">{selectedProductDetails.des}</p>
+                        )}
+                        {selectedProductDetails.info && (
+                          <p className="text-muted-foreground mb-4 text-sm sm:text-base whitespace-pre-wrap">{selectedProductDetails.info}</p>
+                        )}
+                      </div>
                     </div>
                   </div>
 

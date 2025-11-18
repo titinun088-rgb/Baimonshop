@@ -1284,7 +1284,7 @@ class Slip2GoAPI {
 // Configuration
 const SLIP2GO_CONFIG: Slip2GoConfig = {
   apiUrl: import.meta.env.VITE_SLIP2GO_API_URL || 'https://connect.slip2go.com',
-  secretKey: import.meta.env.VITE_SLIP2GO_SECRET_KEY || '48eneHJpZiVu2j6nutRTjJdDX61kbqdC9TbvrZLJed4='
+  secretKey: import.meta.env.VITE_SLIP2GO_SECRET_KEY || ''
 };
 
 // Create API instance

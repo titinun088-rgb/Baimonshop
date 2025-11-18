@@ -2,7 +2,7 @@
 // API Documentation: https://api.peamsub24hr.com
 
 const PEAMSUB_API_BASE_URL = 'https://api.peamsub24hr.com';
-const PEAMSUB_API_KEY = 'qgwvsh5rwvtevey8zdh4bj13';
+const PEAMSUB_API_KEY = import.meta.env.VITE_PEAMSUB_API_KEY || '';
 
 // Types
 export interface PeamsubUserData {

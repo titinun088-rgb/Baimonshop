@@ -108,8 +108,8 @@ const TopUpHistory = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-900 to-gray-900 -mx-3 sm:-mx-4 lg:-mx-6 xl:-mx-8 -mt-16 lg:-mt-16">
-        <div className="w-full px-3 sm:px-4 lg:px-6 xl:px-8 pt-20 lg:pt-20">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-900 to-gray-900 -mx-3 sm:-mx-4 lg:-mx-6 xl:-mx-8">
+        <div className="w-full px-3 sm:px-4 lg:px-6 xl:px-8 pt-8">
             {/* Header */}
             <div className="mb-6 flex items-center justify-between">
               <div>
