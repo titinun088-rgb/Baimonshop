@@ -700,7 +700,12 @@ const PremiumApp = () => {
 
   return (
     <Layout>
-        <Seo title="แอปพรีเมียม — CoinZone" description="จัดการแอปพรีเมียมและประวัติการซื้อ" />
+        <Seo 
+          title="แอปพรีเมียม — CoinZone | Netflix Spotify YouTube Premium Disney+ ราคาถูก" 
+          description="CoinZone บริการแอปพรีเมียม Netflix Spotify YouTube Premium Disney+ Canva Pro ราคาถูกที่สุด ปลอดภัย 100% บริการตลอด 24 ชั่วโมง"
+          keywords="coinzone, แอปพรีเมียม, แอพพรีเมียม, Netflix, Spotify, YouTube Premium, Disney Plus, Canva Pro, premium app"
+          canonical="https://www.coin-zone.shop/premium-app"
+        />
         <div className="space-y-6">
           {/* Header */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">

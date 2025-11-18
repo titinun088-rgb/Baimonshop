@@ -1,0 +1,34 @@
+[33mf9d3b21[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m change text
+[33m2401733[m footer
+[33m4b879c9[m edt
+[33mbcfb8be[m logo
+[33m89e9153[m logp
+[33mf951a32[m seo8
+[33mcc990be[m pack game
+[33m2e41566[m topup
+[33m3ce0e77[m Add Google Tag Manager (GTM-PGZP749Q)
+[33md93e2f2[m Add Google Search Console verification meta tag
+[33m3a930d3[m Add SEO improvements: Schema.org FAQPage, updated sitemap, enhanced meta tags
+[33mc117d8e[m tag1
+[33m92dd3a7[m Cookie
+[33m5deb1c7[m tag
+[33mfe25385[m Edit Top-up
+[33mc98cb1e[m edit link logo shop
+[33mace2a70[m robot.txt
+[33mf51048f[m feat: add dynamic sitemap generation and meta tags
+[33m8f9af07[m fix: move sitemap.xml to root and ensure correct content-type
+[33m6d7e96a[m fix: simplify sitemap.xml and set correct content-type
+[33m99be6b4[m sitemap
+[33m5392328[m Deploy
+[33ma20944d[m Commit
+[33me55232a[m LOGIN
+[33mae4e619[m tag
+[33mc7c3542[m phone
+[33mf42151f[m game system
+[33m7f3c4f7[m Update Open Graph meta tags to use CoinZone logo
+[33m2a47ff5[m Add vercel.json for SPA routing and optimize caching
+[33m25fccd7[m Remove game icon from login and register pages
+[33m3ae6512[m Fix: Optimize build configuration and reduce chunk size warnings
+[33mfde7db9[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m First Commit Version 1
+[33mfa49061[m feat: Initialize project with Next.js, Firebase, and Tailwind CSS
+[33mbb641e6[m [skip lovable] Use tech stack vite_react_shadcn_ts_20250728_minor

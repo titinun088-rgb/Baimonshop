@@ -7,18 +7,18 @@ type SeoProps = {
   image?: string;
   url?: string;
   canonical?: string;
+  keywords?: string;
 };
 
 const SITE_NAME = 'CoinZone';
 
-const DEFAULT_TITLE = 'CoinZone - เติมเกมและแอปพรีเมียม';
-const DEFAULT_DESCRIPTION = 'รับเติมเกมและแอปพรีเมียม รวดเร็ว ปลอดภัย ใช้งานง่าย';
+const DEFAULT_TITLE = 'รับเติมเกม CoinZone | เว็บเติมเกม เติมเกมออนไลน์ ราคาถูก รวดเร็ว ปลอดภัย';
+const DEFAULT_DESCRIPTION = 'รับเติมเกม CoinZone เว็บเติมเกมออนไลน์อันดับ 1 เติมเกม ROV Free Fire PUBG Mobile Legends เติมแอปพรีเมียม Netflix Spotify YouTube Premium ราคาถูกที่สุด รวดเร็วทันใจ ปลอดภัย 100% เว็ปเติมเกมที่ดีที่สุด บริการตลอด 24 ชั่วโมง';
 const DEFAULT_URL = 'https://www.coin-zone.shop/';
-// Use the site logo as the default social preview image (absolute URL preferred for crawlers)
-// Use URL-encoded filename to be safe for crawlers
 const DEFAULT_IMAGE = `${DEFAULT_URL}logo.png`;
+const DEFAULT_KEYWORDS = 'รับเติมเกม, เติมเกม, เว็บเติมเกม, เว็ปเติมเกม, coinzone, CoinZone, เว็บเติมเกมออนไลน์, เว็ปเติมเกมออนไลน์, รับเติมเกมออนไลน์, เว็บรับเติมเกม, เว็ปรับเติมเกม, ร้านเติมเกม, เติมเกมออนไลน์, เติมเงินเกม, topup game';
 
-export default function Seo({ title, description, image, url, canonical }: SeoProps) {
+export default function Seo({ title, description, image, url, canonical, keywords }: SeoProps) {
   const fullTitle = title ? `${title}` : DEFAULT_TITLE;
   const pageUrl = url || canonical || DEFAULT_URL;
   const imageUrl = image || DEFAULT_IMAGE;
@@ -28,6 +28,7 @@ export default function Seo({ title, description, image, url, canonical }: SeoPr
       <title>{fullTitle}</title>
       <meta name="title" content={fullTitle} />
       <meta name="description" content={description || DEFAULT_DESCRIPTION} />
+      <meta name="keywords" content={keywords || DEFAULT_KEYWORDS} />
       <link rel="canonical" href={canonical || pageUrl} />
 
       {/* Open Graph / Facebook */}

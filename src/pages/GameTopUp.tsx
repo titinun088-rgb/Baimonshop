@@ -334,14 +334,18 @@ const GameTopUp = () => {
   return (
     <Layout>
       <Helmet>
-        <title>เติมเกม — CoinZone | เติมเกมออนไลน์ รวดเร็ว ปลอดภัย</title>
-        <meta name="description" content="เติมเกมออนไลน์กับ CoinZone — บริการร้านเติมเกม, แอพพรีเมียม, เติมเงินมือถือ และบัตรเงินสด รวดเร็ว ปลอดภัย ใช้งานง่าย" />
-        <meta name="keywords" content="เติมเกม, ร้านเติมเกม, แอพพรีเมียม, เติมเงินมือถือ, บัตรเงินสด, เติมเงินออนไลน์, เติม ROV, เติม Free Fire" />
-        <meta property="og:title" content="เติมเกม — CoinZone | เติมเกมออนไลน์ รวดเร็ว ปลอดภัย" />
-        <meta property="og:description" content="เติมเกมออนไลน์กับ CoinZone — บริการร้านเติมเกม, แอพพรีเมียม, เติมเงินมือถือ และบัตรเงินสด รวดเร็ว ปลอดภัย ใช้งานง่าย" />
+        <title>รับเติมเกม CoinZone | เว็บเติมเกม เติมเกมออนไลน์ ROV Free Fire PUBG ราคาถูก รวดเร็ว</title>
+        <meta name="description" content="รับเติมเกม CoinZone เว็บเติมเกมออนไลน์อันดับ 1 เติมเกม ROV Free Fire PUBG Mobile Legends Genshin Impact Honkai Star Rail และเกมอื่นๆ อีกมากมาย เว็ปเติมเกมที่ดีที่สุด ราคาถูกที่สุด รวดเร็วทันใจ ปลอดภัย 100% ระบบอัตโนมัติ เงินเข้าไว บริการตลอด 24 ชั่วโมง ไม่มีค่าธรรมเนียม" />
+        <meta name="keywords" content="รับเติมเกม, เติมเกม, เว็บเติมเกม, เว็ปเติมเกม, coinzone, เว็บเติมเกมออนไลน์, เว็ปเติมเกมออนไลน์, รับเติมเกมออนไลน์, เติมเกมออนไลน์, ร้านเติมเกม, เว็บรับเติมเกม, เว็ปรับเติมเกม, เติมเงินเกม, เติม ROV, เติม Free Fire, เติม PUBG, เติม Mobile Legends, เติม Genshin, เติม Honkai, เติมเกมราคาถูก, topup game, game topup" />
+        <meta property="og:title" content="รับเติมเกม CoinZone | เว็บเติมเกมออนไลน์ ROV Free Fire PUBG" />
+        <meta property="og:description" content="รับเติมเกม CoinZone เว็บเติมเกมออนไลน์อันดับ 1 เติมเกม ROV Free Fire PUBG Mobile Legends ราคาถูก รวดเร็ว ปลอดภัย 100% บริการตลอด 24 ชั่วโมง" />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="/logo.png" />
+        <meta property="og:url" content="https://www.coin-zone.shop/game-topup" />
+        <meta property="og:image" content="https://www.coin-zone.shop/logo.png" />
         <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="รับเติมเกม CoinZone | เว็บเติมเกมออนไลน์" />
+        <meta name="twitter:description" content="รับเติมเกม CoinZone เว็บเติมเกม เติมเกมออนไลน์ ROV Free Fire PUBG ราคาถูก รวดเร็ว ปลอดภัย" />
+        <link rel="canonical" href="https://www.coin-zone.shop/game-topup" />
       </Helmet>
         <div className="bg-gradient-to-b from-[#0f0f2d] to-[#1a0033] text-white min-h-screen font-['Kanit',sans-serif] -mx-3 sm:-mx-4 lg:-mx-6 xl:-mx-8 -mt-16 lg:-mt-16">
           {/* Header */}
@@ -349,9 +353,12 @@ const GameTopUp = () => {
             <div className="flex flex-col gap-4">
               <div>
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">
-                  เติมเกม
+                  รับเติมเกม CoinZone - เว็บเติมเกมออนไลน์
                 </h1>
-                <p className="text-purple-300 mt-1 sm:mt-2 text-sm sm:text-base">เติมเงินเกมออนไลน์ • ร้านเติมเกม • แอพพรีเมียม • เติมเงินมือถือ • บัตรเงินสด</p>
+                <h2 className="text-lg sm:text-xl text-purple-200 mt-2">
+                  เว็บเติมเกมอันดับ 1 | เติมเกม ROV Free Fire PUBG Mobile Legends Genshin Impact
+                </h2>
+                <p className="text-purple-300 mt-1 sm:mt-2 text-sm sm:text-base"><strong>รับเติมเกมออนไลน์</strong> • เว็ปเติมเกมราคาถูก • เติมเกมรวดเร็ว • บริการตลอด 24 ชั่วโมง</p>
                 <div className="mt-2 flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-purple-300">
                 </div>
               </div>
@@ -399,8 +406,10 @@ const GameTopUp = () => {
                   {selectedGame.img ? (
                     <img 
                       src={selectedGame.img} 
-                      alt={selectedGame.category}
+                      alt={`เติม ${selectedGame.category} - CoinZone รับเติมเกมออนไลน์`}
+                      title={`เติมเกม ${selectedGame.category} - CoinZone`}
                       className="w-full h-full object-cover"
+                      loading="lazy"
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
                         const _sibling = e.currentTarget.nextElementSibling as HTMLElement | null;

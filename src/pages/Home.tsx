@@ -50,13 +50,17 @@ const Home = () => {
   return (
     <Layout>
       <Helmet>
-        <title>CoinZone — ระบบเติมเงินเกมออนไลน์ และแอปพรีเมียม</title>
-        <meta name="description" content="บริการเติมเงินเกมออนไลน์ เติมแอปพรีเมียม รวดเร็ว ปลอดภัย ใช้งานง่าย ราคาถูก บริการตลอด 24 ชั่วโมง" />
-        <meta property="og:title" content="CoinZone — ระบบเติมเงินเกมออนไลน์ และแอปพรีเมียม" />
-        <meta property="og:description" content="บริการเติมเงินเกมออนไลน์ เติมแอปพรีเมียม รวดเร็ว ปลอดภัย ใช้งานง่าย ราคาถูก บริการตลอด 24 ชั่วโมง" />
+        <title>รับเติมเกม CoinZone | เว็บเติมเกม เติมเกมออนไลน์ ราคาถูก รวดเร็ว ปลอดภัย 24 ชม.</title>
+        <meta name="description" content="รับเติมเกม CoinZone เว็บเติมเกมออนไลน์อันดับ 1 เติมเกม ROV Free Fire PUBG Mobile Legends Genshin Impact แอปพรีเมียม Netflix Spotify YouTube Premium ราคาถูกที่สุด รวดเร็วทันใจ ปลอดภัย 100% เว็ปเติมเกมที่ดีที่สุด บริการตลอด 24 ชั่วโมง ระบบอัตโนมัติ" />
+        <meta name="keywords" content="รับเติมเกม, เติมเกม, เว็บเติมเกม, เว็ปเติมเกม, coinzone, เว็บเติมเกมออนไลน์, เว็ปเติมเกมออนไลน์, รับเติมเกมออนไลน์, ร้านเติมเกม, เติมเงินเกม, เติม ROV, เติม Free Fire, เติม PUBG, เติม Mobile Legends, topup game" />
+        <meta property="og:title" content="รับเติมเกม CoinZone | เว็บเติมเกมออนไลน์ ราคาถูก" />
+        <meta property="og:description" content="รับเติมเกม CoinZone เว็บเติมเกมออนไลน์อันดับ 1 เติมเกม ROV Free Fire PUBG รวดเร็วทันใจ ปลอดภัย 100% ราคาถูกที่สุด บริการตลอด 24 ชั่วโมง" />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="https://www.coin-zone.shop/logo.png" />
+        <meta property="og:url" content="https://www.coin-zone.shop/" />
         <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="รับเติมเกม CoinZone | เว็บเติมเกมออนไลน์" />
+        <meta name="twitter:description" content="รับเติมเกม CoinZone เว็บเติมเกมออนไลน์ เติมเกม ROV Free Fire PUBG รวดเร็ว ปลอดภัย ราคาถูก 24 ชม." />
         <link rel="canonical" href="https://www.coin-zone.shop/" />
       </Helmet>
       <div className="bg-gradient-to-b from-[#0f0f2d] to-[#1a0033] text-white min-h-screen font-['Kanit',sans-serif] -mx-3 sm:-mx-4 lg:-mx-6 xl:-mx-8 -mt-16 lg:-mt-16">
@@ -87,10 +91,14 @@ const Home = () => {
           {/* Header */}
           <div className="mb-12 text-center">
             <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-3">
-              ระบบเติมเงินออนไลน์
+              รับเติมเกม CoinZone - เว็บเติมเกมออนไลน์
             </h1>
-            <p className="text-lg text-purple-300">
-              รวดเร็ว ปลอดภัย ใช้ได้จริง
+            <h2 className="text-2xl md:text-3xl font-semibold text-purple-300 mb-3">
+              เว็บเติมเกมอันดับ 1 | เติมเกม ROV Free Fire PUBG Mobile Legends
+            </h2>
+            <p className="text-lg text-purple-200 max-w-3xl mx-auto">
+              <strong>รับเติมเกมออนไลน์</strong> และแอปพรีเมียม ROV Free Fire PUBG Mobile Legends Genshin Impact Netflix Spotify YouTube Premium 
+              เว็ปเติมเกมที่ดีที่สุด ราคาถูก รวดเร็วทันใจ ปลอดภัย 100% ระบบอัตโนมัติ เงินเข้าไว บริการตลอด 24 ชั่วโมง
             </p>
           </div>
 
@@ -111,8 +119,10 @@ const Home = () => {
                     <div className="absolute inset-0 bg-gradient-to-br opacity-20">
                       <img
                         src={item.image}
-                        alt={item.title}
+                        alt={`${item.title} - CoinZone รับเติมเกม เติมเงินเกมออนไลน์`}
+                        title={`${item.title} - บริการเติมเกมออนไลน์ CoinZone`}
                         className="w-full h-full object-cover"
+                        loading="lazy"
                         onError={(e) => {
                           e.currentTarget.style.display = 'none';
                         }}
@@ -175,15 +185,17 @@ const Home = () => {
                     {product.img ? (
                       <img
                         src={product.img}
-                        alt={product.name}
+                        alt={`${product.name} - แอปพรีเมียม CoinZone ราคา ${product.price} บาท`}
+                        title={`${product.name} - CoinZone แอปพรีเมียม`}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        loading="lazy"
                         onError={(e) => {
                           e.currentTarget.style.display = 'none';
                         }}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <Package className="w-16 h-16 text-purple-400/50" />
+                        <Package className="w-16 h-16 text-purple-400/50" aria-label="ไอคอนสินค้า" />
                       </div>
                     )}
                   </div>
