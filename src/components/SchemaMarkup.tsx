@@ -51,13 +51,17 @@ const SchemaMarkup: React.FC<SchemaMarkupProps> = ({ type, data }) => {
           "bestRating": 5,
           "worstRating": 1
         },
-        "image": data.image || "https://www.coin-zone.shop/logo.png",
+        "image": data.image || [
+          "https://www.coin-zone.shop/logo.png",
+          "https://www.coin-zone.shop/product-default.png"
+        ],
         "url": data.url || "https://www.coin-zone.shop",
         "provider": {
           "@type": "Organization",
           "name": "CoinZone",
           "url": "https://www.coin-zone.shop"
-        }
+        },
+        "category": data.category || "Digital Products"
       };
     }
 
