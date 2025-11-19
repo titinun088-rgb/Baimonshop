@@ -272,7 +272,7 @@ export async function syncPurchaseHistoryFromAPI(
  */
 export async function addUserPurchaseReference(
   userId: string,
-  type: 'premium' | 'game' | 'mobile' | 'cashcard',
+  type: 'premium' | 'game' | 'mobile' | 'cashcard' | 'gamecode',
   reference: string,
   sellPrice?: number // ราคาที่จ่ายให้เว็บไซต์
 ): Promise<void> {

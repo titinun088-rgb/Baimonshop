@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { 
   CreditCard, 
@@ -60,6 +61,9 @@ const CashCard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [productSellPrices, setProductSellPrices] = useState<Map<number, number>>(new Map());
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<PeamsubCashCardProduct | null>(null);
+  const [sellPriceForSelected, setSellPriceForSelected] = useState(0);
 
   // ตรวจสอบว่าเป็นแอดมินหรือไม่
   const isAdmin = userData?.role === 'admin';
@@ -141,33 +145,46 @@ const CashCard = () => {
       return;
     }
     
-    // ตรวจสอบ balance จากฐานข้อมูลเว็บ (Firebase)
-    const webBalance = userData?.balance || 0;
-    const userBalance = parseFloat(userInfo.balance) || 0;
-    
-    // ดึงราคาขาย (จาก admin price หรือ recommended price หรือ API price)
-    const apiPrice = parseFloat(product.price) || 0; // ราคา API (ราคาทุน)
-    const recommendedPrice = parseFloat(product.recommendedPrice) || 0; // ราคาแนะนำ (ราคาขายเริ่มต้น)
+    // ดึงราคาขาย
+    const apiPrice = parseFloat(product.price) || 0;
+    const recommendedPrice = parseFloat(product.recommendedPrice) || 0;
     const sellPrice = await getProductSellPrice(product.id, 'cashcard', apiPrice, recommendedPrice);
     
+    // เก็บข้อมูลและเปิด confirmation dialog
+    setSelectedProduct(product);
+    setSellPriceForSelected(sellPrice);
+    setConfirmDialogOpen(true);
+  };
+
+  const confirmPurchase = async () => {
+    if (!selectedProduct || !user || !userInfo || !userData) return;
+
+    const webBalance = userData.balance || 0;
+    const userBalance = parseFloat(userInfo.balance) || 0;
+    const apiPrice = parseFloat(selectedProduct.price) || 0;
+    const sellPrice = sellPriceForSelected;
+
     // ตรวจสอบ balance จากฐานข้อมูลเว็บก่อน
     if (webBalance < sellPrice) {
       toast.error(`ยอดเงินในระบบไม่พอ (ยอดเงิน: ${webBalance.toLocaleString()} บาท, ราคา: ${sellPrice.toLocaleString()} บาท) กรุณาเติมเงินก่อน`);
+      setConfirmDialogOpen(false);
       return;
     }
     
     // ตรวจสอบ balance จาก Peamsub API
     if (userBalance < apiPrice) {
       toast.error(`ยอดเงินใน Peamsub ไม่พอ (ยอดเงิน: ${userBalance.toLocaleString()} บาท, ราคา: ${apiPrice.toLocaleString()} บาท) กรุณาเติมเงินก่อน`);
+      setConfirmDialogOpen(false);
       return;
     }
 
+    setConfirmDialogOpen(false);
     setPurchasing(true);
     try {
       const reference = `CASH_CARD_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
       // เรียก API ซื้อบัตรเงินสด
-      const result = await purchasePeamsubCashCard(product.id, reference);
+      const result = await purchasePeamsubCashCard(selectedProduct.id, reference);
       
       // หักเงินจาก balance ในฐานข้อมูล
       try {
@@ -190,16 +207,16 @@ const CashCard = () => {
           user.uid,
           'cashcard',
           reference,
-          product.id,
+          selectedProduct.id,
           sellPrice, // ราคาที่จ่ายให้เว็บไซต์
           apiPrice, // ราคาจาก API
-          product.info || product.category || 'บัตรเงินสด',
-          product.id.toString()
+          selectedProduct.info || selectedProduct.category || 'บัตรเงินสด',
+          selectedProduct.id.toString()
         );
       } catch (recordError) {
         console.warn('⚠️ ไม่สามารถบันทึกราคาขายได้:', recordError);
         // Fallback: บันทึก reference ธรรมดา
-        await addUserPurchaseReference(user.uid, 'cashcard', reference);
+        await addUserPurchaseReference(user.uid, 'cashcard', reference, sellPrice);
       }
       
       toast.success(`ซื้อบัตรเงินสดสำเร็จ! ${result || ''}`);
@@ -212,13 +229,11 @@ const CashCard = () => {
       
     } catch (error: any) {
       console.error("Error purchasing cash card:", error);
-      if (error.message === "Insufficient balance") {
-        toast.error("ยอดเงินคงเหลือไม่เพียงพอ กรุณาเติมเงิน");
-      } else {
-        toast.error("ไม่สามารถซื้อบัตรเงินสดได้");
-      }
+      toast.error(error.message || "เกิดข้อผิดพลาดในการซื้อบัตรเงินสด");
     } finally {
       setPurchasing(false);
+      setSelectedProduct(null);
+      setSellPriceForSelected(0);
     }
   };
 
@@ -702,6 +717,66 @@ const CashCard = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>ยืนยันการซื้อบัตรเงินสด</DialogTitle>
+            <DialogDescription>
+              กรุณาตรวจสอบข้อมูลก่อนยืนยันการซื้อ
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedProduct && (
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">ประเภท:</span>
+                  <span className="font-medium">{selectedProduct.info || selectedProduct.category || 'บัตรเงินสด'}</span>
+                </div>
+                {userData?.role === 'admin' && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">ราคา API:</span>
+                    <span className="font-medium">{parseFloat(selectedProduct.price).toLocaleString()} บาท</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">ราคาขาย:</span>
+                  <span className="font-medium text-blue-600">{sellPriceForSelected.toLocaleString()} บาท</span>
+                </div>
+                <div className="border-t pt-2 mt-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">ยอดเงินปัจจุบัน:</span>
+                    <span className="font-medium">{(userData?.balance || 0).toLocaleString()} บาท</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">ยอดเงินหลังซื้อ:</span>
+                    <span className="font-medium text-green-600">
+                      {((userData?.balance || 0) - sellPriceForSelected).toLocaleString()} บาท
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setConfirmDialogOpen(false)}
+            >
+              ยกเลิก
+            </Button>
+            <Button 
+              onClick={confirmPurchase}
+              disabled={purchasing}
+            >
+              {purchasing ? "กำลังดำเนินการ..." : "ยืนยันการซื้อ"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 };

@@ -99,10 +99,16 @@ const Layout = ({ children }: LayoutProps) => {
       icon: CreditCard,
       roles: ['admin', 'seller']
     },
-    {
+    { 
       name: "บัตรเงินสด",
       href: "/cash-card",
       icon: CreditCard,
+      roles: ['admin', 'seller']
+    },
+    { 
+      name: "รหัสเกม",
+      href: "/game-codes",
+      icon: Gamepad2,
       roles: ['admin', 'seller']
     },
     
@@ -191,6 +197,12 @@ const Layout = ({ children }: LayoutProps) => {
       icon: Wifi,
       roles: ['admin']
     },
+    { 
+      name: "จัดการขายไอดีเกม", 
+      href: "/game-code-management", 
+      icon: Gamepad2,
+      roles: ['admin']
+    },
     
     // โปรไฟล์
     { 
@@ -223,7 +235,7 @@ const Layout = ({ children }: LayoutProps) => {
         name: "ซื้อ/เติม",
         icon: ShoppingCart,
         items: navigation.filter(item => 
-          ["เติมเกม", "แอปพรีเมียม", "บัตรเติมเงิน", "บัตรเงินสด"].includes(item.name) && 
+          ["เติมเกม", "แอปพรีเมียม", "บัตรเติมเงิน", "บัตรเงินสด", "รหัสเกม"].includes(item.name) && 
           item.roles.includes(userRole)
         )
       },
@@ -259,7 +271,7 @@ const Layout = ({ children }: LayoutProps) => {
         name: "จัดการ",
         icon: LayoutDashboard,
         items: navigation.filter(item => 
-          ["Dashboard", "เกม", "ยอดขาย", "ผู้ใช้", "รายงานปัญหา", "Peamsub API", "จัดการราคา Peamsub"].includes(item.name) && 
+          ["Dashboard", "เกม", "ยอดขาย", "ผู้ใช้", "รายงานปัญหา", "Peamsub API", "จัดการราคา Peamsub", "จัดการขายไอดีเกม"].includes(item.name) && 
           item.roles.includes('admin')
         )
       });
@@ -413,7 +425,7 @@ const Layout = ({ children }: LayoutProps) => {
               )}
             </div>
             <p className="text-xs text-muted-foreground truncate">
-              coinzone.shop@gmail.com
+              support@coin-zone.shop
             </p>
           </div>
         </Link>
@@ -567,7 +579,7 @@ const Layout = ({ children }: LayoutProps) => {
                         {user?.displayName || "ผู้ใช้"}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        coinzone.shop@gmail.com
+                        support@coin-zone.shop
                       </p>
                     </div>
                   </DropdownMenuLabel>

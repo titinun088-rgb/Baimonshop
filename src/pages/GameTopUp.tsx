@@ -100,8 +100,8 @@ const GameTopUp = () => {
     const hasFraction = frac > 1e-9 && Math.round(frac * 100) > 0; // detect non-zero cents (e.g., .01)
 
     if (hasFraction) {
-      // show two decimal places for fractional prices
-      return { text: new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n), hasFraction: true };
+      // ถ้ามีทศนิยม ให้ปัดเป็นจำนวนเต็ม
+      return { text: new Intl.NumberFormat('th-TH', { maximumFractionDigits: 0 }).format(Math.round(n)), hasFraction: false };
     }
 
     // otherwise show as whole baht
@@ -832,7 +832,10 @@ const GameTopUp = () => {
                   // ดึงราคาขาย (จาก admin price หรือ recommended price หรือ API price)
                   const apiPrice = parseFloat(selectedGameProduct.price) || 0; // ราคา API (ราคาทุน)
                   const recommendedPrice = parseFloat(selectedGameProduct.recommendedPrice) || 0; // ราคาแนะนำ (ราคาขายเริ่มต้น)
-                  const sellPrice = await getProductSellPrice(selectedGameProduct.id, 'game', apiPrice, recommendedPrice);
+                  const rawSellPrice = await getProductSellPrice(selectedGameProduct.id, 'game', apiPrice, recommendedPrice);
+                  
+                  // ปัดทศนิยมของราคาขาย
+                  const sellPrice = Math.round(rawSellPrice);
                   
                   // ตรวจสอบ balance จากฐานข้อมูลเว็บก่อน
                   if (webBalance < sellPrice) {

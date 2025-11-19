@@ -11,6 +11,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { 
   History, 
   CheckCircle, 
@@ -24,11 +31,13 @@ import {
   AlertTriangle,
   Calendar,
   CreditCard,
-  Package
+  Package,
+  Copy
 } from "lucide-react";
 import ProductDetailsDialog from "@/components/ProductDetailsDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { getPeamsubPurchaseHistory, getPeamsubGameHistory, getPeamsubCashCardHistory, getPeamsubMobileHistory, PeamsubPurchaseHistory, PeamsubGameHistory, PeamsubCashCardHistory, PeamsubMobileHistory, ClaimRequest, ClaimStatus } from "@/lib/peamsubUtils";
+import { getPurchasedCodeDetails, GameCodePurchase } from "@/lib/gameCodeUtils";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -106,6 +115,9 @@ const PurchaseHistory = () => {
   const [itemsPerPage] = useState(10);
   const [selectedItem, setSelectedItem] = useState<PremiumHistoryItem | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [selectedGameCode, setSelectedGameCode] = useState<GameCodePurchase | null>(null);
+  const [gameCodeDialogOpen, setGameCodeDialogOpen] = useState(false);
+  const [loadingGameCode, setLoadingGameCode] = useState(false);
 
   // ตรวจสอบว่าเป็นแอดมินหรือไม่
   const isAdmin = userData?.role === 'admin';
@@ -410,12 +422,43 @@ const PurchaseHistory = () => {
     }
   };
 
-  const handleViewDetails = (item: HistoryItem) => {
+  const handleViewDetails = async (item: HistoryItem) => {
     if (item.type === 'premium') {
       setSelectedItem(item);
       setDetailsDialogOpen(true);
+    } else if (item.type === 'game') {
+      // ตรวจสอบว่าเป็นรหัสเกมจากระบบ (มี gameCodePurchaseId)
+      const historyDoc = await import('firebase/firestore').then(m => m.getDoc);
+      const docRef = await import('firebase/firestore').then(m => m.doc);
+      const { db } = await import('@/lib/firebase');
+      
+      try {
+        setLoadingGameCode(true);
+        // ดึงข้อมูลจาก peamsub_purchases เพื่อหา gameCodePurchaseId
+        const purchaseRef = docRef(db, 'peamsub_purchases', `gamecode_${(item as any).reference}`);
+        const purchaseSnap = await historyDoc(purchaseRef);
+        
+        if (purchaseSnap.exists() && purchaseSnap.data().gameCodePurchaseId && user) {
+          const gameCodePurchaseId = purchaseSnap.data().gameCodePurchaseId;
+          const gameCodeDetails = await getPurchasedCodeDetails(gameCodePurchaseId, user.uid);
+          
+          if (gameCodeDetails) {
+            setSelectedGameCode(gameCodeDetails);
+            setGameCodeDialogOpen(true);
+          } else {
+            toast.error("ไม่พบรายละเอียดรหัสเกม");
+          }
+        } else {
+          toast.info("สินค้านี้ไม่สามารถดูได้");
+        }
+      } catch (error) {
+        console.error('Error loading game code details:', error);
+        toast.error("ไม่สามารถโหลดรายละเอียดได้");
+      } finally {
+        setLoadingGameCode(false);
+      }
     } else {
-      toast.info("ดูรายละเอียดได้เฉพาะสินค้าประเภท Premium เท่านั้น");
+      toast.info("ดูรายละเอียดได้เฉพาะสินค้าประเภท Premium และเกม เท่านั้น");
     }
   };
 
@@ -617,7 +660,7 @@ const PurchaseHistory = () => {
                             'outline'
                           } className="text-xs">
                             {item.type === 'premium' ? 'แอพพรีเมียม' : 
-                             item.type === 'game' ? 'เติมเกม' : 
+                             item.type === 'game' ? 'เกม' : 
                              item.type === 'mobile' ? 'เติมเน็ต' :
                              'บัตรเงินสด'}
                           </Badge>
@@ -693,7 +736,7 @@ const PurchaseHistory = () => {
                             'outline'
                             } className="text-xs">
                             {item.type === 'premium' ? 'แอพพรีเมียม' : 
-                             item.type === 'game' ? 'เติมเกม' : 
+                             item.type === 'game' ? 'เกม' : 
                              item.type === 'mobile' ? 'เติมเน็ต-เติมเงินมือถือ' :
                              'บัตรเงินสด'}
                           </Badge>
@@ -829,6 +872,132 @@ const PurchaseHistory = () => {
         }}
         purchaseItem={selectedItem}
       />
+
+      {/* Game Code Details Dialog */}
+      <Dialog open={gameCodeDialogOpen} onOpenChange={setGameCodeDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Package className="h-5 w-5 text-green-500" />
+              รายละเอียดรหัสเกม
+            </DialogTitle>
+            <DialogDescription>
+              ข้อมูลรหัสเกมที่คุณซื้อไปแล้ว
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedGameCode && (
+            <div className="space-y-4 mt-4">
+              <div className="bg-muted p-4 rounded-lg">
+                <h3 className="font-semibold mb-2">{selectedGameCode.gameName}</h3>
+                <p className="text-sm text-muted-foreground">
+                  ซื้อเมื่อ: {new Date(selectedGameCode.purchasedAt).toLocaleString('th-TH')}
+                </p>
+                <p className="text-sm font-semibold text-primary mt-1">
+                  ราคา: ฿{selectedGameCode.price.toLocaleString()}
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Email</label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={selectedGameCode.email}
+                      readOnly
+                      className="flex-1"
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        navigator.clipboard.writeText(selectedGameCode.email);
+                        toast.success("คัดลอก Email แล้ว");
+                      }}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Password</label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={selectedGameCode.password}
+                      readOnly
+                      className="flex-1"
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        navigator.clipboard.writeText(selectedGameCode.password);
+                        toast.success("คัดลอก Password แล้ว");
+                      }}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                {selectedGameCode.details && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">รายละเอียดเพิ่มเติม</label>
+                    <div className="flex gap-2">
+                      <Input
+                        value={selectedGameCode.details}
+                        readOnly
+                        className="flex-1"
+                      />
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          navigator.clipboard.writeText(selectedGameCode.details || "");
+                          toast.success("คัดลอกรายละเอียดแล้ว");
+                        }}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                <Button
+                  className="w-full"
+                  onClick={() => {
+                    const allText = `Email: ${selectedGameCode.email}\nPassword: ${selectedGameCode.password}${selectedGameCode.details ? `\nDetails: ${selectedGameCode.details}` : ""}`;
+                    navigator.clipboard.writeText(allText);
+                    toast.success("คัดลอกทั้งหมดแล้ว");
+                  }}
+                >
+                  <Copy className="h-4 w-4 mr-2" />
+                  คัดลอกทั้งหมด
+                </Button>
+              </div>
+
+              <div className="bg-yellow-50 dark:bg-yellow-950 p-3 rounded-lg">
+                <p className="text-xs text-yellow-800 dark:text-yellow-200">
+                  ⚠️ กรุณาเก็บรักษาข้อมูลนี้ไว้อย่างปลอดภัย
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-end gap-2 mt-4">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setGameCodeDialogOpen(false);
+                setSelectedGameCode(null);
+              }}
+            >
+              ปิด
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 };

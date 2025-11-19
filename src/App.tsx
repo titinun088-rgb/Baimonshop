@@ -41,6 +41,9 @@ import CardTopUp from "./pages/CardTopUp";
 import CategoryManagement from "./pages/CategoryManagement";
 import PurchaseHistory from "./pages/PurchaseHistory";
 import PeamsubPriceManagement from "./pages/PeamsubPriceManagement";
+import GameCodes from "./pages/GameCodes";
+import GameCodeManagement from "./pages/GameCodeManagement";
+import GameCodeDetails from "./pages/GameCodeDetails";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -282,6 +285,30 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute requireEmailVerification={true}>
               <PurchaseHistory />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/game-codes"
+          element={
+            <ProtectedRoute requireEmailVerification={true}>
+              <GameCodes />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/game-code-management"
+          element={
+            <ProtectedRoute requireEmailVerification={true} requireAdmin={true}>
+              <GameCodeManagement />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/game-codes/:id"
+          element={
+            <ProtectedRoute requireEmailVerification={true} requireAdmin={true}>
+              <GameCodeDetails />
             </ProtectedRoute>
           }
         />
