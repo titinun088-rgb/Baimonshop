@@ -177,7 +177,18 @@ const Home = () => {
   return (
     <Layout>
       <Helmet>
-        <title>รับเติมเกม CoinZone | เว็บเติมเกม เติมเกมออนไลน์ ราคาถูก รวดเร็ว ปลอดภัย 24 ชม.</title>
+        <title>CoinZone เว็บเติมเกม รับเติมเกมออนไลน์ราคาถูก เติม ROV Free Fire PUBG</title>
+        <meta name="description" content="CoinZone เว็บเติมเกมออนไลน์อันดับ 1 รับเติมเกมราคาถูกที่สุด เติมเกม ROV Free Fire PUBG Mobile Legends แอพพรีเมียม Netflix Spotify บัตรเงินสด Steam เติมเงินมือถือ AIS True DTAC ระบบอัตโนมัติ รวดเร็ว ปลอดภัย 100% บริการ 24 ชั่วโมง" />
+        <meta name="keywords" content="CoinZone, coinzone, coin zone, coin-zone, เว็บเติมเกม CoinZone, CoinZone เติมเกม, CoinZone ราคาถูก, เติมเกม, เว็บเติมเกม, รับเติมเกม, เติมเกมราคาถูก, เติมเกมออนไลน์, เว็บเติมเกมออนไลน์, ร้านเติมเกม, เติม ROV, เติม Free Fire, เติม PUBG, เติม Mobile Legends, เติมเพชร Free Fire, เติมเงิน ROV, แอพพรีเมียม, Netflix, Spotify, YouTube Premium, บัตรเงินสด, Steam, Garena, เติมเงินมือถือ, AIS, True, DTAC, TrueMoney, เว็บเติมเกมราคาถูก, เติมเกมถูกๆ, topup game, game topup" />
+        <meta property="og:title" content="CoinZone เว็บเติมเกม รับเติมเกมออนไลน์ราคาถูก เติม ROV Free Fire PUBG" />
+        <meta property="og:description" content="CoinZone เว็บเติมเกมออนไลน์อันดับ 1 รับเติมเกมราคาถูกที่สุด เติมเกม ROV Free Fire PUBG Mobile Legends แอพพรีเมียม Netflix Spotify บัตรเงินสด Steam เติมเงินมือถือ ระบบอัตโนมัติ รวดเร็ว ปลอดภัย 100%" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://www.coin-zone.shop/" />
+        <meta property="og:image" content="https://www.coin-zone.shop/logo.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="CoinZone เว็บเติมเกม รับเติมเกมออนไลน์ราคาถูก" />
+        <meta name="twitter:description" content="CoinZone เว็บเติมเกมอันดับ 1 รับเติมเกมราคาถูก เติม ROV Free Fire PUBG แอพพรีเมียม บัตรเงินสด เติมเงินมือถือ" />
+        <link rel="canonical" href="https://www.coin-zone.shop/" />
         <meta name="description" content="รับเติมเกม CoinZone เว็บเติมเกมออนไลน์อันดับ 1 เติมเกม ROV Free Fire PUBG Mobile Legends Genshin Impact แอปพรีเมียม Netflix Spotify YouTube Premium บัตรเงินสด Steam Garena เติมเงินมือถือ AIS True DTAC ราคาถูกที่สุด รวดเร็วทันใจ ปลอดภัย 100% เว็ปเติมเกมที่ดีที่สุด บริการตลอด 24 ชั่วโมง ระบบอัตโนมัติ เงินเข้าไว" />
         <meta name="keywords" content="รับเติมเกม, เติมเกม, เว็บเติมเกม, เว็ปเติมเกม, coinzone, เว็บเติมเกมออนไลน์, เว็ปเติมเกมออนไลน์, รับเติมเกมออนไลน์, ร้านเติมเกม, เติมเงินเกม, เติม ROV, เติม Free Fire, เติม PUBG, เติม Mobile Legends, topup game, แอปพรีเมียม, Netflix, Spotify, YouTube Premium, บัตรเงินสด, Steam Wallet, Garena Shell, เติมเงินมือถือ, เติมเงิน AIS, เติมเงิน True, เติมเงิน DTAC" />
         <meta property="og:title" content="รับเติมเกม CoinZone | เว็บเติมเกมออนไลน์ ราคาถูก" />

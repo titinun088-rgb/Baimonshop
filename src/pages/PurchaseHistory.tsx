@@ -400,25 +400,12 @@ const PurchaseHistory = () => {
 
   const handleClaimProduct = async (item: HistoryItem) => {
     try {
-      if (item.type !== 'premium') {
-        toast.error("เฉพาะสินค้าประเภท Premium เท่านั้นที่สามารถเคลมได้");
-        return;
-      }
-
+      // เปิดหน้า Facebook สำหรับการเคลมสินค้าทุกประเภท
       window.open('https://www.facebook.com/share/1S5gFd4AuU/?mibextid=wwXIfr', '_blank');
-      
-      // Example of how to use the new claim API:
-      // const claimRequest: ClaimRequest = {
-      //   reference: item.refId,
-      //   status: 'wrong_password' as ClaimStatus,
-      //   description: 'รหัสผ่านไม่ถูกต้อง',
-      //   callbackUrl: 'https://your-domain.com/api/claim-callback'
-      // };
-      // const result = await claimPeamsubProduct(claimRequest);
-      // toast.success(`เคลมสินค้าสำเร็จ Ticket ID: ${result.ticketId}`);
+      toast.success("กำลังเปิดหน้าติดต่อแอดมินเพื่อเคลมสินค้า");
     } catch (error) {
-      console.error("Error claiming product:", error);
-      toast.error("ไม่สามารถเคลมสินค้าได้");
+      console.error("Error opening Facebook page:", error);
+      toast.error("ไม่สามารถเปิดหน้าเคลมสินค้าได้");
     }
   };
 
@@ -692,7 +679,6 @@ const PurchaseHistory = () => {
                             size="sm"
                             className="flex-1 text-xs"
                             onClick={() => handleClaimProduct(item)}
-                            disabled={item.status !== "success" && item.status !== "completed"}
                           >
                             <AlertTriangle className="h-3 w-3 mr-1" />
                             เคลม
@@ -767,7 +753,6 @@ const PurchaseHistory = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => handleClaimProduct(item)}
-                            disabled={item.status !== "success" && item.status !== "completed"}
                           >
                             <AlertTriangle className="h-4 w-4" />
                           </Button>
@@ -870,7 +855,7 @@ const PurchaseHistory = () => {
           setDetailsDialogOpen(false);
           setSelectedItem(null);
         }}
-        purchaseItem={selectedItem}
+        purchaseItem={selectedItem as any}
       />
 
       {/* Game Code Details Dialog */}
