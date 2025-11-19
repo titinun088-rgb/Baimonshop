@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# Force Google to re-crawl important pages
+# Use this with Google Search Console API or manually submit URLs
+
+echo "=== URLs to manually submit for re-indexing ==="
+echo "1. https://www.coin-zone.shop/"
+echo "2. https://www.coin-zone.shop/index.html"
+echo "3. https://www.coin-zone.shop/sitemap.xml"
+echo ""
+echo "=== Google Search Console Manual Steps ==="
+echo "1. Go to: https://search.google.com/search-console"
+echo "2. Select your property: coin-zone.shop"
+echo "3. Use 'URL Inspection' tool"
+echo "4. Test each URL above"
+echo "5. Click 'Request Indexing' for each URL"
+echo ""
+echo "=== Rich Results Testing ==="
+echo "1. Go to: https://search.google.com/test/rich-results"
+echo "2. Test URL: https://www.coin-zone.shop/"
+echo "3. Verify Product schemas show image fields"
+echo ""
+echo "=== Expected Schema Structure ==="
+echo "Product schemas should now include:"
+echo "- Netflix Premium: image: netflix-logo.png ✓"
+echo "- Spotify Premium: image: spotify-logo.png ✓" 
+echo "- YouTube Premium: image: youtube-logo.png ✓"
+echo ""
+echo "=== Timeline ==="
+echo "- Immediate: Rich Results Test should pass"
+echo "- 1-24 hours: Search Console may update"
+echo "- 1-7 days: Live search results may show rich snippets"
