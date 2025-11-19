@@ -334,16 +334,26 @@ export async function recordPurchaseWithSellPrice(
       type,
       peamsubId,
       reference,
-      productName,
-      productId,
-      info,
       price: apiPrice,
       sellPrice,
       status,
       date: new Date().toISOString(),
-      resellerId,
       syncedAt: new Date()
     };
+    
+    // เพิ่ม optional fields เฉพาะเมื่อมีค่า (ไม่ใส่ undefined)
+    if (productName) {
+      historyData.productName = productName;
+    }
+    if (productId) {
+      historyData.productId = productId;
+    }
+    if (info) {
+      historyData.info = info;
+    }
+    if (resellerId) {
+      historyData.resellerId = resellerId;
+    }
     
     await setDoc(historyDocRef, historyData, { merge: true });
     

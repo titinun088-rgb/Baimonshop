@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,12 +30,27 @@ import {
   PeamsubCashCardHistory,
   PeamsubUserData
 } from "@/lib/peamsubUtils";
-import { addUserPurchaseReference } from "@/lib/purchaseHistoryUtils";
+import { 
+  addUserPurchaseReference,
+  getUserPurchaseHistory,
+  convertFirestoreToAPI,
+  FirestorePurchaseHistory,
+  recordPurchaseWithSellPrice
+} from "@/lib/purchaseHistoryUtils";
+import { getProductSellPrice } from "@/lib/peamsubPriceUtils";
+import { doc, updateDoc, increment } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+
+// Extended type to include sellPrice
+type CashCardHistoryWithSellPrice = PeamsubCashCardHistory & {
+  sellPrice?: number;
+};
 
 const CashCard = () => {
+  const navigate = useNavigate();
   const { user, userData } = useAuth();
   const [products, setProducts] = useState<PeamsubCashCardProduct[]>([]);
-  const [history, setHistory] = useState<PeamsubCashCardHistory[]>([]);
+  const [history, setHistory] = useState<CashCardHistoryWithSellPrice[]>([]);
   const [userInfo, setUserInfo] = useState<PeamsubUserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [purchasing, setPurchasing] = useState(false);
@@ -43,6 +59,7 @@ const CashCard = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const [productSellPrices, setProductSellPrices] = useState<Map<number, number>>(new Map());
 
   // ตรวจสอบว่าเป็นแอดมินหรือไม่
   const isAdmin = userData?.role === 'admin';
@@ -56,15 +73,54 @@ const CashCard = () => {
 
     setLoading(true);
     try {
-      const [productsData, historyData, userInfoData] = await Promise.all([
+      // ดึงข้อมูลสินค้าและ user info
+      const [productsData, userInfoData] = await Promise.all([
         getPeamsubCashCardProducts(),
-        getPeamsubCashCardHistory(),
         getPeamsubUserInfo()
       ]);
       
       setProducts(productsData);
-      setHistory(historyData);
       setUserInfo(userInfoData);
+      
+      // โหลดราคาขายของสินค้าทั้งหมด (รวมราคาที่ admin ตั้งไว้)
+      const sellPriceMap = new Map<number, number>();
+      await Promise.all(
+        productsData.map(async (product) => {
+          const apiPrice = parseFloat(product.price) || 0;
+          const recommendedPrice = parseFloat(product.recommendedPrice) || 0;
+          const sellPrice = await getProductSellPrice(product.id, 'cashcard', apiPrice, recommendedPrice);
+          sellPriceMap.set(product.id, sellPrice);
+        })
+      );
+      setProductSellPrices(sellPriceMap);
+      
+      // ดึงประวัติจาก Firestore (เพื่อให้มี sellPrice)
+      try {
+        const firestoreHistory = await getUserPurchaseHistory(user.uid);
+        const cashCardHistory: CashCardHistoryWithSellPrice[] = [];
+        
+        firestoreHistory.forEach(history => {
+          if (history.type === 'cashcard') {
+            const converted = convertFirestoreToAPI(history) as PeamsubCashCardHistory;
+            cashCardHistory.push({
+              ...converted,
+              sellPrice: history.sellPrice // เพิ่ม sellPrice
+            });
+          }
+        });
+        
+        setHistory(cashCardHistory);
+      } catch (historyError) {
+        console.error("Error loading history from Firestore:", historyError);
+        // Fallback: ดึงจาก API ถ้า Firestore ล้มเหลว
+        try {
+          const apiHistory = await getPeamsubCashCardHistory();
+          setHistory(apiHistory.map(h => ({ ...h })));
+        } catch (apiError) {
+          console.error("Error loading history from API:", apiError);
+          toast.error("ไม่สามารถโหลดประวัติการซื้อได้");
+        }
+      }
     } catch (error) {
       console.error("Error loading cash card data:", error);
       toast.error("ไม่สามารถโหลดข้อมูลบัตรเงินสดได้");
@@ -89,9 +145,10 @@ const CashCard = () => {
     const webBalance = userData?.balance || 0;
     const userBalance = parseFloat(userInfo.balance) || 0;
     
-    // ดึงราคาขายจากราคาแนะนำหรือราคาปกติ
-    const apiPrice = parseFloat(product.price) || 0;
-    const sellPrice = parseFloat(product.recommendedPrice) || apiPrice;
+    // ดึงราคาขาย (จาก admin price หรือ recommended price หรือ API price)
+    const apiPrice = parseFloat(product.price) || 0; // ราคา API (ราคาทุน)
+    const recommendedPrice = parseFloat(product.recommendedPrice) || 0; // ราคาแนะนำ (ราคาขายเริ่มต้น)
+    const sellPrice = await getProductSellPrice(product.id, 'cashcard', apiPrice, recommendedPrice);
     
     // ตรวจสอบ balance จากฐานข้อมูลเว็บก่อน
     if (webBalance < sellPrice) {
@@ -146,6 +203,12 @@ const CashCard = () => {
       }
       
       toast.success(`ซื้อบัตรเงินสดสำเร็จ! ${result || ''}`);
+      
+      // โหลดข้อมูลใหม่
+      await loadData();
+      
+      // นำทางไปหน้าประวัติการซื้อ
+      navigate('/purchase-history');
       
     } catch (error: any) {
       console.error("Error purchasing cash card:", error);
@@ -309,7 +372,10 @@ const CashCard = () => {
       item.status === "failed" || item.status === "error"
     ).length,
     totalAmount: history.reduce((sum, item) => {
-      const amount = typeof item.price === 'string' ? parseFloat(item.price) : item.price;
+      // ใช้ sellPrice ถ้ามี ถ้าไม่มีให้ใช้ price
+      const amount = (item.sellPrice !== undefined && item.sellPrice > 0) 
+        ? item.sellPrice 
+        : (typeof item.price === 'string' ? parseFloat(item.price) : item.price);
       return sum + (isNaN(amount) ? 0 : amount);
     }, 0)
   };
@@ -486,26 +552,29 @@ const CashCard = () => {
                         <div className="space-y-2">
                           <p className="text-sm text-gray-600">เลือกราคา</p>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {group.variants.map((variant) => (
-                              <div key={variant.id} className="flex items-center justify-between gap-3 rounded border p-3">
-                                <div className="min-w-0">
-                                  <div className="text-xs text-gray-600">ราคาขาย</div>
-                                  <div className="font-semibold text-green-600 truncate">
-                                    {formatAmount(variant.recommendedPrice)} บาท
+                            {group.variants.map((variant) => {
+                              const sellPrice = productSellPrices.get(variant.id) || parseFloat(variant.recommendedPrice || variant.price || '0');
+                              return (
+                                <div key={variant.id} className="flex items-center justify-between gap-3 rounded border p-3">
+                                  <div className="min-w-0">
+                                    <div className="text-xs text-gray-600">ราคาขาย</div>
+                                    <div className="font-semibold text-green-600 truncate">
+                                      {formatAmount(sellPrice)} บาท
+                                    </div>
+                                    {isAdmin && (
+                                      <div className="text-xs text-blue-600">ต้นทุน: {formatAmount(variant.price)} บาท</div>
+                                    )}
                                   </div>
-                                  {isAdmin && (
-                                    <div className="text-xs text-blue-600">ต้นทุน: {formatAmount(variant.price)} บาท</div>
-                                  )}
+                                  <Button 
+                                    size="sm"
+                                    onClick={() => handlePurchase(variant)}
+                                    disabled={purchasing}
+                                  >
+                                    {purchasing ? "กำลังซื้อ..." : "ซื้อ"}
+                                  </Button>
                                 </div>
-                                <Button 
-                                  size="sm"
-                                  onClick={() => handlePurchase(variant)}
-                                  disabled={purchasing}
-                                >
-                                  {purchasing ? "กำลังซื้อ..." : "ซื้อ"}
-                                </Button>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         </div>
                       </div>
@@ -588,7 +657,11 @@ const CashCard = () => {
                           </div>
                         </td>
                         <td className="p-3 font-medium">{item.info || "ไม่ระบุ"}</td>
-                        <td className="p-3">{formatAmount(item.price)} บาท</td>
+                        <td className="p-3">
+                          {item.sellPrice !== undefined && item.sellPrice > 0 
+                            ? `${formatAmount(item.sellPrice)} บาท` 
+                            : `${formatAmount(item.price)} บาท`}
+                        </td>
                         <td className="p-3">{getStatusBadge(item.status)}</td>
                       </tr>
                     ))}

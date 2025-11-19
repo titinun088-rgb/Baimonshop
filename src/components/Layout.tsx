@@ -413,7 +413,7 @@ const Layout = ({ children }: LayoutProps) => {
               )}
             </div>
             <p className="text-xs text-muted-foreground truncate">
-              {user?.email || ""}
+              coinzone.shop@gmail.com
             </p>
           </div>
         </Link>
@@ -567,7 +567,7 @@ const Layout = ({ children }: LayoutProps) => {
                         {user?.displayName || "ผู้ใช้"}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {user?.email || ""}
+                        coinzone.shop@gmail.com
                       </p>
                     </div>
                   </DropdownMenuLabel>
