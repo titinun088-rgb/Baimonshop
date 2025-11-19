@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>CoinZone Logo Preview</title>
+    <style>
+        body { 
+            font-family: 'Arial', sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .logo-container {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        .logo {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            animation: pulse 2s ease-in-out infinite alternate;
+        }
+        .logo::before {
+            content: '';
+            position: absolute;
+            inset: -5px;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            border-radius: 50%;
+            z-index: -1;
+            opacity: 0.5;
+        }
+        .logo-text {
+            font-size: 48px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .brand-name {
+            font-size: 36px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 20px 0;
+        }
+        .tagline {
+            color: #666;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.05); }
+        }
+        .sizes {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        .size-demo {
+            text-align: center;
+        }
+        .size-demo .logo {
+            animation: none;
+        }
+        .size-16 { width: 16px; height: 16px; }
+        .size-32 { width: 32px; height: 32px; }
+        .size-64 { width: 64px; height: 64px; }
+        .size-demo .logo-text {
+            font-size: 8px;
+        }
+        .size-32 .logo-text { font-size: 12px; }
+        .size-64 .logo-text { font-size: 24px; }
+    </style>
+</head>
+<body>
+    <div class="logo-container">
+        <div class="logo">
+            <span class="logo-text">CZ</span>
+        </div>
+        <div class="brand-name">CoinZone</div>
+        <div class="tagline">เว็บเติมเกมออนไลน์ #1</div>
+        
+        <div class="sizes">
+            <div class="size-demo">
+                <div class="logo size-16">
+                    <span class="logo-text">CZ</span>
+                </div>
+                <small>16x16</small>
+            </div>
+            <div class="size-demo">
+                <div class="logo size-32">
+                    <span class="logo-text">CZ</span>
+                </div>
+                <small>32x32</small>
+            </div>
+            <div class="size-demo">
+                <div class="logo size-64">
+                    <span class="logo-text">CZ</span>
+                </div>
+                <small>64x64</small>
+            </div>
+        </div>
+        
+        <p style="margin-top: 30px; color: #666; font-size: 14px;">
+            Logo สำหรับ CoinZone - เว็บเติมเกมออนไลน์<br>
+            ใช้ตัวอักษร "CZ" แทน CoinZone ในรูปแบบ circular design
+        </p>
+    </div>
+</body>
+</html>

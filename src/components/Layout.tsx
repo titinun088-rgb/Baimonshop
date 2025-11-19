@@ -306,16 +306,24 @@ const Layout = ({ children }: LayoutProps) => {
   const SidebarContent = ({ onNavigate }: { onNavigate?: () => void }) => (
     <div className="flex h-full flex-col">
       {/* Logo */}
-      <div className="flex h-16 items-center border-b border-border px-6">
-        <div className="flex items-center gap-3">
-          <img 
-            src="/logo.png" 
-            alt="CoinZone Logo" 
-            className="h-10 w-10 object-contain"
-          />
-          <span className="text-xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
-            CoinZone
-          </span>
+      <div className="flex h-20 items-center border-b border-border px-6 bg-gradient-to-r from-blue-600 to-purple-600">
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <img 
+              src="/logo.png" 
+              alt="CoinZone Logo" 
+              className="h-12 w-12 object-contain drop-shadow-lg"
+            />
+            <div className="absolute -top-1 -right-1 h-4 w-4 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-2xl font-bold text-white drop-shadow-md">
+              CoinZone
+            </span>
+            <span className="text-xs text-blue-100 font-medium">
+              เว็บเติมเกม #1
+            </span>
+          </div>
         </div>
       </div>
 
@@ -449,16 +457,24 @@ const Layout = ({ children }: LayoutProps) => {
       <header className="fixed top-0 left-0 right-0 z-50 h-16 border-b border-border bg-card shadow-sm">
         <div className="h-full px-4">
           <div className="flex items-center justify-between h-full px-6">
-            {/* Logo */}
-            <Link to="/home" className="flex items-center gap-3 flex-shrink-0">
-              <img 
-                src="/logo.png" 
-                alt="CoinZone Logo" 
-                className="h-8 w-8 object-contain"
-              />
-              <span className="text-lg font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
-                CoinZone
-              </span>
+            {/* CoinZone Brand Logo */}
+            <Link to="/home" className="flex items-center gap-4 flex-shrink-0 group hover:scale-105 transition-transform duration-200">
+              <div className="relative">
+                <img 
+                  src="/logo.png" 
+                  alt="CoinZone Logo" 
+                  className="h-10 w-10 object-contain drop-shadow-lg group-hover:drop-shadow-xl transition-all duration-200"
+                />
+                <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
+                  CoinZone
+                </span>
+                <span className="text-xs text-muted-foreground font-medium -mt-1">
+                  เว็บเติมเกม #1
+                </span>
+              </div>
             </Link>
 
             {/* Navigation Menu */}
