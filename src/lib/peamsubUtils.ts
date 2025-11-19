@@ -207,6 +207,12 @@ const makeApiRequest = async <T>(
   options: RequestInit = {},
   retries: number = 2
 ): Promise<PeamsubApiResponse<T>> => {
+  // Check if API key is available
+  if (!PEAMSUB_API_KEY || PEAMSUB_API_KEY.trim() === '') {
+    console.error('❌ Peamsub API Key is missing! Please check your .env.local file and restart the dev server.');
+    throw new Error('Peamsub API Key is not configured. Please set VITE_PEAMSUB_API_KEY in .env.local and restart the dev server.');
+  }
+
   const url = `${PEAMSUB_API_BASE_URL}${endpoint}`;
   const authHeader = `Basic ${btoa(PEAMSUB_API_KEY)}`;
   
@@ -222,6 +228,15 @@ const makeApiRequest = async <T>(
       });
 
       if (!response.ok) {
+        // Special handling for 401 Unauthorized
+        if (response.status === 401) {
+          console.error('❌ Peamsub API: 401 Unauthorized');
+          console.error('   - Check if API key is correct in .env.local');
+          console.error('   - Make sure to restart dev server after changing .env.local');
+          console.error('   - Current API key length:', PEAMSUB_API_KEY.length);
+          throw new Error(`HTTP error! status: 401 (Unauthorized) - Please check your API key in .env.local`);
+        }
+        
         // Don't retry for client errors (4xx) except 429 (rate limit)
         if (response.status >= 400 && response.status < 500 && response.status !== 429) {
           throw new Error(`HTTP error! status: ${response.status}`);
