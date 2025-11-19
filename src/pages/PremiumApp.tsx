@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import Seo from '@/components/Seo';
+import { Helmet } from "react-helmet-async";
+import SchemaMarkup from "@/components/SchemaMarkup";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -715,6 +717,35 @@ const PremiumApp = () => {
 
   return (
     <Layout>
+      <Helmet>
+        <title>CoinZone แอปพรีเมียม | Netflix Spotify YouTube Premium Disney+ ราคาถูกที่สุด</title>
+        <meta name="description" content="CoinZone แอปพรีเมียม Netflix Spotify YouTube Premium Disney+ Canva Pro Adobe ราคาถูกที่สุด บริการตลอด 24 ชั่วโมง ปลอดภัย 100% ระบบอัตโนมัติ ของเข้าไว แอพพรีเมียมคุณภาพสูง" />
+        <meta name="keywords" content="CoinZone, coinzone, coin zone, coin-zone, แอปพรีเมียม CoinZone, CoinZone Netflix, CoinZone Spotify, แอปพรีเมียม, แอพพรีเมียม, Netflix, Spotify, YouTube Premium, Disney Plus, Disney+, Canva Pro, Adobe, Premium App, แอปพรีเมียมราคาถูก, Netflix ราคาถูก, Spotify ราคาถูก, YouTube Premium ราคาถูก, แอพพรีเมียมราคาถูก, แอปพรีเมียมคุณภาพ, บริการแอปพรีเมียม, ซื้อแอปพรีเมียม, ร้านแอปพรีเมียม, เว็บแอปพรีเมียม, แอปพรีเมียมออนไลน์, premium subscription, แอปพรีเมียมถูกๆ, แอปพรีเมียมสุดคุ้ม" />
+        <meta property="og:title" content="CoinZone แอปพรีเมียม | Netflix Spotify YouTube Premium Disney+ ราคาถูกที่สุด" />
+        <meta property="og:description" content="CoinZone แอปพรีเมียม Netflix Spotify YouTube Premium Disney+ Canva Pro Adobe ราคาถูกที่สุด บริการตลอด 24 ชั่วโมง ปลอดภัย 100% ระบบอัตโนมัติ ของเข้าไว" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://www.coin-zone.shop/premium-app" />
+        <meta property="og:image" content="https://www.coin-zone.shop/logo.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="CoinZone แอปพรีเมียม Netflix Spotify YouTube Premium ราคาถูก" />
+        <meta name="twitter:description" content="CoinZone แอปพรีเมียม Netflix Spotify YouTube Premium Disney+ ราคาถูกที่สุด บริการตลอด 24 ชั่วโมง ปลอดภัย 100%" />
+        <link rel="canonical" href="https://www.coin-zone.shop/premium-app" />
+      </Helmet>
+      
+      {/* Schema Markup for Premium Apps */}
+      <SchemaMarkup 
+        type="service"
+        data={{
+          name: "บริการแอปพรีเมียม CoinZone",
+          description: "บริการแอปพรีเมียม Netflix Spotify YouTube Premium Disney+ ราคาถูกที่สุด",
+          price: "59",
+          currency: "THB",
+          rating: 4.8,
+          reviewCount: 5000,
+          url: "https://www.coin-zone.shop/premium-app"
+        }}
+      />
+      
         <Seo 
           title="แอปพรีเมียม — CoinZone | Netflix Spotify YouTube Premium Disney+ ราคาถูก" 
           description="CoinZone บริการแอปพรีเมียม Netflix Spotify YouTube Premium Disney+ Canva Pro ราคาถูกที่สุด ปลอดภัย 100% บริการตลอด 24 ชั่วโมง"
