@@ -202,11 +202,59 @@ const Home = () => {
         <link rel="canonical" href="https://www.coin-zone.shop/" />
       </Helmet>
       
-      <div className="bg-gradient-to-b from-[#0f0f2d] via-[#1a0033] to-black text-white min-h-screen font-['Kanit',sans-serif] -mx-3 sm:-mx-4 lg:-mx-6 xl:-mx-8">
+      <div className="relative bg-black text-white min-h-screen font-['Kanit',sans-serif] -mx-3 sm:-mx-4 lg:-mx-6 xl:-mx-8 overflow-hidden">
+        
+        {/* Gaming Animated Background */}
+        <div className="absolute inset-0">
+          {/* Matrix Grid Background */}
+          <div className="absolute inset-0 opacity-10"
+               style={{
+                 backgroundImage: `
+                   linear-gradient(rgba(0, 255, 255, 0.3) 1px, transparent 1px),
+                   linear-gradient(90deg, rgba(0, 255, 255, 0.3) 1px, transparent 1px)
+                 `,
+                 backgroundSize: '50px 50px',
+                 animation: 'gridMove 20s linear infinite'
+               }}
+          />
+          
+          {/* Floating Particles */}
+          <div className="absolute inset-0">
+            {[...Array(12)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute w-1 h-1 bg-cyan-400 rounded-full opacity-60"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                  animation: `particleFloat ${3 + Math.random() * 4}s ease-in-out infinite ${Math.random() * 2}s`,
+                  boxShadow: '0 0 8px currentColor'
+                }}
+              />
+            ))}
+          </div>
+          
+          {/* Energy Waves */}
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" 
+                 style={{animation: 'scanlineV 4s linear infinite'}} />
+            <div className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent" 
+                 style={{animation: 'scanlineV 6s linear infinite 2s'}} />
+            <div className="absolute h-full w-0.5 bg-gradient-to-b from-transparent via-blue-500/30 to-transparent" 
+                 style={{animation: 'scanlineH 8s linear infinite 1s'}} />
+          </div>
+          
+          {/* Corner Glows */}
+          <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-radial from-purple-600/30 via-purple-600/10 to-transparent blur-3xl animate-pulse" />
+          <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-radial from-blue-600/30 via-blue-600/10 to-transparent blur-3xl animate-pulse" style={{animationDelay: '2s'}} />
+          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-96 h-96 bg-gradient-radial from-cyan-600/30 via-cyan-600/10 to-transparent blur-3xl animate-pulse" style={{animationDelay: '4s'}} />
+        </div>
+        
+
         
         {/* Hero Section */}
         <div className="relative overflow-hidden">
-          {/* Animated Background */}
+          {/* Additional Hero Effects */}
           <div className="absolute inset-0">
             <div className="absolute w-96 h-96 bg-purple-500/20 rounded-full blur-3xl -top-48 -left-48 animate-pulse"></div>
             <div className="absolute w-96 h-96 bg-blue-500/20 rounded-full blur-3xl -top-48 -right-48 animate-pulse delay-1000"></div>

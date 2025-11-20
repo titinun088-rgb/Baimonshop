@@ -452,10 +452,96 @@ const Layout = ({ children }: LayoutProps) => {
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Gaming Background Effects */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        {/* Subtle Grid */}
+        <div 
+          className="absolute inset-0 opacity-5"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(147, 197, 253, 0.1) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(147, 197, 253, 0.1) 1px, transparent 1px)
+            `,
+            backgroundSize: '40px 40px',
+            animation: 'gridMove 25s linear infinite'
+          }}
+        />
+        
+        {/* Floating Particles */}
+        {[...Array(8)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-blue-400/40 rounded-full gaming-particle"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 3}s`,
+              animationDuration: `${4 + Math.random() * 2}s`
+            }}
+          />
+        ))}
+        
+        {/* Corner Glows */}
+        <div className="absolute top-0 left-0 w-64 h-64 bg-gradient-radial from-blue-500/10 to-transparent blur-3xl animate-pulse" />
+        <div className="absolute bottom-0 right-0 w-64 h-64 bg-gradient-radial from-purple-500/10 to-transparent blur-3xl animate-pulse" style={{animationDelay: '2s'}} />
+      </div>
       {/* Desktop Top Navbar */}
-      <header className="fixed top-0 left-0 right-0 z-50 h-16 border-b border-border bg-card shadow-sm">
-        <div className="h-full px-4">
+      <header className="fixed top-0 left-0 right-0 z-50 h-16 border-b border-border/20 bg-transparent backdrop-blur-md shadow-sm overflow-hidden">
+        {/* Animated Background */}
+        <div className="absolute inset-0 -z-10">
+          {/* Transparent Gradient Background */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/5 via-black/10 to-black/5 dark:from-white/5 dark:via-white/10 dark:to-white/5"></div>
+          
+          {/* Moving Grid Pattern */}
+          <div 
+            className="absolute inset-0 opacity-[0.08] dark:opacity-[0.15]"
+            style={{
+              backgroundImage: `
+                linear-gradient(rgba(59, 130, 246, 0.8) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.8) 1px, transparent 1px)
+              `,
+              backgroundSize: '20px 20px',
+              animation: 'gridMove 15s linear infinite'
+            }}
+          />
+          
+          {/* Floating Particles */}
+          {[...Array(8)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-1 h-1 bg-blue-400/60 rounded-full"
+              style={{
+                left: `${10 + (i * 12)}%`,
+                top: `${30 + Math.sin(i) * 20}%`,
+                animation: `particleFloat ${4 + Math.random() * 2}s ease-in-out infinite ${Math.random() * 2}s`,
+                boxShadow: '0 0 6px currentColor'
+              }}
+            />
+          ))}
+          
+          {/* Subtle Scanlines */}
+          <div 
+            className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-blue-400/40 to-transparent" 
+            style={{
+              top: '25%',
+              animation: 'scanlineV 6s linear infinite'
+            }} 
+          />
+          <div 
+            className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-purple-400/30 to-transparent" 
+            style={{
+              top: '75%',
+              animation: 'scanlineV 8s linear infinite 2s'
+            }} 
+          />
+          
+          {/* Corner Glow Effects */}
+          <div className="absolute top-0 left-0 w-32 h-full bg-gradient-to-r from-blue-500/10 to-transparent blur-xl"></div>
+          <div className="absolute top-0 right-0 w-32 h-full bg-gradient-to-l from-purple-500/10 to-transparent blur-xl"></div>
+        </div>
+        
+        <div className="h-full px-4 relative z-10">
           <div className="flex items-center justify-between h-full px-6">
             {/* CoinZone Brand Logo */}
             <Link to="/home" className="flex items-center gap-4 flex-shrink-0 group hover:scale-105 transition-transform duration-200">
@@ -622,8 +708,54 @@ const Layout = ({ children }: LayoutProps) => {
       </header>
 
       {/* Mobile Header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 h-16 border-b border-border bg-card shadow-sm">
-        <div className="flex items-center justify-between h-full px-4">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 h-16 border-b border-border/20 bg-transparent backdrop-blur-md shadow-sm overflow-hidden">
+        {/* Animated Background for Mobile */}
+        <div className="absolute inset-0 -z-10">
+          {/* Transparent Gradient Background */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/5 via-black/10 to-black/5 dark:from-white/5 dark:via-white/10 dark:to-white/5"></div>
+          
+          {/* Moving Grid Pattern */}
+          <div 
+            className="absolute inset-0 opacity-[0.08] dark:opacity-[0.15]"
+            style={{
+              backgroundImage: `
+                linear-gradient(rgba(59, 130, 246, 0.8) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.8) 1px, transparent 1px)
+              `,
+              backgroundSize: '15px 15px',
+              animation: 'gridMove 12s linear infinite'
+            }}
+          />
+          
+          {/* Floating Particles - Less for mobile */}
+          {[...Array(4)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-1 h-1 bg-blue-400/60 rounded-full"
+              style={{
+                left: `${20 + (i * 20)}%`,
+                top: `${40 + Math.sin(i) * 20}%`,
+                animation: `particleFloat ${3 + Math.random() * 2}s ease-in-out infinite ${Math.random() * 2}s`,
+                boxShadow: '0 0 5px currentColor'
+              }}
+            />
+          ))}
+          
+          {/* Subtle Scanline */}
+          <div 
+            className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-purple-400/30 to-transparent" 
+            style={{
+              top: '60%',
+              animation: 'scanlineV 5s linear infinite'
+            }} 
+          />
+          
+          {/* Corner Glow Effects */}
+          <div className="absolute top-0 left-0 w-24 h-full bg-gradient-to-r from-blue-500/10 to-transparent blur-lg"></div>
+          <div className="absolute top-0 right-0 w-24 h-full bg-gradient-to-l from-purple-500/10 to-transparent blur-lg"></div>
+        </div>
+        
+        <div className="flex items-center justify-between h-full px-4 relative z-10">
           {/* Logo */}
           <Link to="/home" className="flex items-center gap-2">
             <img 

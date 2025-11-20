@@ -108,6 +108,12 @@ All colors MUST be HSL.
   }
 }
 
+@layer utilities {
+  .bg-gradient-radial {
+    background: radial-gradient(circle, var(--tw-gradient-stops));
+  }
+}
+
 /* Mobile-friendly utilities */
 @layer utilities {
   .table-container {
@@ -134,6 +140,141 @@ All colors MUST be HSL.
     
     .table-compact .hide-mobile {
       @apply hidden;
+    }
+  }
+
+  /* Gaming Background Animations */
+  @keyframes gridMove {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(50px, 50px); }
+  }
+
+  @keyframes particleFloat {
+    0%, 100% { 
+      transform: translateY(0px) scale(1); 
+      opacity: 0.6; 
+    }
+    25% { 
+      transform: translateY(-10px) scale(1.05); 
+      opacity: 0.8; 
+    }
+    50% { 
+      transform: translateY(-30px) scale(1.2); 
+      opacity: 1; 
+    }
+    75% { 
+      transform: translateY(-20px) scale(1.1); 
+      opacity: 0.9; 
+    }
+  }
+
+  @keyframes scanlineV {
+    0% { 
+      top: -2px; 
+      opacity: 1; 
+      filter: blur(0px);
+    }
+    25% { 
+      opacity: 0.8; 
+      filter: blur(1px);
+    }
+    50% { 
+      opacity: 0.6; 
+      filter: blur(0px);
+    }
+    75% { 
+      opacity: 0.4; 
+      filter: blur(1px);
+    }
+    100% { 
+      top: 100%; 
+      opacity: 0; 
+      filter: blur(2px);
+    }
+  }
+
+  @keyframes scanlineH {
+    0% { 
+      left: -2px; 
+      opacity: 1; 
+      filter: blur(0px);
+    }
+    25% { 
+      opacity: 0.8; 
+      filter: blur(1px);
+    }
+    50% { 
+      opacity: 0.6; 
+      filter: blur(0px);
+    }
+    75% { 
+      opacity: 0.4; 
+      filter: blur(1px);
+    }
+    100% { 
+      left: 100%; 
+      opacity: 0; 
+      filter: blur(2px);
+    }
+  }
+
+  @keyframes energyPulse {
+    0%, 100% { 
+      transform: scale(1); 
+      opacity: 0.3; 
+    }
+    50% { 
+      transform: scale(1.1); 
+      opacity: 0.7; 
+    }
+  }
+
+  @keyframes neonGlow {
+    0%, 100% { 
+      filter: drop-shadow(0 0 5px currentColor); 
+    }
+    50% { 
+      filter: drop-shadow(0 0 15px currentColor) drop-shadow(0 0 25px currentColor); 
+    }
+  }
+
+  /* Gaming Effects */
+  .gaming-particle {
+    animation: particleFloat 4s ease-in-out infinite;
+    filter: drop-shadow(0 0 6px currentColor);
+  }
+
+  .gaming-scanline {
+    animation: scanlineV 3s linear infinite;
+    box-shadow: 0 0 10px currentColor;
+  }
+
+  .gaming-scanline-h {
+    animation: scanlineH 8s linear infinite;
+    box-shadow: 0 0 10px currentColor;
+  }
+
+  .gaming-glow {
+    animation: neonGlow 2s ease-in-out infinite alternate;
+  }
+
+  .grid-move {
+    animation: gridMove 20s linear infinite;
+  }
+
+  .particle-float {
+    animation: particleFloat 4s ease-in-out infinite;
+    filter: drop-shadow(0 0 8px currentColor);
+  }
+
+  /* Responsive Gaming Effects */
+  @media (max-width: 768px) {
+    .gaming-particle {
+      animation-duration: 5s;
+    }
+    
+    .gaming-scanline {
+      animation-duration: 4s;
     }
   }
 }

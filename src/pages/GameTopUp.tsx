@@ -363,7 +363,44 @@ const GameTopUp = () => {
         }}
       />
       
-        <div className="bg-gradient-to-b from-[#0f0f2d] to-[#1a0033] text-white min-h-screen font-['Kanit',sans-serif] -mx-3 sm:-mx-4 lg:-mx-6 xl:-mx-8">
+        <div className="relative bg-gradient-to-b from-[#0f0f2d] to-[#1a0033] text-white min-h-screen font-['Kanit',sans-serif] -mx-3 sm:-mx-4 lg:-mx-6 xl:-mx-8 overflow-hidden">
+          {/* Gaming Background Effects */}
+          <div className="absolute inset-0 pointer-events-none">
+            {/* Circuit Pattern */}
+            <div 
+              className="absolute inset-0 opacity-5"
+              style={{
+                backgroundImage: `
+                  linear-gradient(rgba(139, 92, 246, 0.3) 1px, transparent 1px),
+                  linear-gradient(90deg, rgba(139, 92, 246, 0.3) 1px, transparent 1px)
+                `,
+                backgroundSize: '30px 30px',
+                animation: 'gridMove 30s linear infinite'
+              }}
+            />
+            
+            {/* Gaming Particles */}
+            {[...Array(10)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute w-1 h-1 bg-purple-400/60 rounded-full gaming-particle"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                  animationDelay: `${Math.random() * 4}s`,
+                  animationDuration: `${3 + Math.random() * 3}s`
+                }}
+              />
+            ))}
+            
+            {/* Energy Waves */}
+            <div className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-purple-500/40 to-transparent gaming-scanline" />
+            <div className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-blue-500/30 to-transparent gaming-scanline" style={{animationDelay: '2s', animationDuration: '5s'}} />
+            
+            {/* Corner Effects */}
+            <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-radial from-purple-600/20 to-transparent blur-3xl animate-pulse" />
+            <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-radial from-blue-600/20 to-transparent blur-3xl animate-pulse" style={{animationDelay: '3s'}} />
+          </div>
           {/* Header */}
           <header className="bg-black/20 backdrop-blur-sm border-b border-purple-500/30 p-4 sm:p-6">
             <div className="flex flex-col gap-4">
