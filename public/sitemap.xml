@@ -22,21 +22,29 @@
   </url>
   
   <url>
-    <loc>https://www.coin-zone.shop/รับเติมเกม.html</loc>
-    <lastmod>2025-11-21</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.95</priority>
-  </url>
-  
-  <url>
     <loc>https://www.coin-zone.shop/รับเติมเกม-seo.html</loc>
     <lastmod>2025-11-21</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.95</priority>
   </url>
   
+  <!-- Game-Specific SEO Landing Pages - High Priority -->
   <url>
-    <loc>https://www.coin-zone.shop/แอปพรีเมียม.html</loc>
+    <loc>https://www.coin-zone.shop/เติม-rov.html</loc>
+    <lastmod>2025-11-21</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.95</priority>
+  </url>
+  
+  <url>
+    <loc>https://www.coin-zone.shop/เติม-robux.html</loc>
+    <lastmod>2025-11-21</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.95</priority>
+  </url>
+  
+  <url>
+    <loc>https://www.coin-zone.shop/เติม-valorant.html</loc>
     <lastmod>2025-11-21</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
