@@ -4,10 +4,10 @@ import { Helmet } from "react-helmet-async";
 import Layout from "@/components/Layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { 
-  CreditCard, 
-  Gamepad2, 
-  Smartphone, 
+import {
+  CreditCard,
+  Gamepad2,
+  Smartphone,
   ArrowRight,
   Loader2,
   Package,
@@ -130,7 +130,7 @@ const Home = () => {
       else if (categoryLower.includes('arena')) simpleName = 'Arena of Valor';
       else if (categoryLower.includes('clash')) simpleName = 'Clash of Clans';
       else if (categoryLower.includes('subway')) simpleName = 'Subway Surfers';
-      
+
       // ถ้ายังไม่เคยเพิ่ม category นี้
       if (!seenCategories.has(simpleName)) {
         uniqueGames.push({
@@ -177,7 +177,7 @@ const Home = () => {
   return (
     <Layout>
       <Helmet>
-        <title>🎮 CoinZone เว็บเติมเกม รับเติมเกมออนไลน์ราคาถูก เติม ROV Free Fire PUBG</title>
+        <title>CoinZone เว็บเติมเกม รับเติมเกมออนไลน์ราคาถูก เติม ROV Free Fire PUBG</title>
         <meta name="description" content="CoinZone เว็บเติมเกมออนไลน์อันดับ 1 รับเติมเกมราคาถูกที่สุด เติมเกม ROV Free Fire PUBG Mobile Legends Valorant Roblox Robux Genshin Impact Apex Fortnite แอพพรีเมียม Netflix Spotify บัตรเงินสด Steam เติมเงินมือถือ AIS True DTAC ร้านเติมเกมออนไลน์ ระบบอัตโนมัติ รวดเร็ว ปลอดภัย 100% บริการ 24 ชั่วโมง" />
         <meta name="keywords" content="CoinZone, coinzone, coin zone, coin-zone, เว็บเติมเกม CoinZone, CoinZone เติมเกม, CoinZone ราคาถูก, เติมเกม, เว็บเติมเกม, รับเติมเกม, เติมเกมราคาถูก, เติมเกมออนไลน์, เว็บเติมเกมออนไลน์, ร้านเติมเกม, เติม ROV, เติม Free Fire, เติม PUBG, เติม Mobile Legends, เติมเพชร Free Fire, เติมเงิน ROV, แอพพรีเมียม, Netflix, Spotify, YouTube Premium, บัตรเงินสด, Steam, Garena, เติมเงินมือถือ, AIS, True, DTAC, TrueMoney, เว็บเติมเกมราคาถูก, เติมเกมถูกๆ, เติม rov ถูก, เติม valorant, เติม robux, valorant shop, roblox shop, เติม genshin, ซื้อ robux, robux shop, เติม apex, เติม fortnite, เติม roblox, เติม pubg, mobile legends เติม, fortnite เติม, เติม mlbb, เติมเกมถูกที่สุด, เติมเกมออนไลน์ราคาถูก, topup game, game topup, เติม, เติมเกมสุดคุ้ม" />
         <meta property="og:title" content="CoinZone เว็บเติมเกม รับเติมเกมออนไลน์ราคาถูก เติม ROV Free Fire PUBG" />
@@ -201,23 +201,23 @@ const Home = () => {
         <meta name="twitter:description" content="รับเติมเกม CoinZone เว็บเติมเกมออนไลน์ เติมเกม ROV Free Fire PUBG รวดเร็ว ปลอดภัย ราคาถูก 24 ชม." />
         <link rel="canonical" href="https://www.coin-zone.shop/" />
       </Helmet>
-      
+
       <div className="relative bg-black text-white min-h-screen font-['Kanit',sans-serif] -mx-3 sm:-mx-4 lg:-mx-6 xl:-mx-8 overflow-hidden">
-        
+
         {/* Gaming Animated Background */}
         <div className="absolute inset-0">
           {/* Matrix Grid Background */}
           <div className="absolute inset-0 opacity-10"
-               style={{
-                 backgroundImage: `
+            style={{
+              backgroundImage: `
                    linear-gradient(rgba(0, 255, 255, 0.3) 1px, transparent 1px),
                    linear-gradient(90deg, rgba(0, 255, 255, 0.3) 1px, transparent 1px)
                  `,
-                 backgroundSize: '50px 50px',
-                 animation: 'gridMove 20s linear infinite'
-               }}
+              backgroundSize: '50px 50px',
+              animation: 'gridMove 20s linear infinite'
+            }}
           />
-          
+
           {/* Floating Particles */}
           <div className="absolute inset-0">
             {[...Array(12)].map((_, i) => (
@@ -233,25 +233,25 @@ const Home = () => {
               />
             ))}
           </div>
-          
+
           {/* Energy Waves */}
           <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" 
-                 style={{animation: 'scanlineV 4s linear infinite'}} />
-            <div className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent" 
-                 style={{animation: 'scanlineV 6s linear infinite 2s'}} />
-            <div className="absolute h-full w-0.5 bg-gradient-to-b from-transparent via-blue-500/30 to-transparent" 
-                 style={{animation: 'scanlineH 8s linear infinite 1s'}} />
+            <div className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-purple-500/50 to-transparent"
+              style={{ animation: 'scanlineV 4s linear infinite' }} />
+            <div className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent"
+              style={{ animation: 'scanlineV 6s linear infinite 2s' }} />
+            <div className="absolute h-full w-0.5 bg-gradient-to-b from-transparent via-blue-500/30 to-transparent"
+              style={{ animation: 'scanlineH 8s linear infinite 1s' }} />
           </div>
-          
+
           {/* Corner Glows */}
           <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-radial from-purple-600/30 via-purple-600/10 to-transparent blur-3xl animate-pulse" />
-          <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-radial from-blue-600/30 via-blue-600/10 to-transparent blur-3xl animate-pulse" style={{animationDelay: '2s'}} />
-          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-96 h-96 bg-gradient-radial from-cyan-600/30 via-cyan-600/10 to-transparent blur-3xl animate-pulse" style={{animationDelay: '4s'}} />
+          <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-radial from-blue-600/30 via-blue-600/10 to-transparent blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-96 h-96 bg-gradient-radial from-cyan-600/30 via-cyan-600/10 to-transparent blur-3xl animate-pulse" style={{ animationDelay: '4s' }} />
         </div>
-        
 
-        
+
+
         {/* Hero Section */}
         <div className="relative overflow-hidden">
           {/* Additional Hero Effects */}
@@ -267,9 +267,9 @@ const Home = () => {
               <div className="flex justify-center mb-6">
                 <div className="relative">
                   <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full blur-xl opacity-50 animate-pulse"></div>
-                  <img 
-                    src="/logo.png" 
-                    alt="CoinZone Logo - รับเติมเกม เว็บเติมเกมออนไลน์" 
+                  <img
+                    src="/logo.png"
+                    alt="CoinZone Logo - รับเติมเกม เว็บเติมเกมออนไลน์"
                     className="relative h-20 w-20 rounded-full border-4 border-purple-500/30"
                   />
                 </div>
@@ -291,8 +291,8 @@ const Home = () => {
               </h2>
 
               <p className="text-base sm:text-lg text-gray-400 max-w-4xl mx-auto mb-8 leading-relaxed px-4">
-                <strong className="text-purple-300">รับเติมเกมออนไลน์</strong> แอปพรีเมียม บัตรเงินสด เติมเงินมือถือ 
-                Netflix Spotify YouTube Premium Steam Garena AIS True DTAC 
+                <strong className="text-purple-300">รับเติมเกมออนไลน์</strong> แอปพรีเมียม บัตรเงินสด เติมเงินมือถือ
+                Netflix Spotify YouTube Premium Steam Garena AIS True DTAC
                 <span className="text-cyan-300"> เว็ปเติมเกมที่ดีที่สุด</span> ราคาถูก รวดเร็วทันใจ ปลอดภัย 100% ระบบอัตโนมัติ เงินเข้าไว บริการตลอด 24 ชั่วโมง
               </p>
 
@@ -338,7 +338,7 @@ const Home = () => {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
-          
+
           {/* Services Grid */}
           <section>
             <div className="text-center mb-12">
@@ -347,7 +347,7 @@ const Home = () => {
               </h2>
               <p className="text-gray-400">เลือกบริการที่คุณต้องการ รองรับทุกความต้องการ</p>
             </div>
-            
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {menuItems.map((item) => {
                 const Icon = item.icon;
@@ -370,10 +370,10 @@ const Home = () => {
                           }}
                         />
                       </div>
-                      
+
                       {/* Gradient Overlay */}
                       <div className={`absolute inset-0 bg-gradient-to-br ${item.gradient} opacity-80 group-hover:opacity-90 transition-opacity`} />
-                      
+
                       {/* Content */}
                       <CardContent className="relative h-full flex flex-col items-center justify-center p-6 text-white">
                         <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
@@ -567,7 +567,7 @@ const Home = () => {
           {/* CTA Section */}
           <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-purple-600 to-blue-600 p-12 text-center">
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yLjIxIDEuNzktNCA0LTRzNCAxLjc5IDQgNC0xLjc5IDQtNCA0LTQtMS43OS00LTR6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-20"></div>
-            
+
             <div className="relative">
               <Sparkles className="w-16 h-16 mx-auto mb-6 text-white" />
               <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
