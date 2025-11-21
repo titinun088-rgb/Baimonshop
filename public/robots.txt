@@ -1,35 +1,68 @@
-User-agent: Googlebot
-Allow: /
-Crawl-delay: 1
-
-User-agent: Bingbot  
-Allow: /
-Crawl-delay: 1
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
 User-agent: *
 Allow: /
-Crawl-delay: 2
 
-# High priority keywords for crawling
-# CoinZone coinzone รับเติมเกม เว็ปเติมเกม แอปพรีเมียม บัตรเติมเกม เติมเกมราคาถูก
-
-# Sitemap
+# Sitemap location
 Sitemap: https://www.coin-zone.shop/sitemap.xml
 
-# Block admin-only areas from crawlers
-# These routes are backend/admin interfaces and should not be indexed
+# High-priority pages for crawling
+# หน้าหลัก
+Allow: /
+Allow: /index.html
+
+# หน้าบริการหลัก
+Allow: /game-topup
+Allow: /premium-app
+Allow: /card-topup
+Allow: /cash-card
+Allow: /top-up
+
+# SEO Landing Pages
+Allow: /รับเติมเกม.html
+Allow: /แอปพรีเมียม.html
+
+# หน้า Authentication
+Allow: /login
+Allow: /register
+
+# Block admin and private pages
 Disallow: /dashboard
 Disallow: /users
 Disallow: /activity
 Disallow: /reports
+Disallow: /sales
 Disallow: /peamsub-api
 Disallow: /qr-code-manager
 Disallow: /category-management
 Disallow: /peamsub-price-management
-Disallow: /sales
+Disallow: /game-code-management
+
+# Block user-specific pages
+Disallow: /profile
+Disallow: /account-info
+Disallow: /purchase-history
+Disallow: /top-up-history
+Disallow: /slip-history
+Disallow: /notifications
+Disallow: /my-reports
+
+# Block verification pages
+Disallow: /verify-email
+Disallow: /not-verified
+Disallow: /suspended
+Disallow: /forgot-password
+
+# Crawl delay
+Crawl-delay: 1
+
+# Special instructions for major search engines
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Slurp
+Allow: /
+Crawl-delay: 1

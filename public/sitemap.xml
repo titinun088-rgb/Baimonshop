@@ -1,129 +1,131 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <!-- หน้าหลัก -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <!-- หน้าหลัก - สำคัญที่สุด -->
   <url>
     <loc>https://www.coin-zone.shop/</loc>
-    <lastmod>2025-11-20</lastmod>
+    <lastmod>2025-11-21</lastmod>
     <changefreq>hourly</changefreq>
     <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://www.coin-zone.shop/logo.png</image:loc>
+      <image:title>CoinZone - รับเติมเกม เว็บเติมเกมออนไลน์</image:title>
+      <image:caption>CoinZone เว็บเติมเกมออนไลน์อันดับ 1 ราคาถูก รวดเร็ว ปลอดภัย</image:caption>
+    </image:image>
   </url>
   
-  <!-- หน้า Landing -->
+  <!-- SEO Landing Pages - สำคัญมาก -->
   <url>
-    <loc>https://www.coin-zone.shop/landing</loc>
-    <lastmod>2025-11-19</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  
-  <!-- หน้าเติมเกม -->
-  <url>
-    <loc>https://www.coin-zone.shop/game-topup</loc>
-    <lastmod>2025-11-19</lastmod>
+    <loc>https://www.coin-zone.shop/coinzone.html</loc>
+    <lastmod>2025-11-21</lastmod>
     <changefreq>daily</changefreq>
-    <priority>0.9</priority>
+    <priority>0.95</priority>
   </url>
   
-  <!-- หน้าแอพพรีเมียม -->
-  <url>
-    <loc>https://www.coin-zone.shop/premium-app</loc>
-    <lastmod>2025-11-19</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  
-  <!-- หน้าบัตรเติมเงิน -->
-  <url>
-    <loc>https://www.coin-zone.shop/card-topup</loc>
-    <lastmod>2025-11-19</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  
-  <!-- หน้าบัตรเงินสด -->
-  <url>
-    <loc>https://www.coin-zone.shop/cash-card</loc>
-    <lastmod>2025-11-19</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  
-  <!-- หน้ารหัสเกม -->
-  <url>
-    <loc>https://www.coin-zone.shop/game-codes</loc>
-    <lastmod>2025-11-19</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  
-  <!-- หน้าประวัติการซื้อสินค้า -->
-  <url>
-    <loc>https://www.coin-zone.shop/purchase-history</loc>
-    <lastmod>2025-11-19</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  
-  <!-- หน้าเติมเงิน -->
-  <url>
-    <loc>https://www.coin-zone.shop/top-up</loc>
-    <lastmod>2025-11-19</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  
-  <!-- หน้าข้อมูลบัญชี -->
-  <url>
-    <loc>https://www.coin-zone.shop/account-info</loc>
-    <lastmod>2025-11-19</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <!-- หน้าโปรไฟล์ -->
-  <url>
-    <loc>https://www.coin-zone.shop/profile</loc>
-    <lastmod>2025-11-19</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <!-- หน้าแจ้งเตือน -->
-  <url>
-    <loc>https://www.coin-zone.shop/notifications</loc>
-    <lastmod>2025-11-19</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <!-- หน้าแจ้งปัญหา -->
-  <url>
-    <loc>https://www.coin-zone.shop/my-reports</loc>
-    <lastmod>2025-11-19</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <!-- หน้า Login -->
-  <url>
-    <loc>https://www.coin-zone.shop/login</loc>
-    <lastmod>2025-11-19</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.4</priority>
-  </url>
-  
-  <!-- SEO Landing Pages -->
   <url>
     <loc>https://www.coin-zone.shop/รับเติมเกม.html</loc>
-    <lastmod>2025-11-20</lastmod>
+    <lastmod>2025-11-21</lastmod>
     <changefreq>daily</changefreq>
-    <priority>0.9</priority>
+    <priority>0.95</priority>
+  </url>
+  
+  <url>
+    <loc>https://www.coin-zone.shop/รับเติมเกม-seo.html</loc>
+    <lastmod>2025-11-21</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.95</priority>
   </url>
   
   <url>
     <loc>https://www.coin-zone.shop/แอปพรีเมียม.html</loc>
-    <lastmod>2025-11-20</lastmod>
+    <lastmod>2025-11-21</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
+  </url>
+  
+  <!-- หน้าบริการหลัก -->
+  <url>
+    <loc>https://www.coin-zone.shop/game-topup</loc>
+    <lastmod>2025-11-21</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  
+  <url>
+    <loc>https://www.coin-zone.shop/premium-app</loc>
+    <lastmod>2025-11-21</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
+  
+  <url>
+    <loc>https://www.coin-zone.shop/card-topup</loc>
+    <lastmod>2025-11-21</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
+  
+  <url>
+    <loc>https://www.coin-zone.shop/cash-card</loc>
+    <lastmod>2025-11-21</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
+  
+  <url>
+    <loc>https://www.coin-zone.shop/top-up</loc>
+    <lastmod>2025-11-21</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://www.coin-zone.shop/game-codes</loc>
+    <lastmod>2025-11-21</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- หน้าผู้ใช้ -->
+  <url>
+    <loc>https://www.coin-zone.shop/purchase-history</loc>
+    <lastmod>2025-11-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://www.coin-zone.shop/account-info</loc>
+    <lastmod>2025-11-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://www.coin-zone.shop/profile</loc>
+    <lastmod>2025-11-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <!-- หน้า Authentication -->
+  <url>
+    <loc>https://www.coin-zone.shop/login</loc>
+    <lastmod>2025-11-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://www.coin-zone.shop/register</loc>
+    <lastmod>2025-11-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://www.coin-zone.shop/terms</loc>
+    <lastmod>2025-11-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
   </url>
 </urlset>

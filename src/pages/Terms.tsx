@@ -45,7 +45,8 @@ const Terms = () => {
                 <div>
                   <h2 className="text-xl font-semibold mb-2">คำนำ</h2>
                   <p className="text-muted-foreground leading-relaxed">
-                    ยินดีต้อนรับสู่ Game Nexus Dashboard ซึ่งเป็นระบบจัดการผู้ใช้เกมออนไลน์
+                    ยินดีต้อนรับสู่ <strong>CoinZone</strong> เว็บเติมเกมออนไลน์อันดับ 1 ของประเทศไทย 
+                    ที่ให้บริการเติมเกมออนไลน์ แอปพรีเมียม บัตรเติมเงิน และบริการดิจิทัลต่างๆ 
                     การใช้บริการของเราแสดงว่าคุณยอมรับข้อกำหนดและเงื่อนไขเหล่านี้ 
                     กรุณาอ่านอย่างละเอียดก่อนใช้งาน
                   </p>
@@ -108,12 +109,15 @@ const Terms = () => {
                 3. การใช้งานที่อนุญาตและข้อจำกัด
               </h2>
               <div className="space-y-2 text-muted-foreground">
-                <p className="font-medium text-foreground">อนุญาตให้ใช้งาน:</p>
+                <p className="font-medium text-foreground">บริการที่ CoinZone ให้บริการ:</p>
                 <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>จัดการข้อมูลเกมและรายการเติมเงิน</li>
-                  <li>บันทึกและติดตามยอดขาย</li>
-                  <li>ดูรายงานและสถิติการขาย</li>
-                  <li>จัดการข้อมูลลูกค้าและการแจ้งเตือน</li>
+                  <li><strong>เติมเกมออนไลน์:</strong> ROV, Free Fire, PUBG Mobile, Mobile Legends, Genshin Impact, Valorant, Roblox, Fortnite</li>
+                  <li><strong>แอปพรีเมียม:</strong> Netflix, Spotify, YouTube Premium, Disney+, Canva Pro</li>
+                  <li><strong>บัตรเติมเงิน:</strong> Steam, PlayStation, Xbox, Nintendo, Garena, True Money</li>
+                  <li><strong>เติมเงินมือถือ:</strong> AIS, True, DTAC, NT</li>
+                  <li><strong>บริการดิจิทัล:</strong> ระบบ Wallet, การชำระเงินออนไลน์, ระบบอัตโนมัติ</li>
+                  <li>การจัดการบัญชีผู้ใช้และประวัติการทำรายการ</li>
+                  <li>ระบบรายงานและสถิติการใช้งาน</li>
                 </ul>
 
                 <p className="font-medium text-foreground mt-4">ห้ามใช้งาน:</p>
@@ -129,64 +133,104 @@ const Terms = () => {
 
             <Separator />
 
-            {/* 4. ข้อมูลส่วนบุคคล */}
+            {/* 4. การชำระเงินและการคืนเงิน */}
+            <section>
+              <h2 className="text-xl font-semibold mb-3">4. การชำระเงินและนโยบายการคืนเงิน</h2>
+              <div className="space-y-2 text-muted-foreground">
+                <p className="font-medium text-foreground">ช่องทางการชำระเงิน:</p>
+                <ul className="list-disc list-inside space-y-1 ml-4">
+                  <li>PromptPay QR Code (ธนาคารทุกธนาคาร)</li>
+                  <li>True Money Wallet</li>
+                  <li>บัตรเครดิต/เดบิต</li>
+                  <li>การโอนเงินธนาคาร</li>
+                  <li>ระบบ Wallet ภายในเว็บไซต์</li>
+                </ul>
+                
+                <p className="font-medium text-foreground mt-4">นโยบายการคืนเงิน:</p>
+                <ul className="list-disc list-inside space-y-1 ml-4">
+                  <li>สินค้าดิจิทัลไม่สามารถคืนเงินได้หลังจากส่งมอบแล้ว</li>
+                  <li>หากเกิดข้อผิดพลาดจากระบบ เราจะดำเนินการแก้ไขภายใน 24 ชั่วโมง</li>
+                  <li>กรณีสินค้าไม่ถูกต้อง สามารถขอเปลี่ยนได้ภายใน 7 วัน</li>
+                  <li>การคืนเงินจะดำเนินการภายใน 3-7 วันทำการ</li>
+                </ul>
+              </div>
+            </section>
+
+            <Separator />
+
+            {/* 5. ข้อมูลส่วนบุคคล */}
             <section>
               <h2 className="text-xl font-semibold mb-3 flex items-center gap-2">
                 <Database className="h-5 w-5 text-primary" />
-                4. ข้อมูลส่วนบุคคลและความเป็นส่วนตัว
+                5. ข้อมูลส่วนบุคคลและความเป็นส่วนตัว
               </h2>
               <div className="space-y-2 text-muted-foreground">
-                <p>เรารวบรวมและใช้ข้อมูลของคุณตามที่ระบุในนโยบายความเป็นส่วนตัว:</p>
+                <p>เรารวบรวมและใช้ข้อมูลของคุณตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562:</p>
                 <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>ข้อมูลที่เก็บ: อีเมล, ชื่อร้าน, ข้อมูลการขาย</li>
-                  <li>วัตถุประสงค์: ให้บริการ, ปรับปรุงระบบ, สื่อสารกับผู้ใช้</li>
-                  <li>เราไม่ขายหรือแบ่งปันข้อมูลส่วนบุคคลกับบุคคลที่สาม</li>
-                  <li>ข้อมูลจะถูกเก็บรักษาอย่างปลอดภัยด้วย Firebase Security</li>
-                  <li>คุณมีสิทธิ์เข้าถึง แก้ไข หรือลบข้อมูลของคุณได้</li>
+                  <li><strong>ข้อมูลที่เก็บ:</strong> อีเมล, เบอร์โทรศัพท์, ประวัติการทำรายการ, ข้อมูล Wallet</li>
+                  <li><strong>วัตถุประสงค์:</strong> ให้บริการเติมเกม, ยืนยันตัตน, ป้องกันการฉ้อโกง, ติดต่อสื่อสาร</li>
+                  <li><strong>การแบ่งปัน:</strong> เราไม่ขายหรือแบ่งปันข้อมูลส่วนบุคคลกับบุคคลที่สาม</li>
+                  <li><strong>ความปลอดภัย:</strong> ข้อมูลเข้ารหัสด้วย SSL และเก็บใน Firebase Security</li>
+                  <li><strong>สิทธิ์ของคุณ:</strong> เข้าถึง แก้ไข ลบ หรือโอนข้อมูลได้ตามกฎหมาย</li>
+                  <li><strong>Cookies:</strong> เราใช้ Cookies เพื่อปรับปรุงประสบการณ์การใช้งาน</li>
                 </ul>
               </div>
             </section>
 
             <Separator />
 
-            {/* 5. ทรัพย์สินทางปัญญา */}
+            {/* 6. ทรัพย์สินทางปัญญา */}
             <section>
-              <h2 className="text-xl font-semibold mb-3">5. ทรัพย์สินทางปัญญา</h2>
+              <h2 className="text-xl font-semibold mb-3">6. ทรัพย์สินทางปัญญา</h2>
               <div className="space-y-2 text-muted-foreground">
-                <p>เนื้อหาทั้งหมดในเว็บไซต์นี้เป็นทรัพย์สินของเรา รวมถึง:</p>
+                <p>เนื้อหาทั้งหมดในเว็บไซต์ CoinZone เป็นทรัพย์สินของเรา รวมถึง:</p>
                 <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>โค้ดโปรแกรม, ดีไซน์ และโครงสร้างระบบ</li>
-                  <li>โลโก้, ไอคอน และกราฟิก</li>
-                  <li>เนื้อหา, คู่มือ และเอกสารประกอบ</li>
-                  <li>ห้ามคัดลอกหรือดัดแปลงโดยไม่ได้รับอนุญาต</li>
+                  <li><strong>โลโก้ CoinZone:</strong> ตราสัญลักษณ์, แบรนด์, สีสัน และดีไซน์</li>
+                  <li><strong>ระบบเว็บไซต์:</strong> โค้ดโปรแกรม, UI/UX, อัลกอริทึม, Database</li>
+                  <li><strong>เนื้อหา:</strong> คู่มือการใช้งาน, FAQ, บทความ, รูปภาพ</li>
+                  <li><strong>ดาตาเบส:</strong> ราคาสินค้า, ข้อมูลเกม, API Endpoints</li>
+                  <li><strong>ข้อจำกัด:</strong> ห้ามคัดลอก, ทำซ้ำ, ใช้เพื่อการค้าโดยไม่ได้รับอนุญาต</li>
                 </ul>
               </div>
             </section>
 
             <Separator />
 
-            {/* 6. การจำกัดความรับผิด */}
+            {/* 7. การจำกัดความรับผิดและการรับประกัน */}
             <section>
-              <h2 className="text-xl font-semibold mb-3">6. การจำกัดความรับผิด</h2>
+              <h2 className="text-xl font-semibold mb-3">7. การจำกัดความรับผิดและการรับประกัน</h2>
               <div className="space-y-2 text-muted-foreground">
-                <p>เราให้บริการในสภาพ "AS IS" และไม่รับประกัน:</p>
+                <p className="font-medium text-foreground">สิ่งที่ CoinZone รับประกัน:</p>
                 <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>บริการจะไม่หยุดชะงักหรือปราศจากข้อผิดพลาด</li>
-                  <li>ข้อมูลหรือผลลัพธ์จะถูกต้องเสมอ</li>
-                  <li>ความเสียหายที่เกิดจากการใช้หรือไม่สามารถใช้บริการ</li>
-                  <li>การสูญเสียข้อมูลจากเหตุสุดวิสัย</li>
+                  <li>บริการเติมเกมและแอปพรีเมียมจะสำเร็จภายใน 24 ชั่วโมง</li>
+                  <li>ระบบอัตโนมัติจะทำงานอย่างถูกต้องและรวดเร็ว</li>
+                  <li>ความปลอดภัยของข้อมูลการชำระเงินและข้อมูลส่วนตัว</li>
+                  <li>สินค้าและบริการจะถูกส่งมอบตามความถูกต้อง</li>
                 </ul>
-                <p className="mt-2">
-                  คุณควรสำรองข้อมูลสำคัญและใช้บริการด้วยความระมัดระวัง
-                </p>
+                
+                <p className="font-medium text-foreground mt-4">สิ่งที่ CoinZone ไม่รับผิดชอบ:</p>
+                <ul className="list-disc list-inside space-y-1 ml-4">
+                  <li>ความเสียหายจากการใช้บริการผิดกฎหมายหรือไม่เหมาะสม</li>
+                  <li>การสูญเสียเงินจากข้อผิดพลาดทางเทคนิคหรือระบบ</li>
+                  <li>ปัญหาจากบุคคลที่สามหรือการกระทำที่ผิดกฎหมาย</li>
+                  <li>การหยุดชะงักของระบบจากเหตุสุดวิสัยหรือการบำรุงรักษา</li>
+                </ul>
+                
+                <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg border border-amber-200 dark:border-amber-700 mt-4">
+                  <p className="text-amber-800 dark:text-amber-200 font-medium">ข้อแนะนำ:</p>
+                  <p className="text-amber-700 dark:text-amber-300 text-sm mt-1">
+                    คุณควรสำรองข้อมูลการทำรายการและตรวจสอบความถูกต้องก่อนทำรายการ
+                    ใช้บริการด้วยความระมัดระวัง
+                  </p>
+                </div>
               </div>
             </section>
 
             <Separator />
 
-            {/* 7. การเปลี่ยนแปลงข้อกำหนด */}
+            {/* 8. การเปลี่ยนแปลงข้อกำหนด */}
             <section>
-              <h2 className="text-xl font-semibold mb-3">7. การเปลี่ยนแปลงข้อกำหนด</h2>
+              <h2 className="text-xl font-semibold mb-3">8. การเปลี่ยนแปลงข้อกำหนด</h2>
               <div className="space-y-2 text-muted-foreground">
                 <p>เราขอสงวนสิทธิ์ในการแก้ไขข้อกำหนดเหล่านี้ได้ตลอดเวลา:</p>
                 <ul className="list-disc list-inside space-y-1 ml-4">
@@ -199,9 +243,9 @@ const Terms = () => {
 
             <Separator />
 
-            {/* 8. การยกเลิกบัญชี */}
+            {/* 9. การยกเลิกบัญชี */}
             <section>
-              <h2 className="text-xl font-semibold mb-3">8. การยกเลิกบัญชีและการสิ้นสุดบริการ</h2>
+              <h2 className="text-xl font-semibold mb-3">9. การยกเลิกบัญชีและการสิ้นสุดบริการ</h2>
               <div className="space-y-2 text-muted-foreground">
                 <p>คุณสามารถยกเลิกบัญชีได้ตลอดเวลาโดย:</p>
                 <ul className="list-disc list-inside space-y-1 ml-4">
@@ -220,9 +264,9 @@ const Terms = () => {
 
             <Separator />
 
-            {/* 9. กฎหมายที่ใช้บังคับ */}
+            {/* 10. กฎหมายที่ใช้บังคับ */}
             <section>
-              <h2 className="text-xl font-semibold mb-3">9. กฎหมายที่ใช้บังคับ</h2>
+              <h2 className="text-xl font-semibold mb-3">10. กฎหมายที่ใช้บังคับ</h2>
               <div className="space-y-2 text-muted-foreground">
                 <p>
                   ข้อกำหนดเหล่านี้อยู่ภายใต้กฎหมายของประเทศไทย 
@@ -233,14 +277,19 @@ const Terms = () => {
 
             <Separator />
 
-            {/* 10. ติดต่อเรา */}
+            {/* 11. ติดต่อเรา */}
             <section>
-              <h2 className="text-xl font-semibold mb-3">10. ติดต่อเรา</h2>
+              <h2 className="text-xl font-semibold mb-3">11. ติดต่อเรา</h2>
               <div className="space-y-2 text-muted-foreground">
-                <p>หากมีคำถามเกี่ยวกับข้อกำหนดและเงื่อนไขเหล่านี้ กรุณาติดต่อ:</p>
-                <div className="bg-muted/50 p-4 rounded-lg space-y-1 mt-2">
-                  <p><strong>อีเมล:</strong> support@gamenexus.com</p>
-                  <p><strong>เว็บไซต์:</strong> www.gamenexus.com</p>
+                <p>หากมีคำถามเกี่ยวกับข้อกำหนดและเงื่อนไขเหล่านี้ กรุณาติดต่อ CoinZone:</p>
+                <div className="bg-muted/50 p-4 rounded-lg space-y-2 mt-2">
+                  <p><strong>เว็บไซต์:</strong> <a href="https://www.coin-zone.shop" className="text-primary hover:underline">www.coin-zone.shop</a></p>
+                  <p><strong>อีเมล สนับสนุน:</strong> support@coin-zone.shop</p>
+                  <p><strong>เวลาบริการ:</strong> 24 ชั่วโมง ทุกวัน</p>
+                  <p><strong>Line ID:</strong> @coinzone (สำหรับการสนับสนุนด่วน)</p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    <strong>หมายเหตุ:</strong> หากมีปัญหาเกี่ยวกับการชำระเงินหรือเติมเกม กรุณาส่งหลักฐานการทำรายการและรายละเอียดปัญหามาด้วย
+                  </p>
                 </div>
               </div>
             </section>
