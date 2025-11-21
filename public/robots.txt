@@ -15,10 +15,14 @@ Allow: /premium-app
 Allow: /card-topup
 Allow: /cash-card
 Allow: /top-up
+Allow: /game-codes
 
-# SEO Landing Pages
-Allow: /รับเติมเกม.html
-Allow: /แอปพรีเมียม.html
+# SEO Landing Pages - High Priority
+Allow: /coinzone.html
+Allow: /รับเติมเกม-seo.html
+Allow: /เติม-rov.html
+Allow: /เติม-robux.html
+Allow: /เติม-valorant.html
 
 # หน้า Authentication
 Allow: /login
