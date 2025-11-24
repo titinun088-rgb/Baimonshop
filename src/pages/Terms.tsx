@@ -45,7 +45,7 @@ const Terms = () => {
                 <div>
                   <h2 className="text-xl font-semibold mb-2">คำนำ</h2>
                   <p className="text-muted-foreground leading-relaxed">
-                    ยินดีต้อนรับสู่ <strong>CoinZone</strong> เว็บเติมเกมออนไลน์อันดับ 1 ของประเทศไทย 
+                    ยินดีต้อนรับสู่ <strong>BaimonShop</strong> เว็บเติมเกมออนไลน์อันดับ 1 ของประเทศไทย 
                     ที่ให้บริการเติมเกมออนไลน์ แอปพรีเมียม บัตรเติมเงิน และบริการดิจิทัลต่างๆ 
                     การใช้บริการของเราแสดงว่าคุณยอมรับข้อกำหนดและเงื่อนไขเหล่านี้ 
                     กรุณาอ่านอย่างละเอียดก่อนใช้งาน
@@ -109,7 +109,7 @@ const Terms = () => {
                 3. การใช้งานที่อนุญาตและข้อจำกัด
               </h2>
               <div className="space-y-2 text-muted-foreground">
-                <p className="font-medium text-foreground">บริการที่ CoinZone ให้บริการ:</p>
+                <p className="font-medium text-foreground">บริการที่ BaimonShop ให้บริการ:</p>
                 <ul className="list-disc list-inside space-y-1 ml-4">
                   <li><strong>เติมเกมออนไลน์:</strong> ROV, Free Fire, PUBG Mobile, Mobile Legends, Genshin Impact, Valorant, Roblox, Fortnite</li>
                   <li><strong>แอปพรีเมียม:</strong> Netflix, Spotify, YouTube Premium, Disney+, Canva Pro</li>
@@ -183,9 +183,9 @@ const Terms = () => {
             <section>
               <h2 className="text-xl font-semibold mb-3">6. ทรัพย์สินทางปัญญา</h2>
               <div className="space-y-2 text-muted-foreground">
-                <p>เนื้อหาทั้งหมดในเว็บไซต์ CoinZone เป็นทรัพย์สินของเรา รวมถึง:</p>
+                <p>เนื้อหาทั้งหมดในเว็บไซต์ BaimonShop เป็นทรัพย์สินของเรา รวมถึง:</p>
                 <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li><strong>โลโก้ CoinZone:</strong> ตราสัญลักษณ์, แบรนด์, สีสัน และดีไซน์</li>
+                  <li><strong>โลโก้ BaimonShop:</strong> ตราสัญลักษณ์, แบรนด์, สีสัน และดีไซน์</li>
                   <li><strong>ระบบเว็บไซต์:</strong> โค้ดโปรแกรม, UI/UX, อัลกอริทึม, Database</li>
                   <li><strong>เนื้อหา:</strong> คู่มือการใช้งาน, FAQ, บทความ, รูปภาพ</li>
                   <li><strong>ดาตาเบส:</strong> ราคาสินค้า, ข้อมูลเกม, API Endpoints</li>
@@ -200,7 +200,7 @@ const Terms = () => {
             <section>
               <h2 className="text-xl font-semibold mb-3">7. การจำกัดความรับผิดและการรับประกัน</h2>
               <div className="space-y-2 text-muted-foreground">
-                <p className="font-medium text-foreground">สิ่งที่ CoinZone รับประกัน:</p>
+                <p className="font-medium text-foreground">สิ่งที่ BaimonShop รับประกัน:</p>
                 <ul className="list-disc list-inside space-y-1 ml-4">
                   <li>บริการเติมเกมและแอปพรีเมียมจะสำเร็จภายใน 24 ชั่วโมง</li>
                   <li>ระบบอัตโนมัติจะทำงานอย่างถูกต้องและรวดเร็ว</li>
@@ -208,7 +208,7 @@ const Terms = () => {
                   <li>สินค้าและบริการจะถูกส่งมอบตามความถูกต้อง</li>
                 </ul>
                 
-                <p className="font-medium text-foreground mt-4">สิ่งที่ CoinZone ไม่รับผิดชอบ:</p>
+                <p className="font-medium text-foreground mt-4">สิ่งที่ BaimonShop ไม่รับผิดชอบ:</p>
                 <ul className="list-disc list-inside space-y-1 ml-4">
                   <li>ความเสียหายจากการใช้บริการผิดกฎหมายหรือไม่เหมาะสม</li>
                   <li>การสูญเสียเงินจากข้อผิดพลาดทางเทคนิคหรือระบบ</li>
@@ -281,12 +281,12 @@ const Terms = () => {
             <section>
               <h2 className="text-xl font-semibold mb-3">11. ติดต่อเรา</h2>
               <div className="space-y-2 text-muted-foreground">
-                <p>หากมีคำถามเกี่ยวกับข้อกำหนดและเงื่อนไขเหล่านี้ กรุณาติดต่อ CoinZone:</p>
+                <p>หากมีคำถามเกี่ยวกับข้อกำหนดและเงื่อนไขเหล่านี้ กรุณาติดต่อ BaimonShop:</p>
                 <div className="bg-muted/50 p-4 rounded-lg space-y-2 mt-2">
                   <p><strong>เว็บไซต์:</strong> <a href="https://www.coin-zone.shop" className="text-primary hover:underline">www.coin-zone.shop</a></p>
                   <p><strong>อีเมล สนับสนุน:</strong> support@coin-zone.shop</p>
                   <p><strong>เวลาบริการ:</strong> 24 ชั่วโมง ทุกวัน</p>
-                  <p><strong>Line ID:</strong> @coinzone (สำหรับการสนับสนุนด่วน)</p>
+                  <p><strong>Line ID:</strong> @baimonshop (สำหรับการสนับสนุนด่วน)</p>
                   <p className="text-sm text-muted-foreground mt-2">
                     <strong>หมายเหตุ:</strong> หากมีปัญหาเกี่ยวกับการชำระเงินหรือเติมเกม กรุณาส่งหลักฐานการทำรายการและรายละเอียดปัญหามาด้วย
                   </p>

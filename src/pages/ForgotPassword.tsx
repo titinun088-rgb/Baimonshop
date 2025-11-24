@@ -117,7 +117,7 @@ const ForgotPassword = () => {
                   <p className="font-semibold">ขั้นตอนถัดไป:</p>
                   <ol className="ml-4 list-decimal space-y-1 text-muted-foreground">
                     <li>เปิดกล่องจดหมายอีเมลของคุณ</li>
-                    <li>ค้นหาอีเมลจาก CoinZone</li>
+                    <li>ค้นหาอีเมลจาก BaimonShop</li>
                     <li>คลิกลิงก์รีเซ็ตรหัสผ่าน</li>
                     <li>ตั้งรหัสผ่านใหม่</li>
                     <li>กลับมาเข้าสู่ระบบด้วยรหัสผ่านใหม่</li>

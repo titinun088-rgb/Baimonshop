@@ -22,14 +22,14 @@ const Footer = () => {
                 <div className="relative bg-gradient-to-br from-purple-600 to-blue-600 p-2 rounded-xl">
                   <img 
                     src="/logo.png" 
-                    alt="CoinZone - รับเติมเกม เว็บเติมเกมออนไลน์" 
+                    alt="BaimonShop - รับเติมเกม เว็บเติมเกมออนไลน์" 
                     className="h-10 w-10 object-contain transform group-hover:scale-110 transition-transform duration-300"
                   />
                 </div>
               </div>
               <div>
                 <span className="block text-2xl font-bold bg-gradient-to-r from-purple-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                  CoinZone
+                  BaimonShop
                 </span>
                 <span className="block text-xs text-purple-300">รับเติมเกม เว็บเติมเกมออนไลน์</span>
               </div>
@@ -173,7 +173,7 @@ const Footer = () => {
         {/* SEO Keywords Section */}
         <div className="border-t border-purple-500/20 pt-8 mb-8">
           <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">CoinZone - รับเติมเกม เว็บเติมเกมออนไลน์ ราคาถูก</h4>
+            <h4 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">BaimonShop - รับเติมเกม เว็บเติมเกมออนไลน์ ราคาถูก</h4>
             <p className="text-xs text-gray-500 leading-relaxed">
               <strong className="text-purple-300">เติมเกมออนไลน์:</strong> รับเติมเกม เว็บเติมเกม เว็ปเติมเกม ร้านเติมเกม เติม ROV เติม Free Fire เติม PUBG เติม Mobile Legends เติม Genshin Impact เติม Honkai Star Rail เติม Valorant เติม Roblox เติมเกมราคาถูก เติมเกมรวดเร็ว เติมเกมปลอดภัย topup game
               {" • "}
@@ -190,7 +190,7 @@ const Footer = () => {
         <div className="border-t border-purple-500/20 pt-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-gray-500 text-sm text-center sm:text-left">
-              © 2025 <span className="text-purple-400 font-semibold">CoinZone</span> - เว็บเติมเกมออนไลน์อันดับ 1 | All rights reserved.
+              © 2025 <span className="text-purple-400 font-semibold">BaimonShop</span> - เว็บเติมเกมออนไลน์อันดับ 1 | All rights reserved.
             </p>
             <div className="flex items-center gap-2 text-gray-500 text-sm">
               <span>Made with</span>

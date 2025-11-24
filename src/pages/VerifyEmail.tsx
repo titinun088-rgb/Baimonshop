@@ -138,7 +138,7 @@ const VerifyEmail = () => {
               </p>
               <ol className="ml-6 list-decimal space-y-1 text-muted-foreground">
                 <li>เปิดกล่องจดหมายอีเมลของคุณ</li>
-                <li>ค้นหาอีเมลจาก CoinZone</li>
+                <li>ค้นหาอีเมลจาก BaimonShop</li>
                 <li>คลิกลิงก์ยืนยันในอีเมล</li>
                 <li>กลับมาที่หน้านี้และคลิก "ตรวจสอบสถานะ"</li>
               </ol>

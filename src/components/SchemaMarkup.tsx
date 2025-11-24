@@ -30,7 +30,7 @@ const SchemaMarkup: React.FC<SchemaMarkupProps> = ({ type, data }) => {
         ...baseSchema,
         "brand": {
           "@type": "Brand",
-          "name": "CoinZone"
+          "name": "BaimonShop"
         },
         "offers": {
           "@type": "Offer",
@@ -40,7 +40,7 @@ const SchemaMarkup: React.FC<SchemaMarkupProps> = ({ type, data }) => {
           "validFrom": new Date().toISOString().split('T')[0],
           "seller": {
             "@type": "Organization",
-            "name": "CoinZone",
+            "name": "BaimonShop",
             "url": "https://www.coin-zone.shop"
           }
         },
@@ -58,7 +58,7 @@ const SchemaMarkup: React.FC<SchemaMarkupProps> = ({ type, data }) => {
         "url": data.url || "https://www.coin-zone.shop",
         "provider": {
           "@type": "Organization",
-          "name": "CoinZone",
+          "name": "BaimonShop",
           "url": "https://www.coin-zone.shop"
         },
         "category": data.category || "Digital Products"

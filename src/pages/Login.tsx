@@ -150,7 +150,7 @@ const Login = () => {
               <div className="flex justify-center">
                 <Turnstile
                   ref={turnstileRef}
-                  siteKey="0x4AAAAAACCjuqv4ion-H8Dt"
+                  siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || "0x4AAAAAACCqF5_vh6WxdW8Y"}
                   onSuccess={(token) => setCaptchaToken(token)}
                   onError={() => {
                     setCaptchaToken(null);

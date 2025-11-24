@@ -78,11 +78,11 @@ const Register = () => {
             <div className="flex items-center justify-center gap-3 mb-2">
             <img 
               src="/logo.png" 
-              alt="CoinZone Logo" 
+              alt="BaimonShop Logo" 
               className="h-12 w-12 object-contain"
             />
             <h1 className="text-3xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
-              CoinZone
+              BaimonShop
             </h1>
           </div>
           <p className="text-muted-foreground">สมัครสมาชิกเพื่อเริ่มต้นใช้งาน</p>

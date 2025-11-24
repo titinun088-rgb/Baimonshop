@@ -311,14 +311,14 @@ const Layout = ({ children }: LayoutProps) => {
           <div className="relative">
             <img 
               src="/logo.png" 
-              alt="CoinZone Logo" 
+              alt="BaimonShop Logo" 
               className="h-12 w-12 object-contain drop-shadow-lg"
             />
             <div className="absolute -top-1 -right-1 h-4 w-4 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
           </div>
           <div className="flex flex-col">
             <span className="text-2xl font-bold text-white drop-shadow-md">
-              CoinZone
+              BaimonShop
             </span>
             <span className="text-xs text-blue-100 font-medium">
               เว็บเติมเกม #1
@@ -543,7 +543,7 @@ const Layout = ({ children }: LayoutProps) => {
         
         <div className="h-full px-4 relative z-10">
           <div className="flex items-center justify-between h-full px-6">
-            {/* CoinZone Brand Logo */}
+            {/* BaimonShop Brand Logo */}
             <Link to="/home" className="flex items-center gap-4 flex-shrink-0 group hover:scale-105 transition-transform duration-200">
               <div className="relative">
                 <img 

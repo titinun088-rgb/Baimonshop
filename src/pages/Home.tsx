@@ -177,28 +177,28 @@ const Home = () => {
   return (
     <Layout>
       <Helmet>
-        <title>CoinZone เว็บเติมเกม รับเติมเกมออนไลน์ราคาถูก เติม ROV Free Fire PUBG</title>
-        <meta name="description" content="CoinZone เว็บเติมเกมออนไลน์อันดับ 1 รับเติมเกมราคาถูกที่สุด เติมเกม ROV Free Fire PUBG Mobile Legends Valorant Roblox Robux Genshin Impact Apex Fortnite แอพพรีเมียม Netflix Spotify บัตรเงินสด Steam เติมเงินมือถือ AIS True DTAC ร้านเติมเกมออนไลน์ ระบบอัตโนมัติ รวดเร็ว ปลอดภัย 100% บริการ 24 ชั่วโมง" />
-        <meta name="keywords" content="CoinZone, coinzone, coin zone, coin-zone, เว็บเติมเกม CoinZone, CoinZone เติมเกม, CoinZone ราคาถูก, เติมเกม, เว็บเติมเกม, รับเติมเกม, เติมเกมราคาถูก, เติมเกมออนไลน์, เว็บเติมเกมออนไลน์, ร้านเติมเกม, เติม ROV, เติม Free Fire, เติม PUBG, เติม Mobile Legends, เติมเพชร Free Fire, เติมเงิน ROV, แอพพรีเมียม, Netflix, Spotify, YouTube Premium, บัตรเงินสด, Steam, Garena, เติมเงินมือถือ, AIS, True, DTAC, TrueMoney, เว็บเติมเกมราคาถูก, เติมเกมถูกๆ, เติม rov ถูก, เติม valorant, เติม robux, valorant shop, roblox shop, เติม genshin, ซื้อ robux, robux shop, เติม apex, เติม fortnite, เติม roblox, เติม pubg, mobile legends เติม, fortnite เติม, เติม mlbb, เติมเกมถูกที่สุด, เติมเกมออนไลน์ราคาถูก, topup game, game topup, เติม, เติมเกมสุดคุ้ม" />
-        <meta property="og:title" content="CoinZone เว็บเติมเกม รับเติมเกมออนไลน์ราคาถูก เติม ROV Free Fire PUBG" />
-        <meta property="og:description" content="CoinZone เว็บเติมเกมออนไลน์อันดับ 1 รับเติมเกมราคาถูกที่สุด เติมเกม ROV Free Fire PUBG Mobile Legends แอพพรีเมียม Netflix Spotify บัตรเงินสด Steam เติมเงินมือถือ ระบบอัตโนมัติ รวดเร็ว ปลอดภัย 100%" />
+        <title>BaimonShop เว็บเติมเกม รับเติมเกมออนไลน์ราคาถูก เติม ROV Free Fire PUBG</title>
+        <meta name="description" content="BaimonShop เว็บเติมเกมออนไลน์อันดับ 1 รับเติมเกมราคาถูกที่สุด เติมเกม ROV Free Fire PUBG Mobile Legends Valorant Roblox Robux Genshin Impact Apex Fortnite แอพพรีเมียม Netflix Spotify บัตรเงินสด Steam เติมเงินมือถือ AIS True DTAC ร้านเติมเกมออนไลน์ ระบบอัตโนมัติ รวดเร็ว ปลอดภัย 100% บริการ 24 ชั่วโมง" />
+        <meta name="keywords" content="BaimonShop, baimonshop, baimon shop, baimon-shop, เว็บเติมเกม BaimonShop, BaimonShop เติมเกม, BaimonShop ราคาถูก, เติมเกม, เว็บเติมเกม, รับเติมเกม, เติมเกมราคาถูก, เติมเกมออนไลน์, เว็บเติมเกมออนไลน์, ร้านเติมเกม, เติม ROV, เติม Free Fire, เติม PUBG, เติม Mobile Legends, เติมเพชร Free Fire, เติมเงิน ROV, แอพพรีเมียม, Netflix, Spotify, YouTube Premium, บัตรเงินสด, Steam, Garena, เติมเงินมือถือ, AIS, True, DTAC, TrueMoney, เว็บเติมเกมราคาถูก, เติมเกมถูกๆ, เติม rov ถูก, เติม valorant, เติม robux, valorant shop, roblox shop, เติม genshin, ซื้อ robux, robux shop, เติม apex, เติม fortnite, เติม roblox, เติม pubg, mobile legends เติม, fortnite เติม, เติม mlbb, เติมเกมถูกที่สุด, เติมเกมออนไลน์ราคาถูก, topup game, game topup, เติม, เติมเกมสุดคุ้ม" />
+        <meta property="og:title" content="BaimonShop เว็บเติมเกม รับเติมเกมออนไลน์ราคาถูก เติม ROV Free Fire PUBG" />
+        <meta property="og:description" content="BaimonShop เว็บเติมเกมออนไลน์อันดับ 1 รับเติมเกมราคาถูกที่สุด เติมเกม ROV Free Fire PUBG Mobile Legends แอพพรีเมียม Netflix Spotify บัตรเงินสด Steam เติมเงินมือถือ ระบบอัตโนมัติ รวดเร็ว ปลอดภัย 100%" />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://www.coin-zone.shop/" />
         <meta property="og:image" content="https://www.coin-zone.shop/logo.png" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="CoinZone เว็บเติมเกม รับเติมเกมออนไลน์ราคาถูก" />
-        <meta name="twitter:description" content="CoinZone เว็บเติมเกมอันดับ 1 รับเติมเกมราคาถูก เติม ROV Free Fire PUBG แอพพรีเมียม บัตรเงินสด เติมเงินมือถือ" />
+        <meta name="twitter:title" content="BaimonShop เว็บเติมเกม รับเติมเกมออนไลน์ราคาถูก" />
+        <meta name="twitter:description" content="BaimonShop เว็บเติมเกมอันดับ 1 รับเติมเกมราคาถูก เติม ROV Free Fire PUBG แอพพรีเมียม บัตรเงินสด เติมเงินมือถือ" />
         <link rel="canonical" href="https://www.coin-zone.shop/" />
-        <meta name="description" content="รับเติมเกม CoinZone เว็บเติมเกมออนไลน์อันดับ 1 เติมเกม ROV Free Fire PUBG Mobile Legends Genshin Impact แอปพรีเมียม Netflix Spotify YouTube Premium บัตรเงินสด Steam Garena เติมเงินมือถือ AIS True DTAC ราคาถูกที่สุด รวดเร็วทันใจ ปลอดภัย 100% เว็ปเติมเกมที่ดีที่สุด บริการตลอด 24 ชั่วโมง ระบบอัตโนมัติ เงินเข้าไว" />
-        <meta name="keywords" content="รับเติมเกม, เติมเกม, เว็บเติมเกม, เว็ปเติมเกม, coinzone, เว็บเติมเกมออนไลน์, เว็ปเติมเกมออนไลน์, รับเติมเกมออนไลน์, ร้านเติมเกม, เติมเงินเกม, เติม ROV, เติม Free Fire, เติม PUBG, เติม Mobile Legends, topup game, แอปพรีเมียม, Netflix, Spotify, YouTube Premium, บัตรเงินสด, Steam Wallet, Garena Shell, เติมเงินมือถือ, เติมเงิน AIS, เติมเงิน True, เติมเงิน DTAC" />
-        <meta property="og:title" content="รับเติมเกม CoinZone | เว็บเติมเกมออนไลน์ ราคาถูก" />
-        <meta property="og:description" content="รับเติมเกม CoinZone เว็บเติมเกมออนไลน์อันดับ 1 เติมเกม ROV Free Fire PUBG รวดเร็วทันใจ ปลอดภัย 100% ราคาถูกที่สุด บริการตลอด 24 ชั่วโมง" />
+        <meta name="description" content="รับเติมเกม BaimonShop เว็บเติมเกมออนไลน์อันดับ 1 เติมเกม ROV Free Fire PUBG Mobile Legends Genshin Impact แอปพรีเมียม Netflix Spotify YouTube Premium บัตรเงินสด Steam Garena เติมเงินมือถือ AIS True DTAC ราคาถูกที่สุด รวดเร็วทันใจ ปลอดภัย 100% เว็ปเติมเกมที่ดีที่สุด บริการตลอด 24 ชั่วโมง ระบบอัตโนมัติ เงินเข้าไว" />
+        <meta name="keywords" content="รับเติมเกม, เติมเกม, เว็บเติมเกม, เว็ปเติมเกม, baimonshop, เว็บเติมเกมออนไลน์, เว็ปเติมเกมออนไลน์, รับเติมเกมออนไลน์, ร้านเติมเกม, เติมเงินเกม, เติม ROV, เติม Free Fire, เติม PUBG, เติม Mobile Legends, topup game, แอปพรีเมียม, Netflix, Spotify, YouTube Premium, บัตรเงินสด, Steam Wallet, Garena Shell, เติมเงินมือถือ, เติมเงิน AIS, เติมเงิน True, เติมเงิน DTAC" />
+        <meta property="og:title" content="รับเติมเกม BaimonShop | เว็บเติมเกมออนไลน์ ราคาถูก" />
+        <meta property="og:description" content="รับเติมเกม BaimonShop เว็บเติมเกมออนไลน์อันดับ 1 เติมเกม ROV Free Fire PUBG รวดเร็วทันใจ ปลอดภัย 100% ราคาถูกที่สุด บริการตลอด 24 ชั่วโมง" />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="https://www.coin-zone.shop/logo.png" />
         <meta property="og:url" content="https://www.coin-zone.shop/" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="รับเติมเกม CoinZone | เว็บเติมเกมออนไลน์" />
-        <meta name="twitter:description" content="รับเติมเกม CoinZone เว็บเติมเกมออนไลน์ เติมเกม ROV Free Fire PUBG รวดเร็ว ปลอดภัย ราคาถูก 24 ชม." />
+        <meta name="twitter:title" content="รับเติมเกม BaimonShop | เว็บเติมเกมออนไลน์" />
+        <meta name="twitter:description" content="รับเติมเกม BaimonShop เว็บเติมเกมออนไลน์ เติมเกม ROV Free Fire PUBG รวดเร็ว ปลอดภัย ราคาถูก 24 ชม." />
         <link rel="canonical" href="https://www.coin-zone.shop/" />
       </Helmet>
 
@@ -269,7 +269,7 @@ const Home = () => {
                   <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full blur-xl opacity-50 animate-pulse"></div>
                   <img
                     src="/logo.png"
-                    alt="CoinZone Logo - รับเติมเกม เว็บเติมเกมออนไลน์"
+                    alt="BaimonShop Logo - รับเติมเกม เว็บเติมเกมออนไลน์"
                     className="relative h-20 w-20 rounded-full border-4 border-purple-500/30"
                   />
                 </div>
@@ -278,7 +278,7 @@ const Home = () => {
               {/* Main Heading */}
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6">
                 <span className="block bg-gradient-to-r from-purple-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                  รับเติมเกม CoinZone
+                  รับเติมเกม BaimonShop
                 </span>
                 <span className="block text-2xl sm:text-3xl md:text-4xl mt-2 text-purple-300">
                   เว็บเติมเกมออนไลน์อันดับ 1
@@ -362,7 +362,7 @@ const Home = () => {
                       <div className="absolute inset-0 opacity-20">
                         <img
                           src={item.image}
-                          alt={`${item.title} - CoinZone`}
+                          alt={`${item.title} - BaimonShop`}
                           className="w-full h-full object-cover"
                           loading="lazy"
                           onError={(e) => {
@@ -399,7 +399,7 @@ const Home = () => {
             <div className="relative bg-gradient-to-br from-purple-900/20 to-blue-900/20 rounded-3xl p-8 md:p-12 border border-purple-500/20">
               <div className="text-center mb-12">
                 <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent mb-4">
-                  ทำไมต้องเลือก CoinZone?
+                  ทำไมต้องเลือก BaimonShop?
                 </h2>
                 <p className="text-gray-400">เรามีทุกอย่างที่คุณต้องการ</p>
               </div>
@@ -453,7 +453,7 @@ const Home = () => {
                       <div className="aspect-square relative overflow-hidden">
                         <img
                           src={game.img}
-                          alt={`เติม ${game.name} - CoinZone รับเติมเกม`}
+                          alt={`เติม ${game.name} - BaimonShop รับเติมเกม`}
                           title={`เติม ${game.name} ราคาถูก`}
                           className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-500"
                           loading="lazy"
@@ -524,8 +524,8 @@ const Home = () => {
                       {product.img ? (
                         <img
                           src={product.img}
-                          alt={`${product.name} - แอปพรีเมียม CoinZone ราคา ${product.price} บาท`}
-                          title={`${product.name} - CoinZone แอปพรีเมียม`}
+                          alt={`${product.name} - แอปพรีเมียม BaimonShop ราคา ${product.price} บาท`}
+                          title={`${product.name} - BaimonShop แอปพรีเมียม`}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                           loading="lazy"
                           onError={(e) => {
