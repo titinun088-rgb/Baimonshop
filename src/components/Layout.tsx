@@ -306,7 +306,7 @@ const Layout = ({ children }: LayoutProps) => {
   const SidebarContent = ({ onNavigate }: { onNavigate?: () => void }) => (
     <div className="flex h-full flex-col">
       {/* Logo */}
-      <div className="flex h-20 items-center border-b border-border px-6 bg-gradient-to-r from-blue-600 to-purple-600">
+      <div className="flex h-20 items-center border-b border-border px-6 bg-gradient-cute shadow-pink">
         <div className="flex items-center gap-4">
           <div className="relative">
             <img 
@@ -554,11 +554,11 @@ const Layout = ({ children }: LayoutProps) => {
                 <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-                  BaimonShop
+                <span className="text-xl font-bold text-gradient-pink animate-bounce-cute">
+                  BaimonShop 🌸
                 </span>
-                <span className="text-xs text-muted-foreground font-medium -mt-1">
-                  เว็บเติมเกม #1
+                <span className="text-xs text-pink-300 font-medium -mt-1">
+                  เว็บเติมเกม #1 ✨
                 </span>
               </div>
             </Link>
@@ -646,9 +646,9 @@ const Layout = ({ children }: LayoutProps) => {
             <div className="flex items-center gap-4 flex-shrink-0">
               {/* Balance */}
               {userData && (
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-green-500/10 border border-green-500/20">
-                  <Wallet className="h-4 w-4 text-green-600" />
-                  <span className="text-sm font-semibold text-green-600">
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-pink-500/10 border border-pink-500/20 hover-glow-pink">
+                  <Wallet className="h-4 w-4 text-pink-400" />
+                  <span className="text-sm font-semibold text-pink-400">
                     ฿{(userData.balance || 0).toLocaleString()}
                   </span>
                 </div>
@@ -763,8 +763,8 @@ const Layout = ({ children }: LayoutProps) => {
               alt="BaimonShop Logo" 
               className="h-8 w-8 object-contain"
             />
-            <span className="text-lg font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
-              BaimonShop
+            <span className="text-lg font-bold text-gradient-pink animate-bounce-cute">
+              BaimonShop 🌸
             </span>
           </Link>
 

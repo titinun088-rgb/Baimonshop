@@ -87,9 +87,9 @@ const Landing = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0f0f2d] via-[#1a0033] to-[#0f0f2d] text-white font-['Kanit',sans-serif]">
+    <div className="min-h-screen bg-gradient-to-b from-[#1a0d1a] via-[#2d1a3d] to-[#1a0d1a] text-white font-['Kanit',sans-serif]">
       {/* Header with Login/Register buttons */}
-      <header className="bg-black/20 backdrop-blur-sm border-b border-purple-500/30 sticky top-0 z-50">
+      <header className="bg-pink-900/20 backdrop-blur-sm border-b border-pink-400/30 sticky top-0 z-50 shadow-pink">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
@@ -99,7 +99,7 @@ const Landing = () => {
                 alt="BaimonShop Logo" 
                 className="h-10 w-10 object-contain"
               />
-              <span className="text-xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+              <span className="text-xl font-bold text-gradient-pink animate-bounce-cute">
                 BaimonShop
               </span>
             </div>
@@ -110,7 +110,7 @@ const Landing = () => {
                 variant="outline"
                 onClick={() => navigate("/login")}
                 size="sm"
-                className="border-purple-500/30 text-purple-300 hover:bg-purple-500/20 hover:text-white text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2 h-8 sm:h-10"
+                className="border-pink-400/30 text-pink-300 hover:bg-pink-500/20 hover:text-white text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2 h-8 sm:h-10 hover-glow-pink"
               >
                 <LogIn className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
                 <span className="hidden sm:inline">เข้าสู่ระบบ</span>
@@ -118,7 +118,7 @@ const Landing = () => {
               <Button
                 onClick={() => navigate("/register")}
                 size="sm"
-                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2 h-8 sm:h-10"
+                className="bg-gradient-cute hover:shadow-pink-lg text-white text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2 h-8 sm:h-10 hover-glow-pink transition-all duration-300"
               >
                 <UserPlus className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
                 <span className="hidden sm:inline">สมัครสมาชิก</span>
@@ -131,11 +131,11 @@ const Landing = () => {
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
         <div className="text-center mb-16">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-6">
-            ระบบเติมเงินเกมออนไลน์
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gradient-pink mb-6 animate-bounce-cute">
+            ระบบเติมเงินเกมออนไลน์ 🌸
           </h1>
-          <p className="text-xl text-purple-300 mb-8 max-w-2xl mx-auto">
-            รวดเร็ว ปลอดภัย ใช้งานง่าย พร้อมบริการเติมเกมยอดนิยม
+          <p className="text-xl text-pink-200 mb-8 max-w-2xl mx-auto">
+            น่ารัก รวดเร็ว ปลอดภัย ✨ พร้อมบริการเติมเกมยอดนิยม
           </p>
           
           {/* CTA Buttons */}
@@ -143,44 +143,44 @@ const Landing = () => {
             <Button
               size="lg"
               onClick={() => navigate("/register")}
-              className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-lg px-8 py-6"
+              className="bg-gradient-cute hover:shadow-pink-lg text-white text-lg px-8 py-6 hover-glow-pink transition-all duration-300 border-gradient-pink"
             >
               <UserPlus className="mr-2 h-5 w-5" />
-              เริ่มต้นใช้งาน
+              เริ่มต้นใช้งาน 💕
             </Button>
             <Button
               size="lg"
               variant="outline"
               onClick={() => navigate("/login")}
-              className="border-purple-500/50 text-purple-300 hover:bg-purple-500/20 hover:text-white text-lg px-8 py-6"
+              className="border-pink-400/50 text-pink-200 hover:bg-pink-500/20 hover:text-white text-lg px-8 py-6 hover-glow-pink"
             >
               <LogIn className="mr-2 h-5 w-5" />
-              เข้าสู่ระบบ
+              เข้าสู่ระบบ ✨
             </Button>
           </div>
         </div>
 
         {/* Features */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-          <Card className="bg-black/30 backdrop-blur-sm border-purple-500/30">
+          <Card className="bg-pink-900/30 backdrop-blur-sm border-pink-400/30 hover-glow-pink transition-all duration-300">
             <CardContent className="p-6 text-center">
-              <Zap className="h-12 w-12 mx-auto mb-4 text-yellow-400" />
-              <h3 className="text-xl font-bold mb-2">รวดเร็ว</h3>
-              <p className="text-purple-300">เติมเงินได้ทันทีภายในไม่กี่วินาที</p>
+              <Zap className="h-12 w-12 mx-auto mb-4 text-pink-300 animate-bounce-cute" />
+              <h3 className="text-xl font-bold mb-2 text-pink-100">รวดเร็ว ⚡</h3>
+              <p className="text-pink-200">เติมเงินได้ทันทีภายในไม่กี่วินาที</p>
             </CardContent>
           </Card>
-          <Card className="bg-black/30 backdrop-blur-sm border-purple-500/30">
+          <Card className="bg-pink-900/30 backdrop-blur-sm border-pink-400/30 hover-glow-pink transition-all duration-300">
             <CardContent className="p-6 text-center">
-              <Shield className="h-12 w-12 mx-auto mb-4 text-green-400" />
-              <h3 className="text-xl font-bold mb-2">ปลอดภัย</h3>
-              <p className="text-purple-300">ระบบรักษาความปลอดภัยขั้นสูง</p>
+              <Shield className="h-12 w-12 mx-auto mb-4 text-green-300 animate-bounce-cute" />
+              <h3 className="text-xl font-bold mb-2 text-pink-100">ปลอดภัย 🛡️</h3>
+              <p className="text-pink-200">ระบบรักษาความปลอดภัยขั้นสูง</p>
             </CardContent>
           </Card>
-          <Card className="bg-black/30 backdrop-blur-sm border-purple-500/30">
+          <Card className="bg-pink-900/30 backdrop-blur-sm border-pink-400/30 hover-glow-pink transition-all duration-300">
             <CardContent className="p-6 text-center">
-              <CheckCircle className="h-12 w-12 mx-auto mb-4 text-blue-400" />
-              <h3 className="text-xl font-bold mb-2">ใช้ได้จริง</h3>
-              <p className="text-purple-300">รองรับเกมและแอพพลิเคชั่นมากมาย</p>
+              <CheckCircle className="h-12 w-12 mx-auto mb-4 text-blue-300 animate-bounce-cute" />
+              <h3 className="text-xl font-bold mb-2 text-pink-100">ใช้ได้จริง ✅</h3>
+              <p className="text-pink-200">รองรับเกมและแอพพลิเคชั่นมากมาย</p>
             </CardContent>
           </Card>
         </div>
@@ -486,7 +486,7 @@ const Landing = () => {
       <footer className="bg-black/30 backdrop-blur-sm border-t border-purple-500/30 py-8 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center text-purple-300 text-sm">
-            <p>© 2024 BaimonShop. สงวนลิขสิทธิ์.</p>
+            <p>© 2024 BaimonShop 🌸 สงวนลิขสิทธิ์. Made with 💕</p>
           </div>
         </div>
       </footer>
