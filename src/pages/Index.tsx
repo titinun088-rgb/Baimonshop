@@ -11,9 +11,9 @@ const Index = () => {
     return <Landing />;
   }
 
-  // ถ้าล็อกอินแล้ว redirect ไปหน้า Home
+  // ถ้าล็อกอินแล้ว redirect ไปหน้าขาย
   if (user && userData && user.emailVerified && userData.verified) {
-    return <Navigate to="/home" replace />;
+    return <Navigate to="/game-topup" replace />;
   }
 
   // แสดงหน้า Landing สำหรับผู้ใช้ที่ไม่ล็อกอิน

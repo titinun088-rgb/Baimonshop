@@ -34,8 +34,8 @@ const Login = () => {
 
     try {
       await signIn(formData.email, formData.password);
-      toast.success("เข้าสู่ระบบสำเร็จ!");
-      navigate("/");
+      toast.success("เข้าสู่ระบบสำเร็จ! 🌸");
+      navigate("/game-topup");
     } catch (error: any) {
       console.error("Login error:", error);
 
@@ -66,8 +66,8 @@ const Login = () => {
     setLoading(true);
     try {
       await signInWithGoogle();
-      toast.success("เข้าสู่ระบบด้วย Google สำเร็จ!");
-      navigate("/");
+      toast.success("เข้าสู่ระบบด้วย Google สำเร็จ! 🌸");
+      navigate("/game-topup");
     } catch (error: any) {
       console.error("Google sign-in error:", error);
 
@@ -91,14 +91,14 @@ const Login = () => {
           <div className="flex items-center justify-center gap-3 mb-2">
             <img
               src="/logo.png"
-              alt="CoinZone Logo"
+              alt="BaimonShop Logo"
               className="h-12 w-12 object-contain"
             />
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
-              CoinZone
+            <h1 className="text-3xl font-bold text-gradient-pink">
+              BaimonShop 🌸
             </h1>
           </div>
-          <p className="text-muted-foreground">รับเติมเกมและแอปพรีเมียม</p>
+          <p className="text-pink-300">รับเติมเกมและแอปพรีเมียม ✨</p>
         </div>
 
         <Card className="border-border bg-card shadow-card">
@@ -165,7 +165,7 @@ const Login = () => {
 
               <Button
                 type="submit"
-                className="w-full bg-gradient-primary shadow-glow"
+                className="w-full bg-gradient-cute hover:shadow-pink-lg hover-glow-pink transition-all duration-300"
                 disabled={loading}
               >
                 {loading ? (
