@@ -60,6 +60,20 @@ Value: qgwvsh5rwvtevey8zdh4bj13
 Environment: Production, Preview, Development
 ```
 
+## 9. VITE_SLIP2GO_API_URL
+```
+Name: VITE_SLIP2GO_API_URL
+Value: https://connect.slip2go.com
+Environment: Production, Preview, Development
+```
+
+## 10. VITE_SLIP2GO_SECRET_KEY
+```
+Name: VITE_SLIP2GO_SECRET_KEY
+Value: 48eneHJpZiVu2j6nutRTjJdDX61kbqdC9TbvrZLJed4=
+Environment: Production, Preview, Development
+```
+
 ---
 
 ## 🛠️ วิธีการเพิ่มใน Vercel:
@@ -74,7 +88,7 @@ Environment: Production, Preview, Development
    - **Value**: ค่าที่ต้องการ (เช่น `AIzaSyBw7XNHrcIUr_PQT0XezTFVzHoCR5Zx_FU`)
    - **Environment**: เลือกทั้ง 3 ช่อง (Production, Preview, Development)
 7. **คลิก "Save"**
-7. **ทำซ้ำ** สำหรับทั้ง 8 ตัวแปร
+7. **ทำซ้ำ** สำหรับทั้ง 10 ตัวแปร
 
 ## ✅ หลังจากเพิ่มครบแล้ว:
 - คลิก **"Redeploy"** เพื่อ deploy ใหม่

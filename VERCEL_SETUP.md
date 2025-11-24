@@ -18,6 +18,12 @@ VITE_FIREBASE_MEASUREMENT_ID=G-QBCFDC42S0
 VITE_PEAMSUB_API_KEY=qgwvsh5rwvtevey8zdh4bj13
 ```
 
+### 💳 Slip2Go API Configuration
+```
+VITE_SLIP2GO_API_URL=https://connect.slip2go.com
+VITE_SLIP2GO_SECRET_KEY=48eneHJpZiVu2j6nutRTjJdDX61kbqdC9TbvrZLJed4=
+```
+
 ## 🛠️ วิธีการตั้งค่าบน Vercel
 
 ### Method 1: ผ่าน Vercel Dashboard
@@ -47,6 +53,8 @@ vercel env add VITE_FIREBASE_MESSAGING_SENDER_ID
 vercel env add VITE_FIREBASE_APP_ID
 vercel env add VITE_FIREBASE_MEASUREMENT_ID
 vercel env add VITE_PEAMSUB_API_KEY
+vercel env add VITE_SLIP2GO_API_URL
+vercel env add VITE_SLIP2GO_SECRET_KEY
 
 # Deploy
 vercel --prod
