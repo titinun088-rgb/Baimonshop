@@ -96,11 +96,11 @@ const Landing = () => {
             <div className="flex items-center gap-3">
               <img 
                 src="/logo.png" 
-                alt="CoinZone Logo" 
+                alt="BaimonShop Logo" 
                 className="h-10 w-10 object-contain"
               />
               <span className="text-xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
-                CoinZone
+                BaimonShop
               </span>
             </div>
             
@@ -486,7 +486,7 @@ const Landing = () => {
       <footer className="bg-black/30 backdrop-blur-sm border-t border-purple-500/30 py-8 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center text-purple-300 text-sm">
-            <p>© 2024 CoinZone. สงวนลิขสิทธิ์.</p>
+            <p>© 2024 BaimonShop. สงวนลิขสิทธิ์.</p>
           </div>
         </div>
       </footer>
