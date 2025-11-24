@@ -53,6 +53,13 @@ Value: G-QBCFDC42S0
 Environment: Production, Preview, Development
 ```
 
+## 8. VITE_PEAMSUB_API_KEY
+```
+Name: VITE_PEAMSUB_API_KEY
+Value: qgwvsh5rwvtevey8zdh4bj13
+Environment: Production, Preview, Development
+```
+
 ---
 
 ## 🛠️ วิธีการเพิ่มใน Vercel:
@@ -67,7 +74,7 @@ Environment: Production, Preview, Development
    - **Value**: ค่าที่ต้องการ (เช่น `AIzaSyBw7XNHrcIUr_PQT0XezTFVzHoCR5Zx_FU`)
    - **Environment**: เลือกทั้ง 3 ช่อง (Production, Preview, Development)
 7. **คลิก "Save"**
-8. **ทำซ้ำ** สำหรับทั้ง 7 ตัวแปร
+7. **ทำซ้ำ** สำหรับทั้ง 8 ตัวแปร
 
 ## ✅ หลังจากเพิ่มครบแล้ว:
 - คลิก **"Redeploy"** เพื่อ deploy ใหม่

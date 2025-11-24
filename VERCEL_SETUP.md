@@ -13,6 +13,11 @@ VITE_FIREBASE_APP_ID=1:934820009576:web:3b3bd4d3e3e1a51e794ddd
 VITE_FIREBASE_MEASUREMENT_ID=G-QBCFDC42S0
 ```
 
+### 🔑 Peamsub API Configuration
+```
+VITE_PEAMSUB_API_KEY=qgwvsh5rwvtevey8zdh4bj13
+```
+
 ## 🛠️ วิธีการตั้งค่าบน Vercel
 
 ### Method 1: ผ่าน Vercel Dashboard
@@ -41,6 +46,7 @@ vercel env add VITE_FIREBASE_STORAGE_BUCKET
 vercel env add VITE_FIREBASE_MESSAGING_SENDER_ID
 vercel env add VITE_FIREBASE_APP_ID
 vercel env add VITE_FIREBASE_MEASUREMENT_ID
+vercel env add VITE_PEAMSUB_API_KEY
 
 # Deploy
 vercel --prod
