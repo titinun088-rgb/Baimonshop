@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -7,12 +7,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 const Login = () => {
   const navigate = useNavigate();
   const { signIn, signInWithGoogle } = useAuth();
-  
+
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const turnstileRef = useRef<any>(null);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -20,6 +23,13 @@ const Login = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Check if CAPTCHA is verified
+    if (!captchaToken) {
+      toast.error("กรุณายืนยัน CAPTCHA ก่อนเข้าสู่ระบบ");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -28,7 +38,13 @@ const Login = () => {
       navigate("/");
     } catch (error: any) {
       console.error("Login error:", error);
-      
+
+      // Reset CAPTCHA on error
+      setCaptchaToken(null);
+      if (turnstileRef.current) {
+        turnstileRef.current.reset();
+      }
+
       // แปลข้อความ error
       if (error.code === "auth/user-not-found" || error.code === "auth/wrong-password") {
         toast.error("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
@@ -54,7 +70,7 @@ const Login = () => {
       navigate("/");
     } catch (error: any) {
       console.error("Google sign-in error:", error);
-      
+
       if (error.code === "auth/popup-closed-by-user") {
         toast.error("ยกเลิกการเข้าสู่ระบบ");
       } else if (error.code === "auth/popup-blocked") {
@@ -72,10 +88,10 @@ const Login = () => {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="mb-8 text-center">
-            <div className="flex items-center justify-center gap-3 mb-2">
-            <img 
-              src="/logo.png" 
-              alt="CoinZone Logo" 
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <img
+              src="/logo.png"
+              alt="CoinZone Logo"
               className="h-12 w-12 object-contain"
             />
             <h1 className="text-3xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
@@ -127,6 +143,23 @@ const Login = () => {
                     setFormData({ ...formData, password: e.target.value })
                   }
                   required
+                />
+              </div>
+
+              {/* Cloudflare Turnstile CAPTCHA */}
+              <div className="flex justify-center">
+                <Turnstile
+                  ref={turnstileRef}
+                  siteKey="0x4AAAAAACCjuqv4ion-H8Dt"
+                  onSuccess={(token) => setCaptchaToken(token)}
+                  onError={() => {
+                    setCaptchaToken(null);
+                    toast.error("เกิดข้อผิดพลาดในการยืนยัน CAPTCHA");
+                  }}
+                  onExpire={() => {
+                    setCaptchaToken(null);
+                    toast.warning("CAPTCHA หมดอายุ กรุณายืนยันอีกครั้ง");
+                  }}
                 />
               </div>
 
