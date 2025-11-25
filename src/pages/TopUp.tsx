@@ -129,7 +129,7 @@ const TopUp = () => {
         accountNameEN: 'Phongsakon Kaeodam'
       });
 
-      // เพิ่มการตรวจสอบจากเบอร์ PromptPay
+      // เพิ่มการตรวจสอบจากเบอร์ PromptPay (รหัส 02001)
       const checkPromptPay = createCheckReceiver({
         accountType: ACCOUNT_TYPES.PROMPTPAY_PHONE,
         accountNumber: '0959308178',
