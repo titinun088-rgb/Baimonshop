@@ -123,7 +123,7 @@ const TopUp = () => {
     try {
       // สร้างเงื่อนไขการตรวจสอบทั้งการตรวจสอบซ้ำและการตรวจสอบบัญชีปลายทาง
       const checkReceiver = createCheckReceiver({
-        accountType: ACCOUNT_TYPES.TTB_BANK,
+        accountType: ACCOUNT_TYPES.TMB_BANK,
         accountNumber: '9197025415',
         accountNameTH: 'พงศกร แก้วดำ',
         accountNameEN: 'Phongsakon Kaeodam'
@@ -335,7 +335,7 @@ const TopUp = () => {
                   <div className="space-y-4 max-w-md mx-auto">
                     <div className="bg-white rounded-lg p-4 border-2 border-green-400 shadow-lg">
                       <div className="space-y-3">
-                        <div className="flex justify-between items-center p-3 bg-green-50 rounded"><span className="text-gray-700 font-bold">ธนาคาร:</span><span className="text-green-800 font-bold text-lg">ทหารไทยธนชาต (TTB)</span></div>
+                        <div className="flex justify-between items-center p-3 bg-green-50 rounded"><span className="text-gray-700 font-bold">ธนาคาร:</span><span className="text-green-800 font-bold text-lg">ธนาคารทหารไทย (TMB)</span></div>
                         <div className="flex justify-between items-center p-3 bg-green-50 rounded">
                           <span className="text-gray-700 font-bold">เลขที่บัญชี:</span>
                           <div className="flex items-center gap-2">
