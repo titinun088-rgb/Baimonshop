@@ -121,6 +121,14 @@ const TopUp = () => {
     setIsVerifying(true);
     setVerificationResult(null);
     try {
+      // สร้างเงื่อนไขการตรวจสอบบัญชีธนาคารทหารไทย
+      const checkReceiver = createCheckReceiver({
+        accountType: ACCOUNT_TYPES.TMB_BANK,
+        accountNumber: '9197025415',
+        accountNameTH: 'พงศกร แก้วดำ',
+        accountNameEN: 'Phongsakon Kaeodam'
+      });
+
       // สร้างเงื่อนไขการตรวจสอบจาก PromptPay เบอร์โทรศัพท์
       const checkPromptPay = createCheckReceiver({
         accountType: ACCOUNT_TYPES.PROMPTPAY_PHONE,
@@ -131,7 +139,7 @@ const TopUp = () => {
 
       const checkCondition = createCheckCondition({
         checkDuplicate: true,
-        checkReceiver: [checkPromptPay]
+        checkReceiver: [checkReceiver, checkPromptPay]
       });
 
       const result = await verifySlipByImage(imageFile, checkCondition);
