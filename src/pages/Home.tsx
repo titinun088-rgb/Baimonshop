@@ -183,23 +183,23 @@ const Home = () => {
         <meta property="og:title" content="BaimonShop เว็บเติมเกม รับเติมเกมออนไลน์ราคาถูก เติม ROV Free Fire PUBG" />
         <meta property="og:description" content="BaimonShop เว็บเติมเกมออนไลน์อันดับ 1 รับเติมเกมราคาถูกที่สุด เติมเกม ROV Free Fire PUBG Mobile Legends แอพพรีเมียม Netflix Spotify บัตรเงินสด Steam เติมเงินมือถือ ระบบอัตโนมัติ รวดเร็ว ปลอดภัย 100%" />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://www.coin-zone.shop/" />
-        <meta property="og:image" content="https://www.coin-zone.shop/logo.png" />
+        <meta property="og:url" content="https://www.baimonshop.com/" />
+        <meta property="og:image" content="https://www.baimonshop.com/logo.png" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="BaimonShop เว็บเติมเกม รับเติมเกมออนไลน์ราคาถูก" />
         <meta name="twitter:description" content="BaimonShop เว็บเติมเกมอันดับ 1 รับเติมเกมราคาถูก เติม ROV Free Fire PUBG แอพพรีเมียม บัตรเงินสด เติมเงินมือถือ" />
-        <link rel="canonical" href="https://www.coin-zone.shop/" />
+        <link rel="canonical" href="https://www.baimonshop.com/" />
         <meta name="description" content="รับเติมเกม BaimonShop เว็บเติมเกมออนไลน์อันดับ 1 เติมเกม ROV Free Fire PUBG Mobile Legends Genshin Impact แอปพรีเมียม Netflix Spotify YouTube Premium บัตรเงินสด Steam Garena เติมเงินมือถือ AIS True DTAC ราคาถูกที่สุด รวดเร็วทันใจ ปลอดภัย 100% เว็ปเติมเกมที่ดีที่สุด บริการตลอด 24 ชั่วโมง ระบบอัตโนมัติ เงินเข้าไว" />
         <meta name="keywords" content="รับเติมเกม, เติมเกม, เว็บเติมเกม, เว็ปเติมเกม, baimonshop, เว็บเติมเกมออนไลน์, เว็ปเติมเกมออนไลน์, รับเติมเกมออนไลน์, ร้านเติมเกม, เติมเงินเกม, เติม ROV, เติม Free Fire, เติม PUBG, เติม Mobile Legends, topup game, แอปพรีเมียม, Netflix, Spotify, YouTube Premium, บัตรเงินสด, Steam Wallet, Garena Shell, เติมเงินมือถือ, เติมเงิน AIS, เติมเงิน True, เติมเงิน DTAC" />
         <meta property="og:title" content="รับเติมเกม BaimonShop | เว็บเติมเกมออนไลน์ ราคาถูก" />
         <meta property="og:description" content="รับเติมเกม BaimonShop เว็บเติมเกมออนไลน์อันดับ 1 เติมเกม ROV Free Fire PUBG รวดเร็วทันใจ ปลอดภัย 100% ราคาถูกที่สุด บริการตลอด 24 ชั่วโมง" />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://www.coin-zone.shop/logo.png" />
-        <meta property="og:url" content="https://www.coin-zone.shop/" />
+        <meta property="og:image" content="https://www.baimonshop.com/logo.png" />
+        <meta property="og:url" content="https://www.baimonshop.com/" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="รับเติมเกม BaimonShop | เว็บเติมเกมออนไลน์" />
         <meta name="twitter:description" content="รับเติมเกม BaimonShop เว็บเติมเกมออนไลน์ เติมเกม ROV Free Fire PUBG รวดเร็ว ปลอดภัย ราคาถูก 24 ชม." />
-        <link rel="canonical" href="https://www.coin-zone.shop/" />
+        <link rel="canonical" href="https://www.baimonshop.com/" />
       </Helmet>
 
       <div className="relative bg-black text-white min-h-screen font-['Kanit',sans-serif] -mx-3 sm:-mx-4 lg:-mx-6 xl:-mx-8 overflow-hidden">

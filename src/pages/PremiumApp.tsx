@@ -724,12 +724,12 @@ const PremiumApp = () => {
         <meta property="og:title" content="BaimonShop แอปพรีเมียม | Netflix Spotify YouTube Premium Disney+ ราคาถูกที่สุด" />
         <meta property="og:description" content="BaimonShop แอปพรีเมียม Netflix Spotify YouTube Premium Disney+ Canva Pro Adobe ราคาถูกที่สุด บริการตลอด 24 ชั่วโมง ปลอดภัย 100% ระบบอัตโนมัติ ของเข้าไว" />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://www.coin-zone.shop/premium-app" />
-        <meta property="og:image" content="https://www.coin-zone.shop/logo.png" />
+        <meta property="og:url" content="https://www.baimonshop.com/premium-app" />
+        <meta property="og:image" content="https://www.baimonshop.com/logo.png" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="BaimonShop แอปพรีเมียม Netflix Spotify YouTube Premium ราคาถูก" />
         <meta name="twitter:description" content="BaimonShop แอปพรีเมียม Netflix Spotify YouTube Premium Disney+ ราคาถูกที่สุด บริการตลอด 24 ชั่วโมง ปลอดภัย 100%" />
-        <link rel="canonical" href="https://www.coin-zone.shop/premium-app" />
+        <link rel="canonical" href="https://www.baimonshop.com/premium-app" />
       </Helmet>
       
       {/* Schema Markup for Premium Apps */}
@@ -742,7 +742,7 @@ const PremiumApp = () => {
           currency: "THB",
           rating: 4.8,
           reviewCount: 5000,
-          url: "https://www.coin-zone.shop/premium-app"
+          url: "https://www.baimonshop.com/premium-app"
         }}
       />
       
@@ -750,7 +750,7 @@ const PremiumApp = () => {
           title="แอปพรีเมียม — BaimonShop | Netflix Spotify YouTube Premium Disney+ ราคาถูก" 
           description="BaimonShop บริการแอปพรีเมียม Netflix Spotify YouTube Premium Disney+ Canva Pro ราคาถูกที่สุด ปลอดภัย 100% บริการตลอด 24 ชั่วโมง"
           keywords="baimonshop, แอปพรีเมียม, แอพพรีเมียม, Netflix, Spotify, YouTube Premium, Disney Plus, Canva Pro, premium app"
-          canonical="https://www.coin-zone.shop/premium-app"
+          canonical="https://www.baimonshop.com/premium-app"
         />
         <div className="space-y-6">
           {/* Header */}
@@ -1592,16 +1592,16 @@ const PremiumApp = () => {
                             <span>ราคาปกติ:</span>
                             <span className="font-semibold">{selectedProductDetails.price} บาท</span>
                           </div>
-                          {isAdmin && selectedProductDetails.pricevip && (
-                            <div className="flex justify-between">
-                              <span>ราคา VIP:</span>
-                              <span className="font-semibold text-green-600">{selectedProductDetails.pricevip} บาท</span>
-                            </div>
-                          )}
                           {isAdmin && selectedProductDetails.agent_price && (
                             <div className="flex justify-between">
+                              <span>ราคา VIP:</span>
+                              <span className="font-semibold text-green-600">{selectedProductDetails.agent_price} บาท</span>
+                            </div>
+                          )}
+                          {isAdmin && selectedProductDetails.pricevip && (
+                            <div className="flex justify-between">
                               <span>ราคา Agent:</span>
-                              <span className="font-semibold text-blue-600">{selectedProductDetails.agent_price} บาท</span>
+                              <span className="font-semibold text-blue-600">{selectedProductDetails.pricevip} บาท</span>
                             </div>
                           )}
                         </div>

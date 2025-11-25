@@ -214,7 +214,7 @@ const GameDetail = () => {
         title={game.name}
         description={game.description || `จัดการรายการเติม ${game.name}`}
         image={game.imageUrl}
-        canonical={`https://www.coin-zone.shop/games/${id}`}
+        canonical={`https://www.baimonshop.com/games/${id}`}
       />
       <div className="space-y-6">
         {/* Header */}

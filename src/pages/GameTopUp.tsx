@@ -341,8 +341,8 @@ const GameTopUp = () => {
         <meta property="og:title" content="BaimonShop เติมเกม เว็บเติมเกม รับเติมเกมราคาถูก ROV Free Fire PUBG" />
         <meta property="og:description" content="BaimonShop เว็บเติมเกมออนไลน์อันดับ 1 รับเติมเกมราคาถูกที่สุด เติมเกม ROV Free Fire PUBG เว็ปเติมเกมฟีฟาย เติมเพชร Free Fire คุ้มๆ เติมเงิน ROV Garena ร้านเติมเกมที่ดีที่สุด รวดเร็ว ปลอดภัย 100% บริการตลอด 24 ชั่วโมง" />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://www.coin-zone.shop/game-topup" />
-        <meta property="og:image" content="https://www.coin-zone.shop/logo.png" />
+        <meta property="og:url" content="https://www.baimonshop.com/game-topup" />
+        <meta property="og:image" content="https://www.baimonshop.com/logo.png" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="BaimonShop เติมเกม เว็บเติมเกม รับเติมเกมราคาถูก" />
         <meta name="twitter:description" content="BaimonShop เว็บเติมเกมอันดับ 1 รับเติมเกมราคาถูก เติม ROV Free Fire PUBG เว็ปเติมเกมฟีฟาย เติมเพชร Free Fire คุ้มๆ ร้านเติมเกมที่ดีที่สุด" />
@@ -357,9 +357,9 @@ const GameTopUp = () => {
           description: "บริการเติมเกม ROV Free Fire PUBG Mobile Legends Valorant Roblox ราคาถูกที่สุด",
           price: "10",
           currency: "THB",
-          rating: 4.9,
-          reviewCount: 15000,
-          url: "https://www.coin-zone.shop/game-topup"
+          rating: 4.8,
+          reviewCount: 2500,
+          url: "https://www.baimonshop.com/game-topup"
         }}
       />
       

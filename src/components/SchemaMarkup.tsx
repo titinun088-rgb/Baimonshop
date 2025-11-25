@@ -41,7 +41,7 @@ const SchemaMarkup: React.FC<SchemaMarkupProps> = ({ type, data }) => {
           "seller": {
             "@type": "Organization",
             "name": "BaimonShop",
-            "url": "https://www.coin-zone.shop"
+            "url": "https://www.baimonshop.com"
           }
         },
         "aggregateRating": {
@@ -52,14 +52,14 @@ const SchemaMarkup: React.FC<SchemaMarkupProps> = ({ type, data }) => {
           "worstRating": 1
         },
         "image": data.image || [
-          "https://www.coin-zone.shop/logo.png",
-          "https://www.coin-zone.shop/product-default.png"
+          "https://www.baimonshop.com/logo.png",
+          "https://www.baimonshop.com/product-default.png"
         ],
-        "url": data.url || "https://www.coin-zone.shop",
+        "url": data.url || "https://www.baimonshop.com",
         "provider": {
           "@type": "Organization",
           "name": "BaimonShop",
-          "url": "https://www.coin-zone.shop"
+          "url": "https://www.baimonshop.com"
         },
         "category": data.category || "Digital Products"
       };
@@ -68,8 +68,8 @@ const SchemaMarkup: React.FC<SchemaMarkupProps> = ({ type, data }) => {
     if (type === 'organization') {
       return {
         ...baseSchema,
-        "url": "https://www.coin-zone.shop",
-        "logo": "https://www.coin-zone.shop/logo.png",
+        "url": "https://www.baimonshop.com",
+        "logo": "https://www.baimonshop.com/logo.png",
         "contactPoint": {
           "@type": "ContactPoint",
           "contactType": "customer service",
