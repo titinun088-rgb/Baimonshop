@@ -124,7 +124,7 @@ const TopUp = () => {
       // สร้างเงื่อนไขการตรวจสอบทั้งการตรวจสอบซ้ำและการตรวจสอบบัญชีปลายทาง
       const checkReceiver = createCheckReceiver({
         accountType: ACCOUNT_TYPES.TTB_BANK,
-        accountNumber: '9197055415',
+        accountNumber: '9197025415',
         accountNameTH: 'พงศกร แก้วดำ',
         accountNameEN: 'Phongsakon Kaeodam'
       });
@@ -331,8 +331,8 @@ const TopUp = () => {
                         <div className="flex justify-between items-center p-3 bg-green-50 rounded">
                           <span className="text-gray-700 font-bold">เลขที่บัญชี:</span>
                           <div className="flex items-center gap-2">
-                            <span className="text-green-800 font-bold text-xl font-mono">9197055415</span>
-                            <Button size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText('9197055415'); toast.success('คัดลอกเลขบัญชีแล้ว'); }} className="h-8"><Copy className="h-4 w-4" /></Button>
+                            <span className="text-green-800 font-bold text-xl font-mono">9197025415</span>
+                            <Button size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText('9197025415'); toast.success('คัดลอกเลขบัญชีแล้ว'); }} className="h-8"><Copy className="h-4 w-4" /></Button>
                           </div>
                         </div>
                         <div className="flex justify-between items-center p-3 bg-green-50 rounded"><span className="text-gray-700 font-bold">ชื่อบัญชี:</span><span className="text-green-800 font-bold text-lg">นาย พงศกร แก้วดำ</span></div>
