@@ -132,7 +132,7 @@ const TopUp = () => {
       // สร้างเงื่อนไขการตรวจสอบจาก PromptPay เบอร์โทรศัพท์
       const checkPromptPay = createCheckReceiver({
         accountType: ACCOUNT_TYPES.PROMPTPAY_PHONE,
-        accountNumber: '0959308178',
+        accountNumber: '0989949413',
         accountNameTH: 'ฐิตินันท์ กล้าหาญ',
         accountNameEN: 'Titinn Klahan'
       });
@@ -313,7 +313,7 @@ const TopUp = () => {
                       <img src="/S__23691273.jpg" alt="QR Code PromptPay" className="max-w-[200px] w-full h-auto rounded-lg shadow-md border-4 border-white" />
                       <div className="mt-2 text-center text-xs">
                         <p className="font-bold text-blue-900">ฐิตินันท์ กล้าหาญ</p>
-                        <p className="text-gray-700 font-semibold">เบอร์: 0959308178</p>
+                        <p className="text-gray-700 font-semibold">เบอร์: 0989949413</p>
                       </div>
                     </div>
                     <div className="space-y-3">

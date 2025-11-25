@@ -46,6 +46,7 @@ import { db } from "@/lib/firebase";
 
 const GameTopUp = () => {
   const { user, userData } = useAuth();
+  const isAdmin = userData?.role === "admin";
   
   // User Info
   const [userInfo, setUserInfo] = useState<PeamsubUserData | null>(null);
@@ -497,6 +498,13 @@ const GameTopUp = () => {
                         <span className="text-purple-300 text-sm">{formatGameInfo(selectedGame.info)}</span>
                       </div>
                       
+                      {isAdmin && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-400">ราคาต้นทุน:</span>
+                          <span className="text-orange-400 font-semibold">฿{selectedGame.price} บาท</span>
+                        </div>
+                      )}
+                      
                       <div className="flex items-center justify-between">
                         <span className="text-gray-400">ราคาขาย:</span>
                         {(() => {
@@ -506,6 +514,15 @@ const GameTopUp = () => {
                           );
                         })()}
                       </div>
+                      
+                      {isAdmin && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-400">กำไร:</span>
+                          <span className="text-purple-400 font-semibold">
+                            ฿{(parseFloat(selectedGame.recommendedPrice) - parseFloat(selectedGame.price)).toFixed(2)} บาท
+                          </span>
+                        </div>
+                      )}
                       
                       {selectedGame.format_id && (
                         <div className="flex items-center justify-between">
@@ -690,6 +707,12 @@ const GameTopUp = () => {
                             {group.variants.map(variant => (
                               <div key={variant.id} className="flex flex-col gap-2 rounded-xl border border-purple-500/30 bg-black/20 p-3 md:p-4">
                                 <div className="min-w-0">
+                                  {isAdmin && (
+                                    <div className="mb-2">
+                                      <div className="text-xs text-orange-400">ราคาต้นทุน</div>
+                                      <div className="text-sm text-orange-300 font-medium">฿{variant.price} บาท</div>
+                                    </div>
+                                  )}
                                   <div className="text-xs text-gray-400">ราคาขาย</div>
                                   <div className="relative">
                                     {(() => {
@@ -704,6 +727,13 @@ const GameTopUp = () => {
                                       );
                                     })()}
                                   </div>
+                                  {isAdmin && (
+                                    <div className="mt-1">
+                                      <div className="text-xs text-purple-300">
+                                        กำไร: ฿{(parseFloat(variant.recommendedPrice) - parseFloat(variant.price)).toFixed(2)}
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
                                 {variant.info && (
                                   <div className="text-xs text-gray-400 whitespace-pre-line">{formatGameInfo(variant.info)}</div>

@@ -9,9 +9,9 @@ import { generatePromptPayQRImageLink, generatePromptPayQRCode } from './slip2go
  * ข้อมูล PromptPay เริ่มต้น
  */
 export const DEFAULT_PROMPTPAY_CONFIG = {
-  code: '0902369994',
+  code: '0989949413',
   type: 'phone_number' as const,
-  accountName: 'บริษัท สลิปทูโก จำกัด'
+  accountName: 'ฐิตินันท์ กล้าหาญ'
 };
 
 /**

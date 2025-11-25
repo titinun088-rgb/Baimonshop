@@ -17,12 +17,12 @@ const routes = [
     changefreq: 'daily'
   },
   {
-    path: '/card-topup',
+    path: '/premium-app',
     priority: 0.9,
     changefreq: 'daily'
   },
   {
-    path: '/premium-app',
+    path: '/card-topup',
     priority: 0.8,
     changefreq: 'daily'
   },
@@ -36,14 +36,51 @@ const routes = [
     priority: 0.8,
     changefreq: 'daily'
   },
+  // SEO Landing Pages
+  {
+    path: '/รับเติมเกม.html',
+    priority: 0.9,
+    changefreq: 'weekly'
+  },
+  {
+    path: '/รับเติมเกม-seo.html',
+    priority: 0.8,
+    changefreq: 'weekly'
+  },
+  {
+    path: '/แอปพรีเมียม.html',
+    priority: 0.9,
+    changefreq: 'weekly'
+  },
+  {
+    path: '/เติม-valorant.html',
+    priority: 0.8,
+    changefreq: 'weekly'
+  },
+  {
+    path: '/เติม-rov.html',
+    priority: 0.8,
+    changefreq: 'weekly'
+  },
+  {
+    path: '/เติม-robux.html',
+    priority: 0.8,
+    changefreq: 'weekly'
+  },
+  {
+    path: '/coinzone.html',
+    priority: 0.7,
+    changefreq: 'weekly'
+  },
+  // Auth pages
   {
     path: '/login',
-    priority: 0.7,
+    priority: 0.6,
     changefreq: 'monthly'
   },
   {
     path: '/register',
-    priority: 0.7,
+    priority: 0.6,
     changefreq: 'monthly'
   }
 ];
@@ -56,7 +93,7 @@ const generateSitemap = () => {
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${routes.map(route => `  <url>
-    <loc>${baseUrl}${route.path}</loc>
+    <loc>${baseUrl}${encodeURI(route.path)}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>${route.changefreq}</changefreq>
     <priority>${route.priority}</priority>

@@ -17,7 +17,7 @@ interface GeneratePromptPayQRProps {
 export const GeneratePromptPayQR = ({
   defaultAmount = '',
   defaultAccountName = 'ผู้ใช้ของฉัน',
-  defaultPromptPayCode = '0902369994',
+  defaultPromptPayCode = '0989949413',
   defaultPromptPayType = 'phone_number'
 }: GeneratePromptPayQRProps) => {
   const [promptPayCode, setPromptPayCode] = useState(defaultPromptPayCode);
