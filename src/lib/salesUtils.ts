@@ -304,51 +304,85 @@ export async function deleteSale(
 }
 
 /**
- * คำนวณสถิติ Dashboard
+ * คำนวณสถิติ Dashboard (ใช้ข้อมูลจาก API)
  */
 export async function getDashboardStats(
   userId?: string
 ): Promise<DashboardStats> {
   try {
-    console.log("📊 salesUtils: คำนวณสถิติ Dashboard...");
+    console.log("📊 salesUtils: คำนวณสถิติ Dashboard จาก API...");
     
-    // ดึงข้อมูลยอดขาย
-    const sales = userId ? await getSalesByUser(userId) : await getAllSales();
+    // นำเข้าฟังก์ชันจาก purchaseHistoryUtils
+    const { getUserPurchaseHistory, getAllPurchaseHistory } = await import('./purchaseHistoryUtils');
+    
+    // ดึงข้อมูลจาก API purchase history
+    const purchases = userId ? await getUserPurchaseHistory(userId) : await getAllPurchaseHistory();
     
     const now = new Date();
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
+    // ฟังก์ชันแปลงค่าให้เป็นตัวเลข
+    const parseNumber = (value: any): number => {
+      if (typeof value === "number") return isNaN(value) ? 0 : value;
+      if (typeof value === "string") {
+        const n = parseFloat(value);
+        return isNaN(n) ? 0 : n;
+      }
+      return 0;
+    };
+
     // กรองยอดขายวันนี้
-    const todaySales = sales.filter(
-      (sale) => sale.saleDate >= todayStart
-    );
+    const todayPurchases = purchases.filter((p) => {
+      const purchaseDate = p.date ? new Date(p.date) : (p.syncedAt || new Date());
+      return purchaseDate >= todayStart;
+    });
 
     // กรองยอดขายเดือนนี้
-    const monthSales = sales.filter(
-      (sale) => sale.saleDate >= monthStart
-    );
+    const monthPurchases = purchases.filter((p) => {
+      const purchaseDate = p.date ? new Date(p.date) : (p.syncedAt || new Date());
+      return purchaseDate >= monthStart;
+    });
+
+    // คำนวณยอดขาย/ต้นทุน/กำไร
+    const calculateTotals = (items: any[]) => {
+      return items.reduce(
+        (acc, item) => {
+          const apiPrice = parseNumber(item.price);
+          const sellPrice = parseNumber(item.sellPrice);
+          acc.sales += sellPrice;
+          acc.cost += apiPrice;
+          acc.profit += sellPrice - apiPrice;
+          return acc;
+        },
+        { sales: 0, cost: 0, profit: 0 }
+      );
+    };
+
+    const todayTotals = calculateTotals(todayPurchases);
+    const monthTotals = calculateTotals(monthPurchases);
+    const allTotals = calculateTotals(purchases);
 
     const stats: DashboardStats = {
       // วันนี้
-      todaySales: todaySales.reduce((sum, s) => sum + s.netAmount, 0),
-      todayCost: todaySales.reduce((sum, s) => sum + s.totalCost, 0),
-      todayProfit: todaySales.reduce((sum, s) => sum + s.profit, 0),
-      todayOrders: todaySales.length,
+      todaySales: todayTotals.sales,
+      todayCost: todayTotals.cost,
+      todayProfit: todayTotals.profit,
+      todayOrders: todayPurchases.length,
 
       // เดือนนี้
-      monthSales: monthSales.reduce((sum, s) => sum + s.netAmount, 0),
-      monthCost: monthSales.reduce((sum, s) => sum + s.totalCost, 0),
-      monthProfit: monthSales.reduce((sum, s) => sum + s.profit, 0),
-      monthOrders: monthSales.length,
+      monthSales: monthTotals.sales,
+      monthCost: monthTotals.cost,
+      monthProfit: monthTotals.profit,
+      monthOrders: monthPurchases.length,
 
       // ทั้งหมด
-      totalSales: sales.reduce((sum, s) => sum + s.netAmount, 0),
-      totalProfit: sales.reduce((sum, s) => sum + s.profit, 0),
-      totalOrders: sales.length,
+      totalSales: allTotals.sales,
+      totalProfit: allTotals.profit,
+      totalOrders: purchases.length,
     };
 
-    console.log("✅ salesUtils: คำนวณสถิติเสร็จสิ้น", stats);
+    console.log("✅ salesUtils: คำนวณสถิติจาก API เสร็จสิ้น", stats);
     return stats;
   } catch (error) {
     console.error("❌ salesUtils: Error calculating stats:", error);
@@ -369,14 +403,28 @@ export async function getDashboardStats(
 }
 
 /**
- * สร้างข้อมูลกราฟรายวัน (7 วันล่าสุด)
+ * สร้างข้อมูลกราฟรายวัน (7 วันล่าสุด) - ใช้ข้อมูลจาก API
  */
 export async function getDailyChartData(userId?: string): Promise<ChartData[]> {
   try {
-    console.log("📈 salesUtils: สร้างข้อมูลกราฟรายวัน...");
+    console.log("📈 salesUtils: สร้างข้อมูลกราฟรายวันจาก API...");
     
-    const sales = userId ? await getSalesByUser(userId) : await getAllSales();
+    // นำเข้าฟังก์ชันจาก purchaseHistoryUtils
+    const { getUserPurchaseHistory, getAllPurchaseHistory } = await import('./purchaseHistoryUtils');
     
+    // ดึงข้อมูลจาก API purchase history
+    const purchases = userId ? await getUserPurchaseHistory(userId) : await getAllPurchaseHistory();
+    
+    // ฟังก์ชันแปลงค่าให้เป็นตัวเลข
+    const parseNumber = (value: any): number => {
+      if (typeof value === "number") return isNaN(value) ? 0 : value;
+      if (typeof value === "string") {
+        const n = parseFloat(value);
+        return isNaN(n) ? 0 : n;
+      }
+      return 0;
+    };
+
     // สร้าง array 7 วันล่าสุด
     const chartData: ChartData[] = [];
     for (let i = 6; i >= 0; i--) {
@@ -385,19 +433,32 @@ export async function getDailyChartData(userId?: string): Promise<ChartData[]> {
       const dateStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
       const dateEnd = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
 
-      const daySales = sales.filter(
-        (sale) => sale.saleDate >= dateStart && sale.saleDate < dateEnd
+      const dayPurchases = purchases.filter((p) => {
+        const purchaseDate = p.date ? new Date(p.date) : (p.syncedAt || new Date());
+        return purchaseDate >= dateStart && purchaseDate < dateEnd;
+      });
+
+      const dayTotals = dayPurchases.reduce(
+        (acc, item) => {
+          const apiPrice = parseNumber(item.price);
+          const sellPrice = parseNumber(item.sellPrice);
+          acc.sales += sellPrice;
+          acc.cost += apiPrice;
+          acc.profit += sellPrice - apiPrice;
+          return acc;
+        },
+        { sales: 0, cost: 0, profit: 0 }
       );
 
       chartData.push({
         date: `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}`,
-        sales: daySales.reduce((sum, s) => sum + s.netAmount, 0),
-        profit: daySales.reduce((sum, s) => sum + s.profit, 0),
-        cost: daySales.reduce((sum, s) => sum + s.totalCost, 0),
+        sales: dayTotals.sales,
+        profit: dayTotals.profit,
+        cost: dayTotals.cost,
       });
     }
 
-    console.log("✅ salesUtils: สร้างข้อมูลกราฟเสร็จสิ้น");
+    console.log("✅ salesUtils: สร้างข้อมูลกราฟจาก API เสร็จสิ้น");
     return chartData;
   } catch (error) {
     console.error("❌ salesUtils: Error creating chart data:", error);
