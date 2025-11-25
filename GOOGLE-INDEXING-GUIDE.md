@@ -1,17 +1,17 @@
-# CoinZone - Google Indexing Guide
+# BaimonShop - Google Indexing Guide
 # วิธีการทำให้เว็บขึ้น Google อย่างรวดเร็ว
 
 ## 🎯 ขั้นตอนที่ 1: ยืนยันว่าเว็บ Deploy แล้ว
 
 ตรวจสอบว่าเว็บเข้าได้จริงที่:
-- https://www.coin-zone.shop/
-- https://coin-zone.shop/
+- https://www.baimonshop.com/
+- https://baimonshop.com/
 
 ## 🎯 ขั้นตอนที่ 2: Submit ไปยัง Google Search Console
 
 ### 2.1 เข้า Google Search Console
 1. ไปที่: https://search.google.com/search-console
-2. เลือก property: www.coin-zone.shop
+2. เลือก property: www.baimonshop.com
 3. ถ้ายังไม่มี ให้เพิ่ม property ใหม่
 
 ### 2.2 Verify Ownership (ถ้ายังไม่ได้ verify)
@@ -22,7 +22,7 @@
 
 ### 2.3 Submit Sitemap
 1. ไปที่ Sitemaps (เมนูซ้าย)
-2. Add new sitemap: `https://www.coin-zone.shop/sitemap.xml`
+2. Add new sitemap: `https://www.baimonshop.com/sitemap.xml`
 3. คลิก Submit
 
 ### 2.4 Request Indexing สำหรับหน้าสำคัญ
@@ -30,21 +30,21 @@
 
 **หน้าหลัก:**
 ```
-https://www.coin-zone.shop/
+https://www.baimonshop.com/
 ```
 
 **SEO Landing Pages:**
 ```
-https://www.coin-zone.shop/รับเติมเกม.html
-https://www.coin-zone.shop/แอปพรีเมียม.html
+https://www.baimonshop.com/รับเติมเกม.html
+https://www.baimonshop.com/แอปพรีเมียม.html
 ```
 
 **หน้าบริการ:**
 ```
-https://www.coin-zone.shop/game-topup
-https://www.coin-zone.shop/premium-app
-https://www.coin-zone.shop/card-topup
-https://www.coin-zone.shop/cash-card
+https://www.baimonshop.com/game-topup
+https://www.baimonshop.com/premium-app
+https://www.baimonshop.com/card-topup
+https://www.baimonshop.com/cash-card
 ```
 
 วิธี Request Indexing:
@@ -58,15 +58,15 @@ https://www.coin-zone.shop/cash-card
 ## 🎯 ขั้นตอนที่ 3: Submit ไปยัง Bing Webmaster Tools
 
 1. ไปที่: https://www.bing.com/webmasters
-2. Add site: www.coin-zone.shop
-3. Submit sitemap: https://www.coin-zone.shop/sitemap.xml
+2. Add site: www.baimonshop.com
+3. Submit sitemap: https://www.baimonshop.com/sitemap.xml
 
 ## 🎯 ขั้นตอนที่ 4: ทดสอบว่าเว็บถูก Index แล้วหรือยัง
 
 ### ทดสอบใน Google:
 ```
-site:coin-zone.shop
-site:www.coin-zone.shop
+site:baimonshop.com
+site:www.baimonshop.com
 ```
 
 ถ้าขึ้นผลลัพธ์ = ถูก index แล้ว ✅
@@ -74,11 +74,11 @@ site:www.coin-zone.shop
 
 ### ทดสอบค้นหาชื่อเว็บ:
 ```
-CoinZone
-coinzone
-coin-zone
-CoinZone รับเติมเกม
-เว็บเติมเกม CoinZone
+BaimonShop
+baimonshop
+baimon-shop
+BaimonShop รับเติมเกม
+เว็บเติมเกม BaimonShop
 ```
 
 ## 🎯 ขั้นตอนที่ 5: เพิ่ม Backlinks
@@ -109,11 +109,11 @@ CoinZone รับเติมเกม
 ### ตรวจสอบทุกวัน:
 ```bash
 # ทดสอบว่าถูก index หรือยัง
-site:coin-zone.shop
+site:baimonshop.com
 
 # ทดสอบค้นหาชื่อแบรนด์
-CoinZone
-coinzone
+BaimonShop
+baimonshop
 ```
 
 ### ตรวจสอบใน Google Search Console:
@@ -125,9 +125,9 @@ coinzone
 
 | เวลา | ผลลัพธ์ที่คาดหวัง |
 |------|-------------------|
-| **1-3 วัน** | site:coin-zone.shop เริ่มเจอหน้าแรก |
-| **3-7 วัน** | ค้นหา "CoinZone" เจอในผลลัพธ์ |
-| **1-2 สัปดาห์** | ค้นหา "coinzone" เจอหน้าแรก |
+| **1-3 วัน** | site:baimonshop.com เริ่มเจอหน้าแรก |
+| **3-7 วัน** | ค้นหา "BaimonShop" เจอในผลลัพธ์ |
+| **1-2 สัปดาห์** | ค้นหา "baimonshop" เจอหน้าแรก |
 | **2-4 สัปดาห์** | ค้นหา "รับเติมเกม" เริ่มเห็นเว็บ |
 | **1-2 เดือน** | Ranking เริ่มดีขึ้นสำหรับ keywords หลัก |
 
@@ -143,10 +143,10 @@ coinzone
 ### แก้ไข:
 ```bash
 # ตรวจสอบ robots.txt
-https://www.coin-zone.shop/robots.txt
+https://www.baimonshop.com/robots.txt
 
 # ตรวจสอบ sitemap
-https://www.coin-zone.shop/sitemap.xml
+https://www.baimonshop.com/sitemap.xml
 
 # ทดสอบ URL ใน Google Search Console
 URL Inspection → Paste URL → Test Live URL
@@ -154,9 +154,9 @@ URL Inspection → Paste URL → Test Live URL
 
 ## 📝 Checklist รายวัน (จนกว่าจะขึ้น Google)
 
-- [ ] ทดสอบ `site:coin-zone.shop`
-- [ ] ทดสอบค้นหา "CoinZone"
-- [ ] ทดสอบค้นหา "coinzone"
+- [ ] ทดสอบ `site:baimonshop.com`
+- [ ] ทดสอบค้นหา "BaimonShop"
+- [ ] ทดสอบค้นหา "baimonshop"
 - [ ] ตรวจสอบ Google Search Console
 - [ ] แชร์ลิงค์ใน social media 1 ครั้ง
 - [ ] Request indexing สำหรับหน้าใหม่ (ถ้ามี)
@@ -164,10 +164,10 @@ URL Inspection → Paste URL → Test Live URL
 ## 🎯 Keywords เป้าหมาย
 
 ### Priority 1 (Brand Keywords):
-- CoinZone
-- coinzone
-- coin-zone
-- CoinZone Thailand
+- BaimonShop
+- baimonshop
+- baimon-shop
+- BaimonShop Thailand
 
 ### Priority 2 (Service Keywords):
 - รับเติมเกม
@@ -182,8 +182,8 @@ URL Inspection → Paste URL → Test Live URL
 - เติมเกมออนไลน์
 
 ### Priority 4 (Long-tail Keywords):
-- CoinZone รับเติมเกม
-- เว็บเติมเกม CoinZone
+- BaimonShop รับเติมเกม
+- เว็บเติมเกม BaimonShop
 - เติมเกม ROV
 - เติม Free Fire
 - Netflix ราคาถูก

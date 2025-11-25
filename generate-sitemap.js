@@ -50,7 +50,7 @@ const routes = [
 
 // Generate sitemap XML
 const generateSitemap = () => {
-  const baseUrl = 'https://www.coin-zone.shop';
+  const baseUrl = 'https://www.baimonshop.com';
   const today = new Date().toISOString().split('T')[0];
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
@@ -64,7 +64,7 @@ ${routes.map(route => `  <url>
 </urlset>`;
 
   // เขียนไฟล์ sitemap.xml
-  const sitemapPath = join(__dirname, 'dist', 'sitemap.xml');
+  const sitemapPath = join(__dirname, 'public', 'sitemap.xml');
   fs.writeFileSync(sitemapPath, sitemap);
   console.log('✅ Generated sitemap.xml');
 }

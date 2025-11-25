@@ -284,7 +284,7 @@ const Terms = () => {
                 <p>หากมีคำถามเกี่ยวกับข้อกำหนดและเงื่อนไขเหล่านี้ กรุณาติดต่อ BaimonShop:</p>
                 <div className="bg-muted/50 p-4 rounded-lg space-y-2 mt-2">
                   <p><strong>เว็บไซต์:</strong> <a href="https://www.baimonshop.com" className="text-primary hover:underline">www.baimonshop.com</a></p>
-                  <p><strong>อีเมล สนับสนุน:</strong> support@coin-zone.shop</p>
+                  <p><strong>อีเมล สนับสนุน:</strong> support@baimonshop.com</p>
                   <p><strong>เวลาบริการ:</strong> 24 ชั่วโมง ทุกวัน</p>
                   <p><strong>Line ID:</strong> @baimonshop (สำหรับการสนับสนุนด่วน)</p>
                   <p className="text-sm text-muted-foreground mt-2">

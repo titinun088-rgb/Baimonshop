@@ -346,7 +346,7 @@ const GameTopUp = () => {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="BaimonShop เติมเกม เว็บเติมเกม รับเติมเกมราคาถูก" />
         <meta name="twitter:description" content="BaimonShop เว็บเติมเกมอันดับ 1 รับเติมเกมราคาถูก เติม ROV Free Fire PUBG เว็ปเติมเกมฟีฟาย เติมเพชร Free Fire คุ้มๆ ร้านเติมเกมที่ดีที่สุด" />
-        <link rel="canonical" href="https://www.coin-zone.shop/game-topup" />
+        <link rel="canonical" href="https://www.baimonshop.com/game-topup" />
       </Helmet>
       
       {/* Schema Markup for Game Topup Service */}
