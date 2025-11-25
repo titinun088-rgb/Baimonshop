@@ -797,7 +797,7 @@ const Layout = ({ children }: LayoutProps) => {
 
       {/* Contact Admin Button */}
       <a
-        href="https://www.facebook.com/profile.php?id=61578886122532"
+        href="https://www.facebook.com/share/1CpnioY7kk/"
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-4 right-4 z-50"
