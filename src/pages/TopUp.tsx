@@ -124,9 +124,9 @@ const TopUp = () => {
       // สร้างเงื่อนไขการตรวจสอบทั้งการตรวจสอบซ้ำและการตรวจสอบบัญชีปลายทาง
       const checkReceiver = createCheckReceiver({
         accountType: ACCOUNT_TYPES.TTB_BANK,
-        accountNumber: '4472680323',
-        accountNameTH: 'ฐิตินันท์ กล้าหาญ',
-        accountNameEN: 'Titinn Klahan'
+        accountNumber: '9197055415',
+        accountNameTH: 'พงศกร แก้วดำ',
+        accountNameEN: 'Phongsakon Kaeodam'
       });
 
       const checkCondition = createCheckCondition({
@@ -304,7 +304,7 @@ const TopUp = () => {
                       <h3 className="font-bold text-base mb-2 text-blue-900">📱 สแกน QR Code PromptPay</h3>
                       <img src="/S__23691273.jpg" alt="QR Code PromptPay" className="max-w-[200px] w-full h-auto rounded-lg shadow-md border-4 border-white" />
                       <div className="mt-2 text-center text-xs">
-                        <p className="font-bold text-blue-900">ฐิตินันท์ กล้าหาญ</p>
+                        <p className="font-bold text-blue-900">นาย พงศกร แก้วดำ</p>
                         <p className="text-gray-700 font-semibold">เบอร์: 0959308178</p>
                       </div>
                     </div>
@@ -331,11 +331,11 @@ const TopUp = () => {
                         <div className="flex justify-between items-center p-3 bg-green-50 rounded">
                           <span className="text-gray-700 font-bold">เลขที่บัญชี:</span>
                           <div className="flex items-center gap-2">
-                            <span className="text-green-800 font-bold text-xl font-mono">4472680323</span>
-                            <Button size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText('4472680323'); toast.success('คัดลอกเลขบัญชีแล้ว'); }} className="h-8"><Copy className="h-4 w-4" /></Button>
+                            <span className="text-green-800 font-bold text-xl font-mono">9197055415</span>
+                            <Button size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText('9197055415'); toast.success('คัดลอกเลขบัญชีแล้ว'); }} className="h-8"><Copy className="h-4 w-4" /></Button>
                           </div>
                         </div>
-                        <div className="flex justify-between items-center p-3 bg-green-50 rounded"><span className="text-gray-700 font-bold">ชื่อบัญชี:</span><span className="text-green-800 font-bold text-lg">ฐิตินันท์ กล้าหาญ</span></div>
+                        <div className="flex justify-between items-center p-3 bg-green-50 rounded"><span className="text-gray-700 font-bold">ชื่อบัญชี:</span><span className="text-green-800 font-bold text-lg">นาย พงศกร แก้วดำ</span></div>
                       </div>
                     </div>
                     <div className="mt-4">
