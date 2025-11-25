@@ -135,7 +135,7 @@ const Footer = () => {
             </h3>
             <ul className="space-y-4 mb-6">
               <li>
-                <a href="https://www.facebook.com/share/1WhehouoiD/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors group">
+                <a href="https://www.facebook.com/profile.php?id=61578886122532" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors group">
                   <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Facebook className="w-5 h-5" />
                   </div>

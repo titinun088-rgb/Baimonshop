@@ -401,7 +401,7 @@ const PurchaseHistory = () => {
   const handleClaimProduct = async (item: HistoryItem) => {
     try {
       // เปิดหน้า Facebook สำหรับการเคลมสินค้าทุกประเภท
-      window.open('https://www.facebook.com/share/1S5gFd4AuU/?mibextid=wwXIfr', '_blank');
+      window.open('https://www.facebook.com/profile.php?id=61578886122532', '_blank');
       toast.success("กำลังเปิดหน้าติดต่อแอดมินเพื่อเคลมสินค้า");
     } catch (error) {
       console.error("Error opening Facebook page:", error);

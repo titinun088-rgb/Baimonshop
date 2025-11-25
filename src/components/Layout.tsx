@@ -433,7 +433,7 @@ const Layout = ({ children }: LayoutProps) => {
               )}
             </div>
             <p className="text-xs text-muted-foreground truncate">
-              support@baimonshop.com
+              {user?.email || "ไม่มีอีเมล"}
             </p>
           </div>
         </Link>
@@ -681,7 +681,7 @@ const Layout = ({ children }: LayoutProps) => {
                         {user?.displayName || "ผู้ใช้"}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        support@baimonshop.com
+                        {user?.email || "ไม่มีอีเมล"}
                       </p>
                     </div>
                   </DropdownMenuLabel>
@@ -797,7 +797,7 @@ const Layout = ({ children }: LayoutProps) => {
 
       {/* Contact Admin Button */}
       <a
-        href="https://www.facebook.com/share/1S5gFd4AuU/?mibextid=wwXIfr"
+        href="https://www.facebook.com/profile.php?id=61578886122532"
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-4 right-4 z-50"

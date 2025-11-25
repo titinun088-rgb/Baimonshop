@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import Layout from "@/components/Layout";
@@ -20,7 +20,25 @@ import {
   Award,
   Phone
 } from "lucide-react";
-import { getPeamsubProducts, PeamsubProduct, getPeamsubGameProducts, PeamsubGameProduct } from "@/lib/peamsubUtils";
+import { 
+  getPeamsubProducts, 
+  PeamsubProduct, 
+  getPeamsubGameProducts, 
+  PeamsubGameProduct,
+  getPeamsubMobileProducts,
+  PeamsubMobileProduct,
+  getPeamsubCashCardProducts,
+  PeamsubCashCardProduct
+} from "@/lib/peamsubUtils";
+
+// Type สำหรับสินค้าที่รวมทุกประเภท
+type MixedProduct = {
+  id: string;
+  name: string;
+  img?: string;
+  category: 'game' | 'premium' | 'mobile' | 'cashcard';
+  path: string;
+};
 
 const Home = () => {
   const navigate = useNavigate();
@@ -28,36 +46,151 @@ const Home = () => {
   const [products, setProducts] = useState<PeamsubProduct[]>([]);
   const [gameProducts, setGameProducts] = useState<PeamsubGameProduct[]>([]);
   const [gamesLoading, setGamesLoading] = useState(true);
+  const [randomProducts, setRandomProducts] = useState<MixedProduct[]>([]);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    loadProducts();
-    loadGameProducts();
+    loadAllProducts();
   }, []);
 
-  const loadProducts = async () => {
+  const loadAllProducts = async () => {
     setLoading(true);
+    setGamesLoading(true);
     try {
-      const data = await getPeamsubProducts();
-      setProducts(data);
+      // โหลดทุกประเภทสินค้าพร้อมกัน
+      const [premiumData, gameData, mobileData, cashCardData] = await Promise.all([
+        getPeamsubProducts().catch(() => []),
+        getPeamsubGameProducts().catch(() => []),
+        getPeamsubMobileProducts().catch(() => []),
+        getPeamsubCashCardProducts().catch(() => [])
+      ]);
+
+      setProducts(premiumData);
+      setGameProducts(gameData);
+
+      // รวมสินค้าทุกประเภท
+      const allProducts: MixedProduct[] = [];
+
+      // เพิ่มแอปพรีเมียม
+      premiumData.forEach(p => {
+        if (p.img) {
+          allProducts.push({
+            id: p.id,
+            name: p.name,
+            img: p.img,
+            category: 'premium',
+            path: '/premium-app'
+          });
+        }
+      });
+
+      // เพิ่มเกม (ใช้ category แทน id เพื่อไม่ให้ซ้ำ)
+      const gameCategories = new Map<string, PeamsubGameProduct>();
+      gameData.forEach(p => {
+        if (p.img && !gameCategories.has(p.category)) {
+          gameCategories.set(p.category, p);
+        }
+      });
+      gameCategories.forEach(p => {
+        allProducts.push({
+          id: `game-${p.category}`,
+          name: p.category,
+          img: p.img,
+          category: 'game',
+          path: '/game-topup'
+        });
+      });
+
+      // เพิ่มมือถือ
+      mobileData.forEach(p => {
+        if (p.img) {
+          allProducts.push({
+            id: `mobile-${p.id}`,
+            name: p.name,
+            img: p.img,
+            category: 'mobile',
+            path: '/top-up'
+          });
+        }
+      });
+
+      // เพิ่มบัตรเงินสด
+      cashCardData.forEach(p => {
+        if (p.img) {
+          allProducts.push({
+            id: `cashcard-${p.id}`,
+            name: p.name,
+            img: p.img,
+            category: 'cashcard',
+            path: '/cash-card'
+          });
+        }
+      });
+
+      // สุ่มสินค้าแบบคละหมวดหมู่
+      const shuffled = [...allProducts].sort(() => Math.random() - 0.5);
+      
+      // เลือกสินค้าให้คละกันดี โดยพยายามให้แต่ละหมวดมีสัดส่วนใกล้เคียงกัน
+      const selectedProducts: MixedProduct[] = [];
+      const categoryCounts = { game: 0, premium: 0, mobile: 0, cashcard: 0 };
+      const maxPerCategory = 10; // จำกัดแต่ละหมวดไม่เกิน 10 รายการ
+      
+      for (const product of shuffled) {
+        if (selectedProducts.length >= 40) break; // เพิ่มเป็น 40 รายการ
+        
+        // ถ้าหมวดนี้ยังไม่เต็ม ให้เพิ่มได้
+        if (categoryCounts[product.category] < maxPerCategory) {
+          selectedProducts.push(product);
+          categoryCounts[product.category]++;
+        }
+      }
+      
+      // สุ่มอีกครั้งเพื่อให้คละกันมากขึ้น
+      const finalShuffled = selectedProducts.sort(() => Math.random() - 0.5);
+      
+      // ทำซ้ำสินค้าเพื่อให้เลื่อนได้ต่อเนื่อง
+      setRandomProducts([...finalShuffled, ...finalShuffled, ...finalShuffled]);
+
     } catch (error) {
       console.error("Error loading products:", error);
-      setProducts([]);
     } finally {
       setLoading(false);
+      setGamesLoading(false);
     }
   };
 
+  useEffect(() => {
+    // Auto scroll
+    const scrollContainer = scrollRef.current;
+    if (!scrollContainer || randomProducts.length === 0) return;
+
+    let scrollPosition = 0;
+    const scrollSpeed = 1; // ความเร็วในการเลื่อน (px ต่อ frame)
+
+    const scroll = () => {
+      if (scrollContainer) {
+        scrollPosition += scrollSpeed;
+        scrollContainer.scrollLeft = scrollPosition;
+
+        // เมื่อเลื่อนถึงจุดกึ่งกลาง ให้กลับไปเริ่มต้น (infinite scroll)
+        const maxScroll = scrollContainer.scrollWidth / 3;
+        if (scrollPosition >= maxScroll) {
+          scrollPosition = 0;
+        }
+      }
+    };
+
+    const intervalId = setInterval(scroll, 30);
+
+    return () => clearInterval(intervalId);
+  }, [randomProducts]);
+
+  const loadProducts = async () => {
+    // ฟังก์ชันนี้ไม่ใช้แล้ว - ใช้ loadAllProducts แทน
+  };
+
   const loadGameProducts = async () => {
-    setGamesLoading(true);
-    try {
-      const data = await getPeamsubGameProducts();
-      setGameProducts(data);
-    } catch (error) {
-      console.error("Error loading game products:", error);
-      setGameProducts([]);
-    } finally {
-      setGamesLoading(false);
-    }
+    // ฟังก์ชันนี้ไม่ใช้แล้ว - ใช้ loadAllProducts แทน
   };
 
   const menuItems = [
@@ -339,6 +472,74 @@ const Home = () => {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
 
+          {/* Auto-scrolling Random Products Carousel */}
+          {randomProducts.length > 0 && (
+            <section className="relative -mx-4 sm:-mx-6 lg:-mx-8 overflow-hidden">
+              <div className="text-center mb-8 px-4 sm:px-6 lg:px-8">
+                <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent mb-4">
+                  สินค้าแนะนำ 🎁
+                </h2>
+                <p className="text-gray-400">สินค้ายอดนิยมที่คุณไม่ควรพลาด</p>
+              </div>
+              
+              <div 
+                ref={scrollRef}
+                className="flex gap-4 overflow-x-hidden py-4 px-4"
+                style={{ scrollBehavior: 'auto' }}
+              >
+                {randomProducts.map((product, index) => {
+                  // เลือก icon ตามประเภท
+                  const CategoryIcon = product.category === 'game' ? Gamepad2 
+                    : product.category === 'mobile' ? Smartphone
+                    : product.category === 'cashcard' ? CreditCard
+                    : Sparkles;
+
+                  return (
+                    <Card
+                      key={`${product.id}-${index}`}
+                      className="flex-shrink-0 w-48 group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-purple-500/30 bg-black/30 backdrop-blur-sm border-purple-500/20"
+                      onClick={() => navigate(product.path)}
+                    >
+                      <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-purple-900/20 to-blue-900/20 rounded-t-lg">
+                        {product.img ? (
+                          <img
+                            src={product.img}
+                            alt={product.name}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            loading="lazy"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <CategoryIcon className="w-16 h-16 text-purple-400/50" />
+                          </div>
+                        )}
+                        {/* Category Badge */}
+                        <div className="absolute top-2 right-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+                          {product.category === 'game' ? '🎮 เกม' 
+                            : product.category === 'mobile' ? '📱 มือถือ'
+                            : product.category === 'cashcard' ? '💳 บัตร'
+                            : '⭐ พรีเมียม'}
+                        </div>
+                      </div>
+                      <CardContent className="p-4 bg-gradient-to-br from-purple-900/30 to-blue-900/30">
+                        <h3 className="font-semibold text-sm line-clamp-2 text-white text-center min-h-[40px] flex items-center justify-center">
+                          {product.name}
+                        </h3>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+
+              {/* Gradient Overlays for fade effect */}
+              <div className="absolute top-0 left-0 w-32 h-full bg-gradient-to-r from-[#0a0118] to-transparent pointer-events-none"></div>
+              <div className="absolute top-0 right-0 w-32 h-full bg-gradient-to-l from-[#0a0118] to-transparent pointer-events-none"></div>
+            </section>
+          )}
+
           {/* Services Grid */}
           <section>
             <div className="text-center mb-12">
@@ -588,7 +789,7 @@ const Home = () => {
                 <Button
                   size="lg"
                   variant="outline"
-                  onClick={() => window.open("https://www.facebook.com/share/1WhehouoiD/?mibextid=wwXIfr", "_blank")}
+                  onClick={() => window.open("https://www.facebook.com/profile.php?id=61578886122532", "_blank")}
                   className="border-2 border-white text-white hover:bg-white/10 text-lg px-8 py-6 font-semibold"
                 >
                   <ThumbsUp className="w-5 h-5 mr-2" />
