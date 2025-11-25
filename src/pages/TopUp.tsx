@@ -129,9 +129,17 @@ const TopUp = () => {
         accountNameEN: 'Phongsakon Kaeodam'
       });
 
+      // เพิ่มการตรวจสอบจากเบอร์ PromptPay
+      const checkPromptPay = createCheckReceiver({
+        accountType: ACCOUNT_TYPES.PROMPTPAY_PHONE,
+        accountNumber: '0959308178',
+        accountNameTH: 'พงศกร แก้วดำ',
+        accountNameEN: 'Phongsakon Kaeodam'
+      });
+
       const checkCondition = createCheckCondition({
         checkDuplicate: true,
-        checkReceiver: [checkReceiver]
+        checkReceiver: [checkReceiver, checkPromptPay]
       });
 
       const result = await verifySlipByImage(imageFile, checkCondition);
