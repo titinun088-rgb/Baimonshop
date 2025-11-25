@@ -300,6 +300,26 @@ const TopUp = () => {
             <p className="text-gray-200 mt-2">เติมเงินเข้าบัญชีของคุณผ่านการตรวจสอบสลิปการโอนเงิน</p>
           </div>
 
+          {/* คำเตือนสำคัญ */}
+          <Alert className="mb-6 bg-yellow-50 border-2 border-yellow-400">
+            <AlertTriangle className="h-5 w-5 text-yellow-600" />
+            <AlertDescription className="text-gray-900 font-medium">
+              <p className="font-bold text-lg mb-2">⚠️ คำเตือนสำคัญ</p>
+              <p className="mb-2">
+                <strong>โปรดหลีกเลี่ยงการโอนเงิน เวลา 23.00 - 00.00 น.</strong> 
+                {' '}หากยอดเงินไม่เข้า โปรดติดต่อ{' '}
+                <a 
+                  href="https://www.facebook.com/share/1CpnioY7kk/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 underline font-bold"
+                >
+                  แอดมิน
+                </a>
+              </p>
+            </AlertDescription>
+          </Alert>
+
           <Card className="mb-6 bg-white shadow-xl border-2 border-blue-400">
             <CardHeader className="pb-3">
               <CardTitle className="text-lg font-bold text-gray-900 flex items-center gap-2">📋 ข้อมูลการโอนเงิน</CardTitle>
