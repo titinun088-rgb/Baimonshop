@@ -491,10 +491,10 @@ const PremiumApp = () => {
     const userBalance = parseFloat(userInfo.balance) || 0;
     const userRank = userInfo.rank || 0;
     
-    // ดึงราคาขาย (จาก admin price หรือ recommended price หรือ API price)
-    // Premium App ไม่มี recommendedPrice ใช้ราคาตาม rank
+    // ใช้ราคาขายปกติ (price) เป็นราคาที่แสดงให้ลูกค้าและหักจากยอดเงิน
+    const sellPrice = selectedProduct.price || 0;
+    // ราคาต้นทุนสำหรับซื้อจาก API (ตาม rank)
     const apiPrice = getProductPriceByRank(selectedProduct, userRank);
-    const sellPrice = await getProductSellPrice(selectedProduct.id, 'premium', apiPrice);
     
     // ตรวจสอบ balance จากฐานข้อมูลเว็บก่อน
     if (webBalance < sellPrice) {
@@ -1007,8 +1007,6 @@ const PremiumApp = () => {
                     return (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {filtered.map((product) => {
-                          const canPurchase = userInfo ? canPurchaseProduct(product, parseFloat(userInfo.balance), userInfo.rank) : { canPurchase: false, price: product.price };
-                          
                           return (
                             <Card key={product.id} className="overflow-hidden group bg-black/30 backdrop-blur-sm border-purple-500/20 hover:border-purple-500/50 transition-all duration-300 hover:scale-105">
                               <div className="aspect-square overflow-hidden">
@@ -1024,25 +1022,23 @@ const PremiumApp = () => {
                               <CardContent className="p-4">
                                 <h3 className="font-semibold mb-2 text-white">{product.name}</h3>
                                 
-                                <div className="space-y-2 mb-4">
-                                  <div className="flex justify-between items-center">
-                                    <span className="text-sm text-purple-300">ราคา:</span>
-                                    <span className="font-semibold text-lg text-white">
-                                      {canPurchase.canPurchase ? `${canPurchase.price} บาท` : 'ไม่สามารถซื้อได้'}
-                                    </span>
-                                  </div>
-                                  <div className="flex justify-between items-center">
-                                    <span className="text-sm text-purple-300">สต็อก:</span>
-                                    <Badge variant={product.stock > 0 ? "default" : "destructive"}>
-                                      {product.stock} ชิ้น
-                                    </Badge>
-                                  </div>
-                                </div>
-
-                                <div className="space-y-2">
+                      <div className="space-y-2 mb-4">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-purple-300">ราคา:</span>
+                          <span className="font-semibold text-lg text-white">
+                            {product.price} บาท
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-purple-300">สต็อก:</span>
+                          <Badge variant={product.stock > 0 ? "default" : "destructive"}>
+                            {product.stock} ชิ้น
+                          </Badge>
+                        </div>
+                      </div>                                <div className="space-y-2">
                                   <Button
                                     onClick={() => openPurchaseDialog(product)}
-                                    disabled={!canPurchase.canPurchase}
+                                    disabled={product.stock <= 0}
                                     className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
                                   >
                                     <ShoppingCart className="mr-2 h-4 w-4" />
@@ -1348,7 +1344,7 @@ const PremiumApp = () => {
                         <p className="text-sm">
                           <span className="text-muted-foreground">ราคา:</span> 
                           <span className="font-semibold ml-2">
-                            {getProductPriceByRank(selectedProduct, userInfo.rank)} บาท
+                            {selectedProduct.price} บาท
                           </span>
                         </p>
                       </div>
