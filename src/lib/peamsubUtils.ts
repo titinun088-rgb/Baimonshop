@@ -671,8 +671,22 @@ export const getPeamsubCashCardProducts = async (): Promise<PeamsubCashCardProdu
     console.log('💳 กำลังดึงรายการสินค้าบัตรเงินสด...');
     const response = await makeApiRequest<PeamsubCashCardProduct[]>('/v2/cashcard');
     if (response.statusCode === 200) {
-      console.log('✅ รายการสินค้าบัตรเงินสด:', response.data);
-      return response.data;
+      // กรองสินค้าที่เป็น STEAM หรือ TMN ออก
+      const filteredProducts = response.data.filter(product => {
+        const category = product.category?.toUpperCase() || '';
+        const info = product.info?.toUpperCase() || '';
+        
+        // ตรวจสอบว่ามีคำว่า STEAM หรือ TMN ใน category หรือ info หรือไม่
+        const isSteam = category.includes('STEAM') || info.includes('STEAM');
+        const isTMN = category.includes('TMN') || info.includes('TMN') || category.includes('TRUEMONEY') || info.includes('TRUEMONEY');
+        
+        // คืนค่า true ถ้าไม่ใช่ STEAM หรือ TMN (จะเก็บไว้)
+        return !isSteam && !isTMN;
+      });
+      
+      console.log(`✅ กรองสินค้าบัตรเงินสด: ${response.data.length} -> ${filteredProducts.length} รายการ`);
+      console.log(`   ลบ STEAM/TMN ออก ${response.data.length - filteredProducts.length} รายการ`);
+      return filteredProducts;
     } else {
       throw new Error(`API returned status code: ${response.statusCode}`);
     }
