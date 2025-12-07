@@ -228,18 +228,42 @@ const makeApiRequest = async <T>(
       });
 
       if (!response.ok) {
+        // Try to parse error message from response body
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        let errorData: any = null;
+        
+        try {
+          errorData = await response.json();
+          if (errorData.message) {
+            errorMessage = `${errorMessage} - ${errorData.message}`;
+          }
+          console.error('❌ API Error Response:', errorData);
+        } catch (parseError) {
+          // If we can't parse JSON, just use the status
+          console.error('❌ Could not parse error response');
+        }
+        
         // Special handling for 401 Unauthorized
         if (response.status === 401) {
           console.error('❌ Peamsub API: 401 Unauthorized');
           console.error('   - Check if API key is correct in .env.local');
           console.error('   - Make sure to restart dev server after changing .env.local');
           console.error('   - Current API key length:', PEAMSUB_API_KEY.length);
-          throw new Error(`HTTP error! status: 401 (Unauthorized) - Please check your API key in .env.local`);
+          throw new Error(`${errorMessage} - Please check your API key in .env.local`);
+        }
+        
+        // Special handling for 400 Bad Request
+        if (response.status === 400) {
+          console.error('❌ Peamsub API: 400 Bad Request');
+          console.error('   - Request URL:', url);
+          console.error('   - Request method:', options.method || 'GET');
+          console.error('   - Request body:', options.body);
+          throw new Error(errorMessage);
         }
         
         // Don't retry for client errors (4xx) except 429 (rate limit)
         if (response.status >= 400 && response.status < 500 && response.status !== 429) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          throw new Error(errorMessage);
         }
         
         // For server errors (5xx) or rate limits (429), retry if attempts remain
@@ -250,7 +274,7 @@ const makeApiRequest = async <T>(
           continue;
         }
         
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
@@ -662,6 +686,15 @@ export const purchasePeamsubCashCard = async (id: number, reference: string): Pr
   try {
     console.log('💳 กำลังซื้อบัตรเงินสด...', { id, reference });
 
+    // Validate parameters
+    if (!id || typeof id !== 'number' || id <= 0) {
+      throw new Error(`Invalid product ID: ${id}`);
+    }
+    
+    if (!reference || typeof reference !== 'string' || reference.trim() === '') {
+      throw new Error(`Invalid reference: ${reference}`);
+    }
+
     // Get user info
     const userInfo = await getPeamsubUserInfo();
     const userBalance = parseFloat(userInfo.balance) || 0;
@@ -681,10 +714,16 @@ export const purchasePeamsubCashCard = async (id: number, reference: string): Pr
       throw new Error("Insufficient balance");
     }
 
+    // Prepare request payload
+    const payload = { id, reference };
+    console.log('📤 Sending cash card purchase request:', payload);
+
     const response = await makeApiRequest<{ statusCode: number }>('/v2/cashcard', {
       method: 'POST',
-      body: JSON.stringify({ id, reference })
+      body: JSON.stringify(payload)
     });
+    
+    console.log('📥 Cash card purchase response:', response);
     
     if (response.statusCode === 200) {
       console.log('✅ ซื้อบัตรเงินสดสำเร็จ');

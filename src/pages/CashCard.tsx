@@ -229,7 +229,25 @@ const CashCard = () => {
       
     } catch (error: any) {
       console.error("Error purchasing cash card:", error);
-      toast.error(error.message || "เกิดข้อผิดพลาดในการซื้อบัตรเงินสด");
+      
+      // แยกประเภทของ error เพื่อแสดงข้อความที่เหมาะสม
+      let errorMessage = "เกิดข้อผิดพลาดในการซื้อบัตรเงินสด";
+      
+      if (error.message) {
+        if (error.message.includes('ไม่สามารถสั่งซื้อสินค้าได้ในขณะนี้')) {
+          errorMessage = "ไม่สามารถสั่งซื้อสินค้าได้ในขณะนี้ อาจเนื่องจากสินค้าหมด หรือระบบกำลังปิดปรุง กรุณาลองใหม่อีกครั้งในภายหลัง";
+        } else if (error.message.includes('Insufficient balance')) {
+          errorMessage = "ยอดเงินไม่เพียงพอ กรุณาเติมเงินก่อนทำรายการ";
+        } else if (error.message.includes('Product with id')) {
+          errorMessage = "ไม่พบสินค้าที่เลือก กรุณาลองใหม่อีกครั้ง";
+        } else if (error.message.includes('Invalid')) {
+          errorMessage = "ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบและลองใหม่อีกครั้ง";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setPurchasing(false);
       setSelectedProduct(null);

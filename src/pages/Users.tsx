@@ -30,7 +30,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Search, MoreVertical, Edit, Trash2, Shield, CheckCircle, XCircle, Loader2, Ban, ArrowUpCircle, History } from "lucide-react";
+import { Plus, Search, MoreVertical, Edit, Trash2, Shield, CheckCircle, XCircle, Loader2, Ban, ArrowUpCircle, History, ArrowDownCircle } from "lucide-react";
 import { toast } from "sonner";
 import { getAllUsers, deleteUser } from "@/lib/adminUtils";
 import { createTopUpTransaction, completeTopUpTransaction, getUserTopUpHistory } from "@/lib/topupUtils";
@@ -103,7 +103,8 @@ const TopUpHistoryContent = ({ userId }: { userId: string }) => {
                 </span>
               </div>
               <p className="font-semibold text-black">
-                {transaction.paymentMethod === 'admin' ? 'เติมเงินโดยแอดมิน' :
+                {transaction.paymentMethod === 'admin' ? 
+                  (transaction.amount < 0 ? 'หักเงินโดยแอดมิน' : 'เติมเงินโดยแอดมิน') :
                  transaction.paymentMethod === 'promptpay' ? 'PromptPay' :
                  transaction.paymentMethod === 'bank_transfer' ? 'โอนเงินธนาคาร' :
                  transaction.paymentMethod}
@@ -114,11 +115,12 @@ const TopUpHistoryContent = ({ userId }: { userId: string }) => {
             </div>
             <div className="text-right">
               <p className={`text-xl font-bold ${
+                transaction.amount < 0 ? 'text-red-600' :
                 transaction.status === 'completed' ? 'text-green-600' :
                 transaction.status === 'pending' ? 'text-yellow-600' :
                 'text-red-600'
               }`}>
-                {transaction.status === 'completed' ? '+' : ''}
+                {transaction.amount > 0 && transaction.status === 'completed' ? '+' : ''}
                 {transaction.amount.toLocaleString()} บาท
               </p>
             </div>
@@ -158,6 +160,13 @@ const Users = () => {
   
   // Top-up history dialog
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
+  
+  // Deduct dialog
+  const [deductDialogOpen, setDeductDialogOpen] = useState(false);
+  const [userToDeduct, setUserToDeduct] = useState<UserData | null>(null);
+  const [deductAmount, setDeductAmount] = useState(0);
+  const [deductReason, setDeductReason] = useState("");
+  const [deducting, setDeducting] = useState(false);
   const [userHistory, setUserHistory] = useState<UserData | null>(null);
 
   // โหลดข้อมูลผู้ใช้
@@ -287,6 +296,60 @@ const Users = () => {
   const openHistoryDialog = (user: UserData) => {
     setUserHistory(user);
     setHistoryDialogOpen(true);
+  };
+
+  // หักเงินจากผู้ใช้
+  const handleDeductUser = async () => {
+    if (!userToDeduct || deductAmount <= 0) return;
+
+    // ตรวจสอบว่ายอดเงินพอหักหรือไม่
+    if ((userToDeduct.balance || 0) < deductAmount) {
+      toast.error("ยอดเงินไม่เพียงพอที่จะหัก");
+      return;
+    }
+
+    setDeducting(true);
+    try {
+      // สร้างธุรกรรมการหักเงิน (จำนวนเป็นลบ)
+      const transactionId = await createTopUpTransaction(
+        userToDeduct.uid,
+        -deductAmount, // ใช้ค่าติดลบเพื่อหักเงิน
+        'admin', // payment method
+        'manual', // verification method
+        {
+          adminDeduct: true,
+          reason: deductReason || 'หักเงินโดยแอดมิน',
+          adminId: 'admin' // ระบุว่าเป็นแอดมิน
+        }
+      );
+
+      // อัปเดตยอดเงิน (หักเงิน) และเปลี่ยนสถานะเป็น completed
+      await completeTopUpTransaction(transactionId, userToDeduct.uid, -deductAmount);
+
+      toast.success(`หักเงิน ${deductAmount.toLocaleString()} บาท จาก ${userToDeduct.email} สำเร็จ`);
+      
+      // รีเซ็ต form
+      setDeductDialogOpen(false);
+      setUserToDeduct(null);
+      setDeductAmount(0);
+      setDeductReason("");
+      
+      // โหลดข้อมูลใหม่
+      await loadUsers();
+    } catch (error) {
+      console.error("Error deducting user:", error);
+      toast.error("เกิดข้อผิดพลาดในการหักเงิน");
+    } finally {
+      setDeducting(false);
+    }
+  };
+
+  // เปิด dialog หักเงิน
+  const openDeductDialog = (user: UserData) => {
+    setUserToDeduct(user);
+    setDeductAmount(0);
+    setDeductReason("");
+    setDeductDialogOpen(true);
   };
 
   return (
@@ -433,6 +496,10 @@ const Users = () => {
                                   <ArrowUpCircle className="mr-2 h-4 w-4" />
                                   เติมเงิน
                                 </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => openDeductDialog(user)}>
+                                  <ArrowDownCircle className="mr-2 h-4 w-4 text-red-500" />
+                                  <span className="text-red-500">หักเงิน</span>
+                                </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => openHistoryDialog(user)}>
                                   <History className="mr-2 h-4 w-4" />
                                   ประวัติการเติมเงิน
@@ -573,6 +640,71 @@ const Users = () => {
                   <>
                     <ArrowUpCircle className="mr-2 h-4 w-4" />
                     เติมเงิน
+                  </>
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Deduct Dialog */}
+        <AlertDialog open={deductDialogOpen} onOpenChange={setDeductDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>หักเงินจากผู้ใช้</AlertDialogTitle>
+              <AlertDialogDescription>
+                หักเงินจากผู้ใช้ <strong>{userToDeduct?.email}</strong>
+                <br />
+                ยอดเงินปัจจุบัน: <strong>{userToDeduct?.balance?.toLocaleString()} บาท</strong>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">จำนวนเงินที่จะหัก (บาท)</label>
+                <Input
+                  type="number"
+                  value={deductAmount || ""}
+                  onChange={(e) => setDeductAmount(Number(e.target.value) || 0)}
+                  placeholder="กรอกจำนวนเงินที่จะหัก"
+                  min="1"
+                  max={userToDeduct?.balance || 0}
+                />
+                {deductAmount > (userToDeduct?.balance || 0) && (
+                  <p className="text-sm text-red-500 mt-1">
+                    ยอดเงินไม่เพียงพอ (สูงสุด {userToDeduct?.balance?.toLocaleString()} บาท)
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="text-sm font-medium">เหตุผล (ไม่บังคับ)</label>
+                <Input
+                  value={deductReason}
+                  onChange={(e) => setDeductReason(e.target.value)}
+                  placeholder="เช่น ปรับยอด, หักค่าปรับ, แก้ไขข้อผิดพลาด"
+                />
+              </div>
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <p className="text-sm text-yellow-800">
+                  <strong>คำเตือน:</strong> การหักเงินจะไม่สามารถยกเลิกได้ กรุณาตรวจสอบข้อมูลให้ถูกต้อง
+                </p>
+              </div>
+            </div>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deducting}>ยกเลิก</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeductUser}
+                disabled={deducting || !deductAmount || deductAmount <= 0 || deductAmount > (userToDeduct?.balance || 0)}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                {deducting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    กำลังหักเงิน...
+                  </>
+                ) : (
+                  <>
+                    <ArrowDownCircle className="mr-2 h-4 w-4" />
+                    หักเงิน
                   </>
                 )}
               </AlertDialogAction>
