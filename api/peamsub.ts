@@ -1,4 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import fetch from 'node-fetch';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 
 // API key จะอยู่ใน server-side เท่านั้น (ไม่ถูก expose)
 const PEAMSUB_API_KEY = process.env.PEAMSUB_API_KEY || '';
@@ -29,6 +31,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // เข้ารหัส API key ด้วย Base64
     const authHeader = `Basic ${Buffer.from(PEAMSUB_API_KEY).toString('base64')}`;
 
+    // Configure Proxy Agent (Fixie)
+    const proxyUrl = process.env.FIXIE_URL;
+    const agent = proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined;
+
     // เรียก Peamsub API
     const response = await fetch(`${PEAMSUB_API_BASE_URL}${endpoint}`, {
       method,
@@ -37,14 +43,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         'Content-Type': 'application/json',
       },
       body: body ? JSON.stringify(body) : undefined,
+      agent
     });
 
     const data = await response.json();
-    
+
     return res.status(response.status).json(data);
   } catch (error) {
     console.error('Peamsub API Error:', error);
-    return res.status(500).json({ 
+    return res.status(500).json({
       error: 'Internal server error',
       message: error instanceof Error ? error.message : 'Unknown error'
     });
