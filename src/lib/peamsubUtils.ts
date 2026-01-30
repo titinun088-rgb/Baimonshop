@@ -2,7 +2,7 @@
 // API Documentation: https://api.peamsub24hr.com
 
 const PEAMSUB_API_BASE_URL = 'https://api.peamsub24hr.com';
-const PEAMSUB_API_KEY = import.meta.env.VITE_PEAMSUB_API_KEY || '';
+// Note: PEAMSUB_API_KEY is now handled on the backend (api/peamsub.ts)
 
 // Types
 export interface PeamsubUserData {
@@ -35,7 +35,7 @@ export interface PeamsubClaimCallback {
 }
 
 // Claim status enum
-export type ClaimStatus = 
+export type ClaimStatus =
   | 'wrong_password'
   | 'incorrect_pin'
   | 'youtube_premium_disconnect'
@@ -205,33 +205,34 @@ export interface PeamsubApiResponse<T> {
 const makeApiRequest = async <T>(
   endpoint: string,
   options: RequestInit = {},
-  retries: number = 2
+  retries: number = 3
 ): Promise<PeamsubApiResponse<T>> => {
-  // Check if API key is available
-  if (!PEAMSUB_API_KEY || PEAMSUB_API_KEY.trim() === '') {
-    console.error('❌ Peamsub API Key is missing! Please check your .env.local file and restart the dev server.');
-    throw new Error('Peamsub API Key is not configured. Please set VITE_PEAMSUB_API_KEY in .env.local and restart the dev server.');
-  }
+  // Use the local Vercel API proxy
+  const proxyUrl = '/api/peamsub';
 
-  const url = `${PEAMSUB_API_BASE_URL}${endpoint}`;
-  const authHeader = `Basic ${btoa(PEAMSUB_API_KEY)}`;
-  
+  // Prepare payload for the proxy
+  const proxyPayload = {
+    endpoint: endpoint,
+    method: options.method || 'GET',
+    body: options.body ? JSON.parse(options.body as string) : undefined
+  };
+
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
-      const response = await fetch(url, {
-        ...options,
+      // Always POST to the proxy
+      const response = await fetch(proxyUrl, {
+        method: 'POST',
         headers: {
-          'Authorization': authHeader,
           'Content-Type': 'application/json',
-          ...options.headers,
         },
+        body: JSON.stringify(proxyPayload)
       });
 
       if (!response.ok) {
         // Try to parse error message from response body
         let errorMessage = `HTTP error! status: ${response.status}`;
         let errorData: any = null;
-        
+
         try {
           errorData = await response.json();
           if (errorData.message) {
@@ -242,38 +243,26 @@ const makeApiRequest = async <T>(
           // If we can't parse JSON, just use the status
           console.error('❌ Could not parse error response');
         }
-        
-        // Special handling for 401 Unauthorized
-        if (response.status === 401) {
-          console.error('❌ Peamsub API: 401 Unauthorized');
-          console.error('   - Check if API key is correct in .env.local');
-          console.error('   - Make sure to restart dev server after changing .env.local');
-          console.error('   - Current API key length:', PEAMSUB_API_KEY.length);
-          throw new Error(`${errorMessage} - Please check your API key in .env.local`);
-        }
-        
-        // Special handling for 400 Bad Request
-        if (response.status === 400) {
-          console.error('❌ Peamsub API: 400 Bad Request');
-          console.error('   - Request URL:', url);
-          console.error('   - Request method:', options.method || 'GET');
-          console.error('   - Request body:', options.body);
+
+        // Special handling for PreamSub Single IP Constraint
+        // Retry on 401/403 because Fixie rotates IPs and PreamSub might only whitelist one.
+        const isIpBlockError = response.status === 403 || response.status === 401;
+        const isServerSideError = response.status >= 500;
+        const isRateLimit = response.status === 429;
+
+        // Don't retry for client errors (4xx) unless it's IP/Auth related or Rate Limit
+        if (response.status >= 400 && response.status < 500 && !isIpBlockError && !isRateLimit) {
           throw new Error(errorMessage);
         }
-        
-        // Don't retry for client errors (4xx) except 429 (rate limit)
-        if (response.status >= 400 && response.status < 500 && response.status !== 429) {
-          throw new Error(errorMessage);
-        }
-        
-        // For server errors (5xx) or rate limits (429), retry if attempts remain
-        if (attempt < retries && (response.status >= 500 || response.status === 429)) {
-          const delay = Math.pow(2, attempt) * 1000; // Exponential backoff
-          console.warn(`⚠️ API request failed (${response.status}), retrying in ${delay}ms...`);
+
+        // Retry if attempts remain and condition met
+        if (attempt < retries && (isServerSideError || isRateLimit || isIpBlockError)) {
+          const delay = Math.pow(2, attempt) * 500; // Start at 500ms
+          console.warn(`⚠️ API request failed (${response.status}), retrying in ${delay}ms... (Attempt ${attempt + 1}/${retries})`);
           await new Promise(resolve => setTimeout(resolve, delay));
           continue;
         }
-        
+
         throw new Error(errorMessage);
       }
 
@@ -284,7 +273,7 @@ const makeApiRequest = async <T>(
       if (attempt === retries) {
         throw error;
       }
-      
+
       // For network errors, retry with exponential backoff
       if (error instanceof TypeError && error.message.includes('fetch')) {
         const delay = Math.pow(2, attempt) * 1000;
@@ -292,12 +281,12 @@ const makeApiRequest = async <T>(
         await new Promise(resolve => setTimeout(resolve, delay));
         continue;
       }
-      
+
       // For other errors, don't retry
       throw error;
     }
   }
-  
+
   throw new Error('Max retries exceeded');
 };
 
@@ -359,10 +348,10 @@ export const getPeamsubPreorderProducts = async (): Promise<PeamsubPreorderProdu
         throw new Error('ส่งคำขอมากเกินไป กรุณารอสักครู่แล้วลองใหม่');
       }
     }
-    
+
     // Only log other errors
     console.error('❌ Error getting Peamsub preorder products:', error);
-    
+
     throw error;
   }
 };
@@ -402,20 +391,20 @@ export const getPeamsubGameProducts = async (): Promise<PeamsubGameProduct[]> =>
           }
 
           // ตรวจสอบความถูกต้องของข้อมูล
-          const validProducts = products.filter(product => 
-            product && 
+          const validProducts = products.filter(product =>
+            product &&
             typeof product === 'object' &&
             'id' in product &&
             'category' in product
           );
 
           // ลบข้อมูลซ้ำ
-          const uniqueProducts = validProducts.filter((product, index, self) => 
+          const uniqueProducts = validProducts.filter((product, index, self) =>
             index === self.findIndex((p) => p.id === product.id)
           );
 
           console.log(`✅ ดึงรายการสินค้าเติมเกม Peamsub สำเร็จ: ${uniqueProducts.length} รายการ`);
-          
+
           // Log warning ถ้าได้ข้อมูลน้อยผิดปกติ
           if (uniqueProducts.length < 10) {
             console.warn('⚠️ Warning: ได้รับข้อมูลเกมน้อยกว่าที่ควร อาจมีปัญหากับ API');
@@ -427,7 +416,7 @@ export const getPeamsubGameProducts = async (): Promise<PeamsubGameProduct[]> =>
         }
       } catch (error: any) {
         retryCount++;
-        
+
         // ถ้าเป็น rate limit หรือ network error ให้ retry
         if (error.message.includes('429') || error.message.includes('network')) {
           if (retryCount < maxRetries) {
@@ -436,7 +425,7 @@ export const getPeamsubGameProducts = async (): Promise<PeamsubGameProduct[]> =>
             continue;
           }
         }
-        
+
         // ถ้าเป็น error อื่นๆ หรือ retry ครบแล้ว ให้ throw
         throw error;
       }
@@ -445,7 +434,7 @@ export const getPeamsubGameProducts = async (): Promise<PeamsubGameProduct[]> =>
     throw new Error('Max retries exceeded');
   } catch (error) {
     console.error('❌ Error getting Peamsub game products:', error);
-    
+
     // Return empty array instead of throwing error for graceful degradation
     console.warn('⚠️ Returning empty array for graceful degradation');
     return [];
@@ -459,7 +448,7 @@ export const purchasePeamsubProduct = async (id: number, reference: string): Pro
       method: 'POST',
       body: JSON.stringify({ id, reference })
     });
-    
+
     if (response.statusCode === 200) {
       console.log('✅ ซื้อสินค้า Peamsub สำเร็จ');
       return 'ซื้อสินค้าสำเร็จ';
@@ -475,14 +464,14 @@ export const purchasePeamsubProduct = async (id: number, reference: string): Pro
 export const getPeamsubPurchaseHistory = async (references?: string[]): Promise<PeamsubPurchaseHistory[]> => {
   try {
     console.log('📋 กำลังดึงประวัติการซื้อสินค้า Peamsub...', references ? `สำหรับ references: ${references.join(', ')}` : 'ทั้งหมด');
-    
+
     const response = await makeApiRequest<PeamsubPurchaseHistory[]>('/v2/app-premium/history', {
       method: 'POST',
       body: JSON.stringify({
         references: references || [] // ส่ง array ว่างเพื่อดึงประวัติทั้งหมด
       })
     });
-    
+
     if (response.statusCode === 200) {
       console.log('✅ ประวัติการซื้อสินค้า Peamsub:', response.data);
       return response.data;
@@ -504,7 +493,7 @@ export const getPeamsubPurchaseHistory = async (references?: string[]): Promise<
         throw new Error('ส่งคำขอมากเกินไป กรุณารอสักครู่แล้วลองใหม่');
       }
     }
-    
+
     // Only log other errors
     console.error('❌ Error getting Peamsub purchase history:', error);
     throw error;
@@ -514,12 +503,12 @@ export const getPeamsubPurchaseHistory = async (references?: string[]): Promise<
 export const claimPeamsubProduct = async (claimRequest: ClaimRequest): Promise<ClaimResponse> => {
   try {
     console.log('🎫 กำลังเคลมสินค้า Peamsub...', claimRequest);
-    
+
     const response = await makeApiRequest<ClaimResponse>('/v2/app-premium/claim', {
       method: 'POST',
       body: JSON.stringify(claimRequest)
     });
-    
+
     if (response.statusCode === 200) {
       console.log('✅ เคลมสินค้า Peamsub สำเร็จ:', response.data);
       return response.data;
@@ -539,7 +528,7 @@ export const purchasePeamsubPreorder = async (id: number, reference: string, cal
       method: 'POST',
       body: JSON.stringify({ id, reference, callbackUrl })
     });
-    
+
     if (response.statusCode === 200) {
       console.log('✅ พรีออเดอร์สินค้า Peamsub สำเร็จ');
       return 'พรีออเดอร์สินค้าสำเร็จ';
@@ -577,7 +566,7 @@ export const getPeamsubPreorderHistory = async (): Promise<PeamsubPreorderHistor
         throw new Error('ส่งคำขอมากเกินไป กรุณารอสักครู่แล้วลองใหม่');
       }
     }
-    
+
     // Only log other errors
     console.error('❌ Error getting Peamsub preorder history:', error);
     throw error;
@@ -609,7 +598,7 @@ export const purchasePeamsubGame = async (id: number, uid: string, reference: st
       method: 'POST',
       body: JSON.stringify({ id, uid, reference })
     });
-    
+
     if (response.statusCode === 200) {
       console.log('✅ เติมเกมสำเร็จ');
       return 'เติมเกมสำเร็จ';
@@ -629,7 +618,7 @@ export const getPeamsubGameHistory = async (references: string[] = []): Promise<
       method: 'POST',
       body: JSON.stringify({ references })
     });
-    
+
     if (response.statusCode === 200) {
       console.log('✅ ประวัติการเติมเกม:', response.data);
       return response.data;
@@ -651,7 +640,7 @@ export const purchasePeamsubMobile = async (id: number, number: string, referenc
       method: 'POST',
       body: JSON.stringify({ id, number, reference })
     });
-    
+
     if (response.statusCode === 200) {
       console.log('✅ เติมเน็ต-เติมเงินมือถือสำเร็จ');
       return 'เติมเน็ต-เติมเงินมือถือสำเร็จ';
@@ -675,15 +664,15 @@ export const getPeamsubCashCardProducts = async (): Promise<PeamsubCashCardProdu
       const filteredProducts = response.data.filter(product => {
         const category = product.category?.toUpperCase() || '';
         const info = product.info?.toUpperCase() || '';
-        
+
         // ตรวจสอบว่ามีคำว่า STEAM หรือ TMN ใน category หรือ info หรือไม่
         const isSteam = category.includes('STEAM') || info.includes('STEAM');
         const isTMN = category.includes('TMN') || info.includes('TMN') || category.includes('TRUEMONEY') || info.includes('TRUEMONEY');
-        
+
         // คืนค่า true ถ้าไม่ใช่ STEAM หรือ TMN (จะเก็บไว้)
         return !isSteam && !isTMN;
       });
-      
+
       console.log(`✅ กรองสินค้าบัตรเงินสด: ${response.data.length} -> ${filteredProducts.length} รายการ`);
       console.log(`   ลบ STEAM/TMN ออก ${response.data.length - filteredProducts.length} รายการ`);
       return filteredProducts;
@@ -704,7 +693,7 @@ export const purchasePeamsubCashCard = async (id: number, reference: string): Pr
     if (!id || typeof id !== 'number' || id <= 0) {
       throw new Error(`Invalid product ID: ${id}`);
     }
-    
+
     if (!reference || typeof reference !== 'string' || reference.trim() === '') {
       throw new Error(`Invalid reference: ${reference}`);
     }
@@ -736,9 +725,9 @@ export const purchasePeamsubCashCard = async (id: number, reference: string): Pr
       method: 'POST',
       body: JSON.stringify(payload)
     });
-    
+
     console.log('📥 Cash card purchase response:', response);
-    
+
     if (response.statusCode === 200) {
       console.log('✅ ซื้อบัตรเงินสดสำเร็จ');
       return 'ซื้อบัตรเงินสดสำเร็จ';
@@ -758,7 +747,7 @@ export const getPeamsubCashCardHistory = async (references: string[] = []): Prom
       method: 'POST',
       body: JSON.stringify({ references })
     });
-    
+
     if (response.statusCode === 200) {
       console.log('✅ ประวัติการซื้อบัตรเงินสด:', response.data);
       return response.data;
@@ -967,7 +956,7 @@ export const filterPreorderHistoryByDate = (history: PeamsubPreorderHistory[], s
 
 // Search functions
 export const searchProducts = (products: PeamsubProduct[], query: string): PeamsubProduct[] => {
-  return products.filter(product => 
+  return products.filter(product =>
     product.name.toLowerCase().includes(query.toLowerCase()) ||
     product.des.toLowerCase().includes(query.toLowerCase()) ||
     product.type_app.toLowerCase().includes(query.toLowerCase())
@@ -975,7 +964,7 @@ export const searchProducts = (products: PeamsubProduct[], query: string): Peams
 };
 
 export const searchPreorderProducts = (products: PeamsubPreorderProduct[], query: string): PeamsubPreorderProduct[] => {
-  return products.filter(product => 
+  return products.filter(product =>
     product.name.toLowerCase().includes(query.toLowerCase()) ||
     product.des.toLowerCase().includes(query.toLowerCase()) ||
     product.type_app.toLowerCase().includes(query.toLowerCase())
@@ -983,7 +972,7 @@ export const searchPreorderProducts = (products: PeamsubPreorderProduct[], query
 };
 
 export const searchGameProducts = (products: PeamsubGameProduct[], query: string): PeamsubGameProduct[] => {
-  return products.filter(product => 
+  return products.filter(product =>
     product.category.toLowerCase().includes(query.toLowerCase()) ||
     product.info.toLowerCase().includes(query.toLowerCase())
   );
@@ -1082,7 +1071,7 @@ export const getProductSummary = (products: PeamsubProduct[]): { totalProducts: 
   const totalProducts = products.length;
   const totalStock = products.reduce((sum, product) => sum + product.stock, 0);
   const averagePrice = totalProducts > 0 ? products.reduce((sum, product) => sum + product.price, 0) / totalProducts : 0;
-  
+
   return { totalProducts, totalStock, averagePrice };
 };
 
@@ -1090,17 +1079,17 @@ export const getPreorderProductSummary = (products: PeamsubPreorderProduct[]): {
   const totalProducts = products.length;
   const totalStock = products.reduce((sum, product) => sum + product.stock, 0);
   const averagePrice = totalProducts > 0 ? products.reduce((sum, product) => sum + product.price, 0) / totalProducts : 0;
-  
+
   return { totalProducts, totalStock, averagePrice };
 };
 
-export const getGameProductSummary = (products: PeamsubGameProduct[]): { 
-  totalProducts: number; 
-  totalPrice: number; 
+export const getGameProductSummary = (products: PeamsubGameProduct[]): {
+  totalProducts: number;
+  totalPrice: number;
   averagePrice: number;
   categories: string[];
-  cheapestProduct: PeamsubGameProduct | null; 
-  mostExpensiveProduct: PeamsubGameProduct | null 
+  cheapestProduct: PeamsubGameProduct | null;
+  mostExpensiveProduct: PeamsubGameProduct | null
 } => {
   const totalProducts = products.length;
   const validProducts = products.filter(product => !isNaN(parseFloat(product.price)));
@@ -1108,24 +1097,24 @@ export const getGameProductSummary = (products: PeamsubGameProduct[]): {
     const price = parseFloat(product.price);
     return isNaN(price) ? sum : sum + price;
   }, 0);
-  
+
   const averagePrice = validProducts.length > 0 ? totalPrice / validProducts.length : 0;
-  
+
   // Get unique categories
   const categories = [...new Set(products.map(product => product.category).filter(Boolean))];
-  
+
   const cheapestProduct = validProducts.length > 0 ? validProducts.reduce((cheapest, product) => {
     const price = parseFloat(product.price);
     const cheapestPrice = parseFloat(cheapest.price);
     return isNaN(price) ? cheapest : (isNaN(cheapestPrice) || price < cheapestPrice ? product : cheapest);
   }) : null;
-  
+
   const mostExpensiveProduct = validProducts.length > 0 ? validProducts.reduce((mostExpensive, product) => {
     const price = parseFloat(product.price);
     const mostExpensivePrice = parseFloat(mostExpensive.price);
     return isNaN(price) ? mostExpensive : (isNaN(mostExpensivePrice) || price > mostExpensivePrice ? product : mostExpensive);
   }) : null;
-  
+
   return { totalProducts, totalPrice, averagePrice, categories, cheapestProduct, mostExpensiveProduct };
 };
 
@@ -1152,28 +1141,28 @@ export const getClaimStatusText = (status: string): string => {
 // Purchase validation functions
 export const canPurchaseProduct = (product: PeamsubProduct, userBalance: number, userRank: number): { canPurchase: boolean; price: number; reason?: string } => {
   const price = getProductPriceByRank(product, userRank);
-  
+
   if (!isProductInStock(product)) {
     return { canPurchase: false, price, reason: 'สินค้าหมดสต็อก' };
   }
-  
+
   if (!hasEnoughBalance(userBalance, price)) {
     return { canPurchase: false, price, reason: 'ยอดเงินไม่เพียงพอ' };
   }
-  
+
   return { canPurchase: true, price };
 };
 
 export const canPurchasePreorderProduct = (product: PeamsubPreorderProduct, userBalance: number, userRank: number): { canPurchase: boolean; price: number; reason?: string } => {
   const price = getPreorderProductPriceByRank(product, userRank);
-  
+
   if (!isPreorderProductInStock(product)) {
     return { canPurchase: false, price, reason: 'สินค้าหมดสต็อก' };
   }
-  
+
   if (!hasEnoughBalance(userBalance, price)) {
     return { canPurchase: false, price, reason: 'ยอดเงินไม่เพียงพอ' };
   }
-  
+
   return { canPurchase: true, price };
 };
