@@ -246,7 +246,15 @@ const makeApiRequest = async <T>(
 
         // Special handling for PreamSub Single IP Constraint
         // Retry on 401/403 because Fixie rotates IPs and PreamSub might only whitelist one.
-        const isIpBlockError = response.status === 403 || response.status === 401;
+        // ALSO: PreamSub sometimes returns 400 with "IP ... Whitelist" message.
+        const errorMsgString = errorMessage || '';
+        const isIpMessage = errorMsgString.includes('Whitelist') || errorMsgString.includes('IP');
+
+        const isIpBlockError =
+          response.status === 403 ||
+          response.status === 401 ||
+          (response.status === 400 && isIpMessage);
+
         const isServerSideError = response.status >= 500;
         const isRateLimit = response.status === 429;
 
@@ -258,7 +266,7 @@ const makeApiRequest = async <T>(
         // Retry if attempts remain and condition met
         if (attempt < retries && (isServerSideError || isRateLimit || isIpBlockError)) {
           const delay = Math.pow(2, attempt) * 500; // Start at 500ms
-          console.warn(`⚠️ API request failed (${response.status}), retrying in ${delay}ms... (Attempt ${attempt + 1}/${retries})`);
+          console.warn(`⚠️ API request failed (${response.status} - ${isIpBlockError ? 'IP Block' : 'Error'}), retrying in ${delay}ms... (Attempt ${attempt + 1}/${retries})`);
           await new Promise(resolve => setTimeout(resolve, delay));
           continue;
         }
