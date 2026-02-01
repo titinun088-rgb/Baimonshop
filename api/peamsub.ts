@@ -32,17 +32,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const authHeader = `Basic ${Buffer.from(PEAMSUB_API_KEY).toString('base64')}`;
 
     // Configure Proxy Agent (Fixie)
-    // TEMP DEBUG: Hardcoded to verify connection, bypassing env var issues
-    const proxyUrl = 'http://fixie:KKToygSsimaMOLE@criterium.usefixie.com:80';
+    // Using Explicit Proxy Auth Header to resolve 407 errors
+    const proxyHost = 'criterium.usefixie.com';
+    const proxyPort = 80;
+    const proxyUser = 'fixie'; // Force correct user
+    const proxyPass = 'KKToygSsimaMOLE'; // Force correct pass
+
+    // Manual Base64 Auth
+    const proxyAuth = Buffer.from(`${proxyUser}:${proxyPass}`).toString('base64');
+
     let agent: any = undefined;
 
-    if (proxyUrl) {
-      try {
-        console.log(`Using HARDCODED Proxy URL (Debug)`);
-        agent = new HttpsProxyAgent(proxyUrl);
-      } catch (proxyError) {
-        console.error('Failed to create proxy agent:', proxyError);
-      }
+    try {
+      console.log(`Configuring Proxy for ${proxyHost}:${proxyPort} with Explicit Auth`);
+      agent = new HttpsProxyAgent({
+        host: proxyHost,
+        port: proxyPort,
+        headers: {
+          'Proxy-Authorization': `Basic ${proxyAuth}`
+        }
+      });
+    } catch (proxyError) {
+      console.error('Failed to create proxy agent:', proxyError);
     }
 
     // เรียก Peamsub API
