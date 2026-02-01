@@ -1,11 +1,11 @@
 ```javascript
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import * as https from 'https';
-import * as http from 'http';
-import * as tls from 'tls';
+import fetch from 'node-fetch';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 
 // API key จะอยู่ใน server-side เท่านั้น (ไม่ถูก expose)
 const PEAMSUB_API_KEY = process.env.PEAMSUB_API_KEY || '';
+const PEAMSUB_API_BASE_URL = 'https://api.peamsub24hr.com';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS headers
@@ -17,134 +17,78 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).end();
   }
 
-  const { endpoint, method = 'GET', body } = req.body || {};
-
-  if (!endpoint) {
-    return res.status(400).json({ error: 'Endpoint is required' });
-  }
-
-  if (!PEAMSUB_API_KEY) {
-    return res.status(500).json({ error: 'API key not configured' });
-  }
-
-  // --- MANUAL PROXY TUNNELING IMPLEMENTATION ---
   try {
-    const responseData = await new Promise((resolve, reject) => {
-      // Proxy Config
-      const proxyHost = 'criterium.usefixie.com';
-      const proxyPort = 80;
-      const proxyUser = 'fixie';
-      const proxyPass = 'KKToygSsimaMOLE';
-      const proxyAuth = 'Basic ' + Buffer.from(`${ proxyUser }:${ proxyPass } `).toString('base64');
+    const { endpoint, method = 'GET', body } = req.body || {};
 
-      // Target Config
-      const targetHost = 'api.peamsub24hr.com';
-      const targetPort = 443;
+    if (!endpoint) {
+      return res.status(400).json({ error: 'Endpoint is required' });
+    }
 
-      console.log(`[Proxy] Connecting to ${ proxyHost }:${ proxyPort } -> ${ targetHost }:${ targetPort } `);
+    // ตรวจสอบว่ามี API key หรือไม่
+    if (!PEAMSUB_API_KEY) {
+      return res.status(500).json({ error: 'API key not configured' });
+    }
 
-      // 1. Establish CONNECT Tunnel
-      const connectReq = http.request({
-        host: proxyHost,
-        port: proxyPort,
-        method: 'CONNECT',
-        path: `${ targetHost }:${ targetPort } `,
-        headers: {
-          'Proxy-Authorization': proxyAuth,
-          'Host': targetHost // Some proxies require this
-        }
+    // เข้ารหัส API key ด้วย Base64
+    const authHeader = `Basic ${ Buffer.from(PEAMSUB_API_KEY).toString('base64') } `;
+
+    // Configure Proxy Agent (Fixie)
+    // STRATEGY: Use Port 8080 and Disable SSL Verify
+    const proxyUrl = 'http://fixie:KKToygSsimaMOLE@criterium.usefixie.com:8080';
+    
+    let agent: any = undefined;
+
+    try {
+      console.log(`Configuring Proxy(Port 8080, NoSSL)`);
+      agent = new HttpsProxyAgent({
+        host: 'criterium.usefixie.com',
+        port: 8080,
+        auth: 'fixie:KKToygSsimaMOLE',
+        rejectUnauthorized: false
       });
+      
+    } catch (proxyError) {
+      console.error('Failed to create proxy agent:', proxyError);
+    }
 
-      connectReq.on('connect', (proxyRes, proxySocket, head) => {
-        if (proxyRes.statusCode !== 200) {
-          console.error(`[Proxy] Connect Failed: ${ proxyRes.statusCode } ${ proxyRes.statusMessage } `);
-          // Read any error body from proxy
-          let proxyErrorBody = '';
-          proxyRes.on('data', chunk => proxyErrorBody += chunk.toString());
-          proxyRes.on('end', () => {
-            console.log('Proxy Error Body:', proxyErrorBody);
-            reject(new Error(`Proxy Authentication Failed: ${ proxyRes.statusCode } - ${ proxyErrorBody || proxyRes.statusMessage } `));
-          });
-          return;
-        }
-
-        console.log('[Proxy] Tunnel Established. Starting TLS handshake...');
-
-        // 2. Establish TLS over the proxy socket
-        const tlsSocket = tls.connect({
-          socket: proxySocket,
-          servername: targetHost
-        }, () => {
-          console.log('[Proxy] TLS Handshake Success. Sending Request...');
-
-          // 3. Send Actual API Request
-          const apiReq = https.request({
-            host: targetHost,
-            path: endpoint,
-            method: method,
-            headers: {
-              'Authorization': `Basic ${ Buffer.from(PEAMSUB_API_KEY).toString('base64') } `,
-              'Content-Type': 'application/json'
-            },
-            socket: tlsSocket, // Use our tunnelled socket
-            agent: false // Important! Don't use default agent
-          }, (apiRes) => {
-            let data = '';
-            apiRes.on('data', (chunk) => { data += chunk; });
-            apiRes.on('end', () => {
-              resolve({
-                status: apiRes.statusCode || 500,
-                statusText: apiRes.statusMessage,
-                data: data
-              });
-            });
-          });
-
-          apiReq.on('error', (e) => reject(e));
-
-          if (body) {
-            apiReq.write(JSON.stringify(body));
-          }
-          apiReq.end();
-        });
-
-        tlsSocket.on('error', (e) => {
-          console.error('[TLS] Error:', e);
-          reject(e);
-        });
-      });
-
-      connectReq.on('error', (e) => {
-        console.error('[Proxy] Connection Error:', e);
-        reject(e);
-      });
-
-      connectReq.end();
+    // เรียก Peamsub API
+    const response = await fetch(`${ PEAMSUB_API_BASE_URL }${ endpoint } `, {
+      method,
+      headers: {
+        'Authorization': authHeader,
+        'Content-Type': 'application/json',
+      },
+      body: body ? JSON.stringify(body) : undefined,
+      agent
     });
 
-    // Handle Response (same logic as before)
-    const result = responseData as any;
-    
+    let data;
+    const responseText = await response.text();
+
     try {
-      const json = JSON.parse(result.data);
-      return res.status(result.status).json(json);
+      data = JSON.parse(responseText);
     } catch (e) {
-      console.warn('Non-JSON response:', result.data.substring(0, Math.min(result.data.length, 200))); // Limit log length
-      return res.status(result.status).json({
-         statusCode: result.status,
-         error: result.status >= 400 ? 'API Error' : null,
-         message: result.data || `API returned status ${ result.status } `,
+      console.warn('Peamsub API returned non-JSON:', responseText.substring(0, Math.min(responseText.length, 200)));
+      
+      // CRITICAL: Cannot return 407 to browser
+      const finalStatus = response.status === 407 ? 500 : response.status;
+      
+      return res.status(finalStatus).json({
+         statusCode: response.status,
+         error: response.ok ? null : 'API Error',
+         message: response.status === 407 ? 'Proxy Authentication Failed' : (responseText || `API returned status ${ response.status } `),
          data: null
       });
     }
 
-  } catch (error: any) {
-    console.error('Manual Proxy Error:', error);
-    // Convert Proxy Auth error to 500 to avoid browser blocking
-    const status = error.message.includes('Proxy Authentication') ? 500 : 500;
-    return res.status(status).json({
+    // CRITICAL: Cannot return 407 to browser
+    const finalStatus = response.status === 407 ? 500 : response.status;
+    return res.status(finalStatus).json(data);
+  } catch (error) {
+    console.error('Peamsub API Error:', error);
+    return res.status(500).json({
       error: 'Internal server error',
-      message: error.message || 'Unknown error'
+      message: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 }
