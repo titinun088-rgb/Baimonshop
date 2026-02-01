@@ -32,14 +32,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const authHeader = `Basic ${Buffer.from(PEAMSUB_API_KEY).toString('base64')}`;
 
     // Configure Proxy Agent (Fixie)
-    const proxyUrl = process.env.FIXIE_URL;
-    // Explicitly define agent type or leave it to inference, but cast if needed for fetch
+    // TEMP DEBUG: Hardcoded to verify connection, bypassing env var issues
+    const proxyUrl = 'http://fixie:KKToygSsimaMOLE@criterium.usefixie.com:80';
     let agent: any = undefined;
 
     if (proxyUrl) {
       try {
-        console.log(`Setting up proxy with URL length: ${proxyUrl.length}`);
-        // Standard usage per documentation: pass the connection string directly
+        console.log(`Using HARDCODED Proxy URL (Debug)`);
         agent = new HttpsProxyAgent(proxyUrl);
       } catch (proxyError) {
         console.error('Failed to create proxy agent:', proxyError);
