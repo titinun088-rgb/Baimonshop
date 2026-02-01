@@ -33,7 +33,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Configure Proxy Agent (Fixie)
     const proxyUrl = process.env.FIXIE_URL;
-    const agent = proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined;
+    let agent: any = undefined;
+
+    if (proxyUrl) {
+      try {
+        // Robustly parse the proxy URL to handle special characters in password
+        const parsedUrl = new URL(proxyUrl);
+        agent = new HttpsProxyAgent({
+          host: parsedUrl.hostname,
+          port: parsedUrl.port || 80,
+          auth: `${parsedUrl.username}:${parsedUrl.password}`
+        });
+        console.log(`Proxy configured for host: ${parsedUrl.hostname}`);
+      } catch (proxyError) {
+        console.error('Invalid Proxy URL format:', proxyError);
+        // Fallback or continue without proxy (which will likely fail IP check, but avoids crash)
+      }
+    }
 
     // เรียก Peamsub API
     const response = await fetch(`${PEAMSUB_API_BASE_URL}${endpoint}`, {
