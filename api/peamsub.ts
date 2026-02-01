@@ -46,7 +46,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       agent
     });
 
-    const data = await response.json();
+    let data;
+    const responseText = await response.text();
+
+    try {
+      data = JSON.parse(responseText);
+    } catch (e) {
+      console.warn('Peamsub API returned non-JSON:', responseText.substring(0, 200));
+      // Fallback: Return raw text as message or a generic error if empty
+      // If status is 403/400 (IP Block), we might get HTML or plain text
+      return res.status(response.status).json({
+        statusCode: response.status,
+        error: response.ok ? null : 'API Error',
+        message: responseText || `API returned status ${response.status}`,
+        data: null
+      });
+    }
 
     return res.status(response.status).json(data);
   } catch (error) {
