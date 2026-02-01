@@ -33,37 +33,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Configure Proxy Agent (Fixie)
     const proxyUrl = process.env.FIXIE_URL;
+    // Explicitly define agent type or leave it to inference, but cast if needed for fetch
     let agent: any = undefined;
 
     if (proxyUrl) {
       try {
-        const parsedUrl = new URL(proxyUrl);
-        const username = parsedUrl.username;
-        const password = parsedUrl.password;
-
-        // Manual Proxy-Authorization header construction
-        const auth = Buffer.from(`${username}:${password}`).toString('base64');
-        const proxyAuthHeader = `Basic ${auth}`;
-
-        agent = new HttpsProxyAgent({
-          host: parsedUrl.hostname,
-          port: parsedUrl.port || 80,
-          headers: {
-            'Proxy-Authorization': proxyAuthHeader
-          }
-        });
-
-        console.log(`Proxy configured for ${parsedUrl.hostname} with manual auth header`);
+        console.log(`Setting up proxy with URL length: ${proxyUrl.length}`);
+        // Standard usage per documentation: pass the connection string directly
+        agent = new HttpsProxyAgent(proxyUrl);
       } catch (proxyError) {
-        console.error('Invalid Proxy URL format:', proxyError);
+        console.error('Failed to create proxy agent:', proxyError);
       }
     }
 
     // เรียก Peamsub API
-    // Note: We don't pass 'agent' directly to fetch option if we want to add headers to the CONNECT request,
-    // but message 'Proxy Authentication Failed' usually comes from the CONNECT step.
-    // 'https-proxy-agent' should handle the CONNECT headers if passed in options.
-
+    // Note: 'agent' property in node-fetch options handles the proxy connection
     const response = await fetch(`${PEAMSUB_API_BASE_URL}${endpoint}`, {
       method,
       headers: {
