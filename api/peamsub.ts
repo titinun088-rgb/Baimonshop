@@ -55,15 +55,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       console.warn('Peamsub API returned non-JSON:', responseText.substring(0, 200));
       // Fallback: Return raw text as message or a generic error if empty
       // If status is 403/400 (IP Block), we might get HTML or plain text
-      return res.status(response.status).json({
+
+      // CRITICAL: Cannot return 407 to browser, it triggers ERR_UNEXPECTED_PROXY_AUTH
+      const finalStatus = response.status === 407 ? 500 : response.status;
+
+      return res.status(finalStatus).json({
         statusCode: response.status,
         error: response.ok ? null : 'API Error',
-        message: responseText || `API returned status ${response.status}`,
+        message: response.status === 407 ? 'Proxy Authentication Failed' : (responseText || `API returned status ${response.status}`),
         data: null
       });
     }
 
-    return res.status(response.status).json(data);
+    // CRITICAL: Cannot return 407 to browser
+    const finalStatus = response.status === 407 ? 500 : response.status;
+    return res.status(finalStatus).json(data);
   } catch (error) {
     console.error('Peamsub API Error:', error);
     return res.status(500).json({
