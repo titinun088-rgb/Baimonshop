@@ -37,21 +37,33 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (proxyUrl) {
       try {
-        // Robustly parse the proxy URL to handle special characters in password
         const parsedUrl = new URL(proxyUrl);
+        const username = parsedUrl.username;
+        const password = parsedUrl.password;
+
+        // Manual Proxy-Authorization header construction
+        const auth = Buffer.from(`${username}:${password}`).toString('base64');
+        const proxyAuthHeader = `Basic ${auth}`;
+
         agent = new HttpsProxyAgent({
           host: parsedUrl.hostname,
           port: parsedUrl.port || 80,
-          auth: `${parsedUrl.username}:${parsedUrl.password}`
+          headers: {
+            'Proxy-Authorization': proxyAuthHeader
+          }
         });
-        console.log(`Proxy configured for host: ${parsedUrl.hostname}`);
+
+        console.log(`Proxy configured for ${parsedUrl.hostname} with manual auth header`);
       } catch (proxyError) {
         console.error('Invalid Proxy URL format:', proxyError);
-        // Fallback or continue without proxy (which will likely fail IP check, but avoids crash)
       }
     }
 
     // เรียก Peamsub API
+    // Note: We don't pass 'agent' directly to fetch option if we want to add headers to the CONNECT request,
+    // but message 'Proxy Authentication Failed' usually comes from the CONNECT step.
+    // 'https-proxy-agent' should handle the CONNECT headers if passed in options.
+
     const response = await fetch(`${PEAMSUB_API_BASE_URL}${endpoint}`, {
       method,
       headers: {
