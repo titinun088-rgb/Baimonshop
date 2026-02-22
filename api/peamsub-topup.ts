@@ -1,4 +1,4 @@
- import type { VercelRequest, VercelResponse } from '@vercel/node';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import fetch from 'node-fetch';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { withRateLimit, validateOrigin, validateRequestSize, getClientIP } from './_middleware.js';
@@ -9,7 +9,7 @@ import { withRateLimit, validateOrigin, validateRequestSize, getClientIP } from 
  * Protected with rate limiting and validation
  * CRITICAL: This endpoint can charge money - extra security required!
  */
-async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
+async function handler(req: VercelRequest, res: VercelResponse): Promise<VercelResponse | void> {
   // CORS headers - strict for payment endpoint
   const origin = req.headers.origin;
   const allowedOrigins = [
@@ -72,7 +72,6 @@ async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
     }
 
     // Call Peamsub API with Basic Auth
-    // Call Peamsub API with Basic Auth
     const authHeader = `Basic ${Buffer.from(apiKey).toString('base64')}`;
 
     // Configure Proxy Agent (Fixie)
@@ -96,7 +95,7 @@ async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
       agent
     });
 
-    const data = await response.json();
+    const data = await response.json() as any;
 
     if (!response.ok) {
       console.error('❌ Peamsub API Error:', data);
@@ -126,7 +125,7 @@ async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
       }
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Peamsub Proxy Error:', error);
     return res.status(500).json({
       success: false,

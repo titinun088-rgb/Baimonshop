@@ -31,7 +31,7 @@ interface CheckCondition {
   };
 }
 
-async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
+async function handler(req: VercelRequest, res: VercelResponse): Promise<VercelResponse | void> {
   // CORS headers
   const origin = req.headers.origin;
   const allowedOrigins = [
@@ -42,11 +42,11 @@ async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
     'http://localhost:5173',
     'http://localhost:3000'
   ];
-  
+
   if (origin && allowedOrigins.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
-  
+
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -137,26 +137,26 @@ async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
           res.status(400).json({ error: 'base64Image is required for qr-base64 method' });
           return;
         }
-        
+
         // แปลง base64 กลับเป็น Buffer สำหรับ FormData
         endpoint = `${SLIP2GO_BASE_URL}/api/verify-slip/qr-image/info`;
-        
+
         const imageBuffer = Buffer.from(base64Image, 'base64');
         const form = new FormData();
         form.append('file', imageBuffer, {
           filename: 'slip.jpg',
           contentType: 'image/jpeg'
         });
-        
+
         if (checkCondition) {
           form.append('payload', JSON.stringify(checkCondition));
         }
-        
+
         console.log('🔍 Verifying slip with Slip2Go...');
         console.log('📤 Endpoint:', endpoint);
         console.log('📤 Method:', method);
         console.log('📤 Image buffer size:', imageBuffer.length);
-        
+
         // เรียก Slip2Go API ด้วย FormData (Node.js) - ใช้ body as any เพราะ TypeScript ไม่รู้จัก FormData type
         const formResponse = await fetch(endpoint, {
           method: 'POST',
@@ -166,9 +166,9 @@ async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
           },
           body: form as any
         });
-        
+
         console.log('📥 Slip2Go response status:', formResponse.status);
-        
+
         if (!formResponse.ok) {
           const errorText = await formResponse.text();
           console.error('❌ Slip2Go API error response:', errorText);
@@ -179,11 +179,10 @@ async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
           });
           return;
         }
-        
-        const formData_response = await formResponse.json();
+
+        const formData_response = await formResponse.json() as any;
         console.log('✅ Slip2Go response code:', formData_response.code);
-        res.status(200).json(formData_response);
-        return;
+        return res.status(200).json(formData_response);
 
       default:
         res.status(400).json({ error: 'Invalid method' });
@@ -194,9 +193,9 @@ async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
     console.error('❌ Slip verification error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     const errorStack = error instanceof Error ? error.stack : undefined;
-    
+
     console.error('❌ Error details:', { message: errorMessage, stack: errorStack });
-    
+
     res.status(500).json({
       success: false,
       error: 'Slip verification failed',

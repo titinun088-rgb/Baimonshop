@@ -8,7 +8,7 @@ import { withRateLimit, validateOrigin, validateRequestSize, getClientIP } from 
  * Hides PEAMSUB_API_KEY from client-side
  * Protected with rate limiting
  */
-async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
+async function handler(req: VercelRequest, res: VercelResponse): Promise<VercelResponse | void> {
   // CORS headers
   const origin = req.headers.origin;
   const allowedOrigins = [
@@ -66,7 +66,6 @@ async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
     }
 
     // Call Peamsub API with Basic Auth
-    // Call Peamsub API with Basic Auth
     const authHeader = `Basic ${Buffer.from(apiKey).toString('base64')}`;
 
     // Configure Proxy Agent (Fixie)
@@ -85,7 +84,7 @@ async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
       agent
     });
 
-    const data = await response.json();
+    const data = await response.json() as any;
 
     if (!response.ok) {
       console.error('❌ Peamsub Check Order Error:', data);
@@ -108,7 +107,7 @@ async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
       }
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Peamsub Check Order Proxy Error:', error);
     return res.status(500).json({
       success: false,

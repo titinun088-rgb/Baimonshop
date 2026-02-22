@@ -6,7 +6,7 @@ import { withRateLimit, validateOrigin, validateRequestSize, validateAmount, get
  * Hides SLIP2GO_SECRET_KEY from client-side
  * Protected with rate limiting and validation
  */
-async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
+async function handler(req: VercelRequest, res: VercelResponse): Promise<VercelResponse | void> {
   // CORS headers
   const origin = req.headers.origin;
   const allowedOrigins = [
@@ -17,11 +17,11 @@ async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
     'http://localhost:5173',
     'http://localhost:3000'
   ];
-  
+
   if (origin && allowedOrigins.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
-  
+
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -50,9 +50,9 @@ async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
     const { log, amount } = req.body;
 
     if (!log || !amount) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Missing required fields: log, amount' 
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: log, amount'
       });
     }
 
@@ -70,9 +70,9 @@ async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
     const secretKey = process.env.SLIP2GO_SECRET_KEY || process.env.VITE_SLIP2GO_SECRET_KEY;
     if (!secretKey) {
       console.error('❌ SLIP2GO_SECRET_KEY not configured');
-      return res.status(500).json({ 
-        success: false, 
-        error: 'Server configuration error' 
+      return res.status(500).json({
+        success: false,
+        error: 'Server configuration error'
       });
     }
 
@@ -87,7 +87,7 @@ async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
       body: JSON.stringify({ log, amount })
     });
 
-    const data = await response.json();
+    const data = await response.json() as any;
 
     if (!response.ok) {
       console.error('❌ Slip2Go API Error:', data);
@@ -116,11 +116,11 @@ async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
       }
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Slip2Go Proxy Error:', error);
-    return res.status(500).json({ 
-      success: false, 
-      error: 'Internal server error' 
+    return res.status(500).json({
+      success: false,
+      error: 'Internal server error'
     });
   }
 }
