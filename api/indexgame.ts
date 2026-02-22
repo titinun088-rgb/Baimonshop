@@ -106,11 +106,35 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         const response = await fetch(`${INDEXGAME_API_BASE_URL}${endpoint}`, fetchOptions);
 
-        const responseText = await response.text();
+        const responseText = (await response.text()).trim();
         let responseData;
+
         try {
-            responseData = JSON.parse(responseText);
+            // Robust JSON parsing for Index Game: find start/end of JSON
+            const startIdxObj = responseText.indexOf('{');
+            const endIdxObj = responseText.lastIndexOf('}');
+            const startIdxArr = responseText.indexOf('[');
+            const endIdxArr = responseText.lastIndexOf(']');
+
+            let startIdx = -1;
+            let endIdx = -1;
+
+            if (startIdxObj !== -1 && (startIdxArr === -1 || startIdxObj < startIdxArr)) {
+                startIdx = startIdxObj;
+                endIdx = endIdxObj;
+            } else if (startIdxArr !== -1) {
+                startIdx = startIdxArr;
+                endIdx = endIdxArr;
+            }
+
+            if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
+                const cleanedJson = responseText.substring(startIdx, endIdx + 1);
+                responseData = JSON.parse(cleanedJson);
+            } else {
+                responseData = JSON.parse(responseText);
+            }
         } catch (e) {
+            console.error('❌ IndexGame Proxy Parse Error:', e);
             responseData = { message: responseText };
         }
 
