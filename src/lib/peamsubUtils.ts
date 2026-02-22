@@ -107,6 +107,8 @@ export interface PeamsubGameProduct {
   info: string;
   img: string;
   format_id: string;
+  indexgame_game_id?: number;
+  indexgame_input_config?: any;
 }
 
 export interface PeamsubGameHistory {
@@ -131,6 +133,16 @@ export interface PeamsubMobileProduct {
 }
 
 export interface PeamsubMobileHistory {
+  id: number;
+  reference: string;
+  info: string;
+  price: number;
+  status: string;
+  date: string;
+  resellerId: string;
+}
+
+export interface PeamsubPreorderHistory {
   id: number;
   reference: string;
   info: string;
@@ -200,6 +212,62 @@ export interface PeamsubApiResponse<T> {
   statusCode: number;
   data: T;
 }
+
+// Helper function to make API requests to Index Game with retry logic
+const makeIndexGameRequest = async <T>(
+  endpoint: string,
+  options: RequestInit = {},
+  retries: number = 3
+): Promise<PeamsubApiResponse<T>> => {
+  const proxyUrl = '/api/indexgame';
+
+  const proxyPayload = {
+    endpoint: endpoint,
+    method: options.method || 'GET',
+    body: options.body ? JSON.parse(options.body as string) : undefined
+  };
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const response = await fetch(proxyUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(proxyPayload)
+      });
+
+      if (!response.ok) {
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          if (errorData.message) errorMessage = errorData.message;
+        } catch (e) { }
+
+        if (attempt < retries && (response.status >= 500 || response.status === 429)) {
+          const delay = Math.pow(2, attempt) * 500;
+          await new Promise(resolve => setTimeout(resolve, delay));
+          continue;
+        }
+        throw new Error(errorMessage);
+      }
+
+      const data = await response.json();
+      // Index Game API returns data directly, but our proxy might wrap it or return it as is.
+      // We expect the proxy to return { status: boolean, data: ... } or similar if successful.
+      // For compatibility with PeamsubApiResponse, we wrap it.
+      return {
+        statusCode: response.status,
+        data: data as T
+      };
+    } catch (error) {
+      if (attempt === retries) throw error;
+      const delay = Math.pow(2, attempt) * 1000;
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  throw new Error('Max retries exceeded');
+};
 
 // Helper function to make API requests with retry logic
 const makeApiRequest = async <T>(
@@ -364,87 +432,72 @@ export const getPeamsubPreorderProducts = async (): Promise<PeamsubPreorderProdu
   }
 };
 
+// Cache for game products to avoid redundant parallel fetching
+let cachedGameProducts: PeamsubGameProduct[] | null = null;
+let lastFetchTime: number = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
 export const getPeamsubGameProducts = async (): Promise<PeamsubGameProduct[]> => {
   try {
-    console.log('🎮 กำลังดึงรายการสินค้าเติมเกม Peamsub...');
-
-    // ทำ retry ในกรณีที่เกิด rate limit หรือ network error
-    let retryCount = 0;
-    const maxRetries = 3;
-    const retryDelay = 1000; // 1 วินาที
-
-    while (retryCount < maxRetries) {
-      try {
-        // ดึงข้อมูลโดยตรงจาก endpoint โดยไม่ใช้ pagination
-        const response = await makeApiRequest<PeamsubGameProduct[]>('/v2/game', {
-          method: 'GET',
-          headers: {
-            'Cache-Control': 'no-cache', // ป้องกัน cache
-          }
-        });
-
-        if (response.statusCode === 200) {
-          let products: PeamsubGameProduct[] = [];
-
-          // ตรวจสอบรูปแบบ response
-          if (Array.isArray(response.data)) {
-            products = response.data;
-          } else if (response.data && typeof response.data === 'object') {
-            const responseData = response.data as any;
-            if (Array.isArray(responseData.data)) {
-              products = responseData.data;
-            } else if (Array.isArray(responseData)) {
-              products = responseData;
-            }
-          }
-
-          // ตรวจสอบความถูกต้องของข้อมูล
-          const validProducts = products.filter(product =>
-            product &&
-            typeof product === 'object' &&
-            'id' in product &&
-            'category' in product
-          );
-
-          // ลบข้อมูลซ้ำ
-          const uniqueProducts = validProducts.filter((product, index, self) =>
-            index === self.findIndex((p) => p.id === product.id)
-          );
-
-          console.log(`✅ ดึงรายการสินค้าเติมเกม Peamsub สำเร็จ: ${uniqueProducts.length} รายการ`);
-
-          // Log warning ถ้าได้ข้อมูลน้อยผิดปกติ
-          if (uniqueProducts.length < 10) {
-            console.warn('⚠️ Warning: ได้รับข้อมูลเกมน้อยกว่าที่ควร อาจมีปัญหากับ API');
-          }
-
-          return uniqueProducts;
-        } else {
-          throw new Error(`API returned status code: ${response.statusCode}`);
-        }
-      } catch (error: any) {
-        retryCount++;
-
-        // ถ้าเป็น rate limit หรือ network error ให้ retry
-        if (error.message.includes('429') || error.message.includes('network')) {
-          if (retryCount < maxRetries) {
-            console.warn(`⚠️ Retry ${retryCount}/${maxRetries} after ${retryDelay}ms...`);
-            await new Promise(resolve => setTimeout(resolve, retryDelay));
-            continue;
-          }
-        }
-
-        // ถ้าเป็น error อื่นๆ หรือ retry ครบแล้ว ให้ throw
-        throw error;
-      }
+    // Return cache if it's still fresh
+    if (cachedGameProducts && (Date.now() - lastFetchTime < CACHE_DURATION)) {
+      console.log('🎮 [IndexGame] Returning cached game products');
+      return cachedGameProducts;
     }
 
-    throw new Error('Max retries exceeded');
-  } catch (error) {
-    console.error('❌ Error getting Peamsub game products:', error);
+    console.log('🎮 [IndexGame] กำลังดึงรายการสินค้าเติมเกม...');
 
-    // Return empty array instead of throwing error for graceful degradation
-    console.warn('⚠️ Returning empty array for graceful degradation');
+    // 1. Get all games
+    const response = await makeIndexGameRequest<any>('/api/v1/games');
+
+    // Index Game API structure: { data: [ { id, gamename, ... } ] }
+    const gamesData = response.data?.data || [];
+
+    if (!Array.isArray(gamesData)) {
+      console.warn('⚠️ Index Game games data is not an array:', gamesData);
+      return [];
+    }
+
+    console.log(`✅ พบเกม ${gamesData.length} รายการ กำลังดึงแพ็กเกจ...`);
+
+    // 2. For each game, get its packs in parallel
+    // To avoid hitting rate limits too hard, we could do this in chunks, 
+    // but let's try parallel first.
+    const productPromises = gamesData.map(async (game: any) => {
+      try {
+        const packsResponse = await makeIndexGameRequest<any>(`/api/v1/games/${game.id}/packs`);
+        const packsData = packsResponse.data?.data || [];
+
+        return packsData.map((pack: any) => ({
+          id: pack.pack_id, // We'll need to handle potential ID collisions later if necessary
+          category: game.gamename, // Mapping gamename to category for UI compatibility
+          recommendedPrice: pack.price_member.toString(), // Suggested retail price from API
+          price: pack.price_partner.toString(), // Cost price for the shop
+          discount: "0",
+          info: `${pack.point} ${pack.unit}`,
+          img: "", // Index Game API doesn't seem to provide game images in this list
+          format_id: "", // Managed differently in Index Game via 'input' array
+          // Custom field to help with purchase
+          indexgame_game_id: game.id,
+          indexgame_input_config: game.input
+        }));
+      } catch (err) {
+        console.error(`❌ Error fetching packs for game ${game.id}:`, err);
+        return [];
+      }
+    });
+
+    const allPacksArrays = await Promise.all(productPromises);
+    const flatProducts = allPacksArrays.flat();
+
+    // Update cache
+    cachedGameProducts = flatProducts;
+    lastFetchTime = Date.now();
+
+    console.log(`✅ ดึงรายการสินค้าเติมเกม IndexGame สำเร็จ: ${flatProducts.length} รายการ`);
+    return flatProducts;
+  } catch (error) {
+    console.error('❌ Error getting Index Game products:', error);
     return [];
   }
 };
@@ -599,43 +652,96 @@ export const testPeamsubConnection = async (): Promise<boolean> => {
 };
 
 // Game API Functions
-export const purchasePeamsubGame = async (id: number, uid: string, reference: string): Promise<string> => {
+export const purchasePeamsubGame = async (packId: number, uid: string, reference: string, gameId?: number): Promise<string> => {
   try {
-    console.log('🎮 กำลังเติมเกม...', { id, uid, reference });
-    const response = await makeApiRequest<{ statusCode: number }>('/v2/game', {
+    console.log('🎮 [IndexGame] กำลังเติมเกม...', { packId, uid, reference, gameId });
+
+    // Index Game requires game_id and pack_id separately.
+    // We pass gameId accumulated during product mapping.
+
+    if (!gameId) {
+      throw new Error('Missing Game ID for Index Game purchase');
+    }
+
+    // Map input based on game config if available
+    // Instead of using arguments, we find the product from cache if available.
+    const product = cachedGameProducts?.find(p => p.id === packId && p.indexgame_game_id === gameId);
+    const apiInputConfig = product?.indexgame_input_config || [];
+
+    const inputData: any = {};
+    if (Array.isArray(apiInputConfig) && apiInputConfig.length > 0) {
+      // Use the input_id specified by the API for each input
+      // If we only have one UID from the UI, we assign it to the first input_id
+      const firstInputId = apiInputConfig[0].input_id;
+      inputData[firstInputId.toString()] = {
+        "name": "uid",
+        "value": uid
+      };
+    } else {
+      // Fallback to "1"
+      inputData["1"] = {
+        "name": "uid",
+        "value": uid
+      };
+    }
+
+    const response = await makeIndexGameRequest<any>('/api/v1/purchase', {
       method: 'POST',
-      body: JSON.stringify({ id, uid, reference })
+      body: JSON.stringify({
+        game_id: gameId,
+        pack_id: packId,
+        input: inputData
+      })
     });
 
-    if (response.statusCode === 200) {
-      console.log('✅ เติมเกมสำเร็จ');
-      return 'เติมเกมสำเร็จ';
+    const data = response.data;
+    if (data.status) {
+      console.log('✅ เติมเกมสำเร็จ:', data);
+      return `เติมเกมสำเร็จ (Order ID: ${data.order_id})`;
     } else {
-      throw new Error(`API returned status code: ${response.statusCode}`);
+      throw new Error(data.message || 'เติมเกมไม่สำเร็จ');
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Error purchasing game:', error);
     throw error;
   }
 };
 
-export const getPeamsubGameHistory = async (references: string[] = []): Promise<PeamsubGameHistory[]> => {
+export const getPeamsubGameHistory = async (orderIds: string[] = []): Promise<PeamsubGameHistory[]> => {
   try {
-    console.log('📋 กำลังดึงประวัติการเติมเกม...');
-    const response = await makeApiRequest<PeamsubGameHistory[]>('/v2/game/history', {
-      method: 'POST',
-      body: JSON.stringify({ references })
+    console.log('📋 [IndexGame] กำลังดึงประวัติการเติมเกม (ตรวจสอบสถานะ)...');
+
+    // Index Game doesn't have a broad history API like Peamsub, 
+    // it focuses on order status. We map recent orders.
+    const historyPromises = orderIds.map(async (id) => {
+      try {
+        const response = await makeIndexGameRequest<any>(`/api/v1/order/${id}`);
+        const data = response.data;
+
+        // Map Status: 1=Pending, 2=Success, 3=Canceled, 4=Refunded
+        let status = 'pending';
+        if (data.status === 2) status = 'success';
+        if (data.status === 3 || data.status === 4) status = 'failed';
+
+        return {
+          id: parseInt(data.order_id) || 0,
+          reference: data.order_id,
+          info: `${data.details?.game || ''} - Pack ${data.details?.pack || ''}`,
+          price: 0, // Not provided in status API directly
+          status: status,
+          date: new Date().toISOString(), // Status API might not return date
+          resellerId: ""
+        } as PeamsubGameHistory;
+      } catch (err) {
+        return null;
+      }
     });
 
-    if (response.statusCode === 200) {
-      console.log('✅ ประวัติการเติมเกม:', response.data);
-      return response.data;
-    } else {
-      throw new Error(`API returned status code: ${response.statusCode}`);
-    }
+    const results = await Promise.all(historyPromises);
+    return results.filter(r => r !== null) as PeamsubGameHistory[];
   } catch (error) {
     console.error('❌ Error getting game history:', error);
-    throw error;
+    return [];
   }
 };
 
