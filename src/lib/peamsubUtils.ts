@@ -240,8 +240,13 @@ const makeIndexGameRequest = async <T>(
       if (!response.ok) {
         let errorMessage = `HTTP error! status: ${response.status}`;
         try {
-          const errorData = await response.json();
-          if (errorData.message) errorMessage = errorData.message;
+          const responseText = await response.text();
+          try {
+            const errorData = JSON.parse(responseText);
+            if (errorData.message) errorMessage = errorData.message;
+          } catch (e) {
+            errorMessage = responseText.substring(0, 100);
+          }
         } catch (e) { }
 
         if (attempt < retries && (response.status >= 500 || response.status === 429)) {

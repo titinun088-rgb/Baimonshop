@@ -19,20 +19,47 @@ async function getAccessToken(agent: any) {
 
     console.log('🔑 Logging in to Index Game API...');
 
-    try {
-        const response = await fetch(`${INDEXGAME_API_BASE_URL}/api/v1/auth/login`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                username: INDEXGAME_USERNAME,
-                password: INDEXGAME_PASSWORD,
-            }),
-            agent
-        });
+    const fetchOptions = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+            'Accept': 'application/json, text/plain, */*',
+            'Accept-Language': 'en-US,en;q=0.9,th;q=0.8',
+            'Referer': 'https://api.indexgame.in.th/',
+            'Origin': 'https://api.indexgame.in.th',
+            'Sec-Ch-Ua': '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"',
+            'Sec-Ch-Ua-Mobile': '?0',
+            'Sec-Ch-Ua-Platform': '"Windows"',
+            'Sec-Fetch-Dest': 'empty',
+            'Sec-Fetch-Mode': 'cors',
+            'Sec-Fetch-Site': 'same-site'
+        },
+        body: JSON.stringify({
+            username: INDEXGAME_USERNAME,
+            password: INDEXGAME_PASSWORD,
+        }),
+        agent
+    };
 
-        const data = await response.json() as any;
+    try {
+        const response = await fetch(`${INDEXGAME_API_BASE_URL}/api/v1/auth/login`, fetchOptions);
+        const responseText = (await response.text()).trim();
+
+        let data;
+        try {
+            // Robust JSON extraction
+            const startIdx = responseText.indexOf('{');
+            const endIdx = responseText.lastIndexOf('}');
+            if (startIdx !== -1 && endIdx !== -1) {
+                data = JSON.parse(responseText.substring(startIdx, endIdx + 1));
+            } else {
+                data = JSON.parse(responseText);
+            }
+        } catch (parseError) {
+            console.error('❌ Login Parse Error. Raw:', responseText.substring(0, 100));
+            throw new Error(`Login response not JSON (Cloudflare block?): ${responseText.substring(0, 50)}`);
+        }
 
         if (data.status && data.token) {
             cachedToken = data.token;
