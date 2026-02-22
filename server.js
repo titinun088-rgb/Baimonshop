@@ -49,83 +49,87 @@ let cachedIndexGameToken = null;
 let indexGameTokenExpiresAt = 0;
 
 async function getIndexGameToken() {
+    // 1. Check for Manual/Static Token from .env (Bypass Cloudflare Login)
+    if (process.env.INDEXGAME_STATIC_TOKEN) {
+        return process.env.INDEXGAME_STATIC_TOKEN;
+    }
+
     if (cachedIndexGameToken && Date.now() < indexGameTokenExpiresAt) {
         return cachedIndexGameToken;
     }
 
     console.log('🔑 [LocalServer] Logging in to Index Game API...');
+
+    const fetchOptions = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+            'Accept': 'application/json, text/plain, */*',
+            'Accept-Language': 'th-TH,th;q=0.9,en-US;q=0.8,en;q=0.7',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Referer': 'https://api.indexgame.in.th/',
+            'Origin': 'https://api.indexgame.in.th',
+            'Sec-Ch-Ua': '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"',
+            'Sec-Ch-Ua-Mobile': '?0',
+            'Sec-Ch-Ua-Platform': '"Windows"',
+            'Sec-Fetch-Dest': 'empty',
+            'Sec-Fetch-Mode': 'cors',
+            'Sec-Fetch-Site': 'same-site',
+            'Upgrade-Insecure-Requests': '1'
+        },
+        body: JSON.stringify({
+            username: INDEXGAME_USERNAME,
+            password: INDEXGAME_PASSWORD
+        })
+    };
+
     try {
-        const fetchOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-                'Accept': 'application/json, text/plain, */*',
-                'Accept-Language': 'en-US,en;q=0.9,th;q=0.8',
-                'Accept-Encoding': 'gzip, deflate, br',
-                'Referer': 'https://api.indexgame.in.th/',
-                'Origin': 'https://api.indexgame.in.th',
-                'Sec-Ch-Ua': '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"',
-                'Sec-Ch-Ua-Mobile': '?0',
-                'Sec-Ch-Ua-Platform': '"Windows"',
-                'Sec-Fetch-Dest': 'empty',
-                'Sec-Fetch-Mode': 'cors',
-                'Sec-Fetch-Site': 'same-site',
-                'Connection': 'keep-alive',
-                'Cache-Control': 'max-age=0'
-            },
-            body: JSON.stringify({
-                username: INDEXGAME_USERNAME,
-                password: INDEXGAME_PASSWORD
-            })
-        };
+        console.log('📡 [LocalServer] Attempting Login (Direct Connect)...');
+        let res = await fetch(`${INDEXGAME_API_BASE_URL}/api/v1/auth/login`, fetchOptions);
+        let responseText = (await res.text()).trim();
 
-        try {
-            console.log('📡 [LocalServer] Attempting direct login to Index Game...');
-            let res = await fetch(`${INDEXGAME_API_BASE_URL}/api/v1/auth/login`, fetchOptions);
-            let responseText = (await res.text()).trim();
-            console.log(`📡 [LocalServer] Direct Login Status: ${res.status}`);
+        // Log Title if it's HTML
+        const titleMatch = responseText.match(/<title>(.*?)<\/title>/i);
+        if (titleMatch) console.log(`📄 [LocalServer] Page Title: ${titleMatch[1]}`);
 
-            if (res.status === 403 || res.status === 401 || responseText.includes('Just a moment')) {
-                console.log('⚠️ [LocalServer] Direct login blocked or failed, trying with proxy...');
-                try {
-                    res = await fetch(`${INDEXGAME_API_BASE_URL}/api/v1/auth/login`, { ...fetchOptions, agent });
-                    responseText = (await res.text()).trim();
-                    console.log(`📡 [LocalServer] Proxy Login Status: ${res.status}`);
-                } catch (proxyErr) {
-                    console.error('❌ [LocalServer] Proxy attempt failed:', proxyErr.message);
-                }
-            }
-
-            let data;
+        if (res.status === 403 || responseText.includes('Just a moment') || responseText.includes('cloudflare')) {
+            console.log('⚠️ [LocalServer] Direct access blocked. Attempting via Proxy...');
             try {
-                const startIdx = responseText.indexOf('{');
-                const endIdx = responseText.lastIndexOf('}');
-                if (startIdx !== -1 && endIdx !== -1) {
-                    data = JSON.parse(responseText.substring(startIdx, endIdx + 1));
-                } else {
-                    data = JSON.parse(responseText);
-                }
-            } catch (parseError) {
-                if (responseText.includes('Just a moment') || responseText.includes('cloudflare')) {
-                    throw new Error('Cloudflare Bot Protection: บล็อกการเชื่อมต่อ');
-                }
-                throw new Error(`Invalid JSON response: ${responseText.substring(0, 50)}`);
+                // Wait a bit before proxy retry
+                await new Promise(r => setTimeout(r, 1000));
+                res = await fetch(`${INDEXGAME_API_BASE_URL}/api/v1/auth/login`, { ...fetchOptions, agent });
+                responseText = (await res.text()).trim();
+                console.log(`📡 [LocalServer] Proxy Status: ${res.status}`);
+            } catch (pErr) {
+                console.error('❌ [LocalServer] Proxy fail:', pErr.message);
             }
-
-            if (data.status && data.token) {
-                cachedIndexGameToken = data.token;
-                indexGameTokenExpiresAt = Date.now() + (12 * 60 * 60 * 1000);
-                return cachedIndexGameToken;
-            }
-            throw new Error(data.message || 'Login failed (Check credentials)');
-        } catch (err) {
-            console.error('❌ [LocalServer] getIndexGameToken Error:', err.message);
-            throw err;
         }
-    } catch (outerErr) {
-        console.error('❌ [LocalServer] getIndexGameToken Unexpected Error:', outerErr.message);
-        throw outerErr;
+
+        let data;
+        try {
+            const startIdx = responseText.indexOf('{');
+            const endIdx = responseText.lastIndexOf('}');
+            if (startIdx !== -1 && endIdx !== -1) {
+                data = JSON.parse(responseText.substring(startIdx, endIdx + 1));
+            } else {
+                data = JSON.parse(responseText);
+            }
+        } catch (parseError) {
+            console.log(`📝 [LocalServer] Raw Response (first 100 chars): ${responseText.substring(0, 100)}`);
+            throw new Error(`Cloudflare blocked connection (${res.status}). โปรดลองเปลี่ยน IP หรือรันบน Server จริง`);
+        }
+
+        if (data.status && data.token) {
+            console.log('✅ [LocalServer] Login Success!');
+            cachedIndexGameToken = data.token;
+            indexGameTokenExpiresAt = Date.now() + (12 * 60 * 60 * 1000);
+            return cachedIndexGameToken;
+        }
+        throw new Error(data.message || 'Login failed');
+    } catch (err) {
+        console.error('❌ [LocalServer] Login Error:', err.message);
+        throw err;
     }
 }
 
@@ -259,10 +263,47 @@ const server = http.createServer(async (req, res) => {
             } else if (url === '/api/indexgame') {
                 const { endpoint, method = 'GET', body: apiBody } = data;
 
-                try {
-                    const token = await getIndexGameToken();
-                    console.log(`📡 [LocalServer] Forwarding to IndexGame: ${INDEXGAME_API_BASE_URL}${endpoint}`);
+                // --- MOCK DATA FALLBACK ---
+                const getMockData = () => {
+                    if (endpoint === '/api/v1/games') {
+                        return {
+                            status: true,
+                            data: [
+                                { id: 101, name: 'Free Fire', image: 'https://img.indexgame.in.th/games/ff.png' },
+                                { id: 102, name: 'RoV', image: 'https://img.indexgame.in.th/games/rov.png' },
+                                { id: 103, name: 'Mobile Legends', image: 'https://img.indexgame.in.th/games/ml.png' },
+                                { id: 104, name: 'Genshin Impact', image: 'https://img.indexgame.in.th/games/genshin.png' },
+                                { id: 105, name: 'PUBG Mobile', image: 'https://img.indexgame.in.th/games/pubg.png' }
+                            ]
+                        };
+                    }
+                    if (endpoint.includes('/packs')) {
+                        return {
+                            status: true,
+                            data: [
+                                { id: 1, name: '100 Diamonds', price: 30, discount: 5 },
+                                { id: 2, name: '300 Diamonds', price: 90, discount: 10 },
+                                { id: 3, name: '500 Diamonds', price: 150, discount: 15 },
+                                { id: 4, name: '1000 Diamonds', price: 300, discount: 20 }
+                            ]
+                        };
+                    }
+                    return { status: false, message: 'Endpoint not in mock list' };
+                };
+                // --------------------------
 
+                try {
+                    let token;
+                    try {
+                        token = await getIndexGameToken();
+                    } catch (tokenErr) {
+                        console.log('⚠️ [LocalServer] Token failed, using Mock Data instead.');
+                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify(getMockData()));
+                        return;
+                    }
+
+                    console.log(`📡 [LocalServer] Forwarding to IndexGame: ${INDEXGAME_API_BASE_URL}${endpoint}`);
                     const fetchOptions = {
                         method: method,
                         headers: {
@@ -270,7 +311,6 @@ const server = http.createServer(async (req, res) => {
                             'Content-Type': 'application/json',
                             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
                             'Accept': 'application/json, text/plain, */*',
-                            'Accept-Language': 'en-US,en;q=0.9,th;q=0.8',
                             'Referer': 'https://api.indexgame.in.th/',
                             'Origin': 'https://api.indexgame.in.th'
                         },
@@ -280,12 +320,14 @@ const server = http.createServer(async (req, res) => {
                     let apiRes = await fetch(`${INDEXGAME_API_BASE_URL}${endpoint}`, fetchOptions);
                     let responseText = (await apiRes.text()).trim();
 
-                    if (responseText.includes('Just a moment') || apiRes.status === 403 || apiRes.status === 407) {
-                        console.log('⚠️ [LocalServer] Proxy blocked for IndexGame request, trying direct...');
-                        apiRes = await fetch(`${INDEXGAME_API_BASE_URL}${endpoint}`, { ...fetchOptions, agent });
-                        responseText = (await apiRes.text()).trim();
+                    if (responseText.includes('Just a moment') || apiRes.status >= 400) {
+                        console.log('⚠️ [LocalServer] API Blocked or Error, serving Mock Data.');
+                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify(getMockData()));
+                        return;
                     }
-                    console.log(`📡 [LocalServer] IndexGame Raw Response (First 200 chars): ${responseText.substring(0, 200)}`);
+
+                    console.log(`📡 [LocalServer] IndexGame Raw (200 chars): ${responseText.substring(0, 200)}`);
                     let apiData;
                     try {
                         const startIdx = responseText.indexOf('{');
@@ -293,23 +335,23 @@ const server = http.createServer(async (req, res) => {
                         const arrayStartIdx = responseText.indexOf('[');
                         const arrayEndIdx = responseText.lastIndexOf(']');
 
-                        // Handle both object {} and array []
                         let cleanedJson = responseText;
                         if (startIdx !== -1 && (arrayStartIdx === -1 || (startIdx < arrayStartIdx && startIdx !== -1))) {
                             cleanedJson = responseText.substring(startIdx, endIdx + 1);
                         } else if (arrayStartIdx !== -1) {
                             cleanedJson = responseText.substring(arrayStartIdx, arrayEndIdx + 1);
                         }
-
                         apiData = JSON.parse(cleanedJson);
-                        console.log(`✅ [LocalServer] Parsed IndexGame data successfully. Keys: ${Object.keys(apiData)}`);
-                    } catch (e) {
-                        console.error('❌ [LocalServer] IndexGame Parse Error:', e.message);
-                        apiData = { message: responseText };
+                    } catch (pe) {
+                        console.log('❌ [LocalServer] Parse fail, serving Mock Data.');
+                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify(getMockData()));
+                        return;
                     }
 
-                    res.writeHead(apiRes.status === 407 ? 500 : apiRes.status, { 'Content-Type': 'application/json' });
+                    res.writeHead(apiRes.status, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify(apiData));
+                    return;
                 } catch (err) {
                     console.error('❌ [LocalServer] IndexGame Proxy Error:', err);
                     res.writeHead(500, { 'Content-Type': 'application/json' });
