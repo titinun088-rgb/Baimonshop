@@ -269,11 +269,11 @@ const server = http.createServer(async (req, res) => {
                         return {
                             status: true,
                             data: [
-                                { id: 101, name: 'Free Fire', image: 'https://img.indexgame.in.th/games/ff.png' },
-                                { id: 102, name: 'RoV', image: 'https://img.indexgame.in.th/games/rov.png' },
-                                { id: 103, name: 'Mobile Legends', image: 'https://img.indexgame.in.th/games/ml.png' },
-                                { id: 104, name: 'Genshin Impact', image: 'https://img.indexgame.in.th/games/genshin.png' },
-                                { id: 105, name: 'PUBG Mobile', image: 'https://img.indexgame.in.th/games/pubg.png' }
+                                { id: 101, gamename: 'Free Fire', image: 'https://img.indexgame.in.th/games/ff.png' },
+                                { id: 102, gamename: 'RoV', image: 'https://img.indexgame.in.th/games/rov.png' },
+                                { id: 103, gamename: 'Mobile Legends', image: 'https://img.indexgame.in.th/games/ml.png' },
+                                { id: 104, gamename: 'Genshin Impact', image: 'https://img.indexgame.in.th/games/genshin.png' },
+                                { id: 105, gamename: 'PUBG Mobile', image: 'https://img.indexgame.in.th/games/pubg.png' }
                             ]
                         };
                     }
@@ -281,10 +281,10 @@ const server = http.createServer(async (req, res) => {
                         return {
                             status: true,
                             data: [
-                                { id: 1, name: '100 Diamonds', price: 30, discount: 5 },
-                                { id: 2, name: '300 Diamonds', price: 90, discount: 10 },
-                                { id: 3, name: '500 Diamonds', price: 150, discount: 15 },
-                                { id: 4, name: '1000 Diamonds', price: 300, discount: 20 }
+                                { pack_id: 1, name: '100 Diamonds', price_partner: 30, price_member: 35, point: "100", unit: "Diamonds" },
+                                { pack_id: 2, name: '300 Diamonds', price_partner: 90, price_member: 100, point: "300", unit: "Diamonds" },
+                                { pack_id: 3, name: '500 Diamonds', price_partner: 150, price_member: 165, point: "500", unit: "Diamonds" },
+                                { pack_id: 4, name: '1000 Diamonds', price_partner: 300, price_member: 330, point: "1000", unit: "Diamonds" }
                             ]
                         };
                     }

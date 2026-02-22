@@ -476,8 +476,8 @@ export const getPeamsubGameProducts = async (): Promise<PeamsubGameProduct[]> =>
         return packsData.map((pack: any) => ({
           id: pack.pack_id, // We'll need to handle potential ID collisions later if necessary
           category: game.gamename, // Mapping gamename to category for UI compatibility
-          recommendedPrice: pack.price_member.toString(), // Suggested retail price from API
-          price: pack.price_partner.toString(), // Cost price for the shop
+          recommendedPrice: (pack.price_member || pack.price || 0).toString(), // Suggested retail price from API
+          price: (pack.price_partner || pack.price || 0).toString(), // Cost price for the shop
           discount: "0",
           info: `${pack.point} ${pack.unit}`,
           img: "", // Index Game API doesn't seem to provide game images in this list
