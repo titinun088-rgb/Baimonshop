@@ -40,7 +40,7 @@ const INDEXGAME_USERNAME = process.env.INDEXGAME_USERNAME || 'titinun088';
 const INDEXGAME_PASSWORD = process.env.INDEXGAME_PASSWORD || 'titinun088';
 const FIXIE_URL = process.env.FIXIE_URL || 'http://fixie:KKToygSsimaMOLE@criterium.usefixie.com:80';
 const PEAMSUB_API_BASE_URL = 'https://api.peamsub24hr.com';
-const INDEXGAME_API_BASE_URL = 'https://api.indexgame.in.th';
+const INDEXGAME_API_BASE_URL = 'https://indexgame.in.th';
 
 const agent = new HttpsProxyAgent(FIXIE_URL);
 
@@ -49,8 +49,9 @@ let cachedIndexGameToken = null;
 let indexGameTokenExpiresAt = 0;
 
 async function getIndexGameToken() {
-    // 1. Check for Manual/Static Token from .env (Bypass Cloudflare Login)
+    // 🔥 HIGH PRIORITY: Use static token from .env to bypass Cloudflare Login 403
     if (process.env.INDEXGAME_STATIC_TOKEN) {
+        console.log('🎫 [LocalServer] Using STATIC TOKEN from .env (Bypassing Login)');
         return process.env.INDEXGAME_STATIC_TOKEN;
     }
 
@@ -58,69 +59,32 @@ async function getIndexGameToken() {
         return cachedIndexGameToken;
     }
 
-    console.log('🔑 [LocalServer] Logging in to Index Game API...');
-
-    const fetchOptions = {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-            'Accept': 'application/json, text/plain, */*',
-            'Accept-Language': 'th-TH,th;q=0.9,en-US;q=0.8,en;q=0.7',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Referer': 'https://api.indexgame.in.th/',
-            'Origin': 'https://api.indexgame.in.th',
-            'Sec-Ch-Ua': '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"',
-            'Sec-Ch-Ua-Mobile': '?0',
-            'Sec-Ch-Ua-Platform': '"Windows"',
-            'Sec-Fetch-Dest': 'empty',
-            'Sec-Fetch-Mode': 'cors',
-            'Sec-Fetch-Site': 'same-site',
-            'Upgrade-Insecure-Requests': '1'
-        },
-        body: JSON.stringify({
-            username: INDEXGAME_USERNAME,
-            password: INDEXGAME_PASSWORD
-        })
-    };
+    console.log('🔑 [LocalServer] Attempting Auto-Login to Index Game...');
 
     try {
-        console.log('📡 [LocalServer] Attempting Login (Direct Connect)...');
-        let res = await fetch(`${INDEXGAME_API_BASE_URL}/api/v1/auth/login`, fetchOptions);
-        let responseText = (await res.text()).trim();
+        const response = await fetch(`${INDEXGAME_API_BASE_URL}/api/v1/auth/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
+            },
+            body: JSON.stringify({
+                username: INDEXGAME_USERNAME,
+                password: INDEXGAME_PASSWORD
+            })
+        });
 
-        // Log Title if it's HTML
-        const titleMatch = responseText.match(/<title>(.*?)<\/title>/i);
-        if (titleMatch) console.log(`📄 [LocalServer] Page Title: ${titleMatch[1]}`);
+        const responseText = (await response.text()).trim();
 
-        if (res.status === 403 || responseText.includes('Just a moment') || responseText.includes('cloudflare')) {
-            console.log('⚠️ [LocalServer] Direct access blocked. Attempting via Proxy...');
-            try {
-                // Wait a bit before proxy retry
-                await new Promise(r => setTimeout(r, 1000));
-                res = await fetch(`${INDEXGAME_API_BASE_URL}/api/v1/auth/login`, { ...fetchOptions, agent });
-                responseText = (await res.text()).trim();
-                console.log(`📡 [LocalServer] Proxy Status: ${res.status}`);
-            } catch (pErr) {
-                console.error('❌ [LocalServer] Proxy fail:', pErr.message);
-            }
+        if (response.status === 403 || responseText.includes('Just a moment')) {
+            console.error('❌ [LocalServer] Cloudflare BLOCKED Login (403).');
+            console.log('💡 TIP: ก๊อปปี้ Token จากหน้าเบราว์เซอร์มาใส่ใน .env ช่อง INDEXGAME_STATIC_TOKEN เพื่อแก้ปัญหานี้ครับ');
+            throw new Error('Cloudflare Blocked (403)');
         }
 
-        let data;
-        try {
-            const startIdx = responseText.indexOf('{');
-            const endIdx = responseText.lastIndexOf('}');
-            if (startIdx !== -1 && endIdx !== -1) {
-                data = JSON.parse(responseText.substring(startIdx, endIdx + 1));
-            } else {
-                data = JSON.parse(responseText);
-            }
-        } catch (parseError) {
-            console.log(`📝 [LocalServer] Raw Response (first 100 chars): ${responseText.substring(0, 100)}`);
-            throw new Error(`Cloudflare blocked connection (${res.status}). โปรดลองเปลี่ยน IP หรือรันบน Server จริง`);
-        }
-
-        if (data.status && data.token) {
+        const data = JSON.parse(responseText);
+        if (data.status === true && data.token) {
             console.log('✅ [LocalServer] Login Success!');
             cachedIndexGameToken = data.token;
             indexGameTokenExpiresAt = Date.now() + (12 * 60 * 60 * 1000);

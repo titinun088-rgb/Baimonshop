@@ -5,7 +5,7 @@ import { HttpsProxyAgent } from 'https-proxy-agent';
 // Index Game API Configuration
 const INDEXGAME_USERNAME = process.env.INDEXGAME_USERNAME || '';
 const INDEXGAME_PASSWORD = process.env.INDEXGAME_PASSWORD || '';
-const INDEXGAME_API_BASE_URL = 'https://api.indexgame.in.th';
+const INDEXGAME_API_BASE_URL = 'https://indexgame.in.th';
 
 // Cache token in memory (within the same instance)
 let cachedToken: string | null = null;
