@@ -54,8 +54,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 }),
                 agent,
             });
-            const data = await response.json();
-            return res.status(200).json(data);
+            const text = await response.text();
+            console.log('💰 wePAY balance raw response:', text);
+            try {
+                const data = JSON.parse(text);
+                return res.status(200).json(data);
+            } catch (e) {
+                return res.status(200).json({ raw: text, error: 'Invalid JSON' });
+            }
         }
 
         // ─── 2. ดึงรายการสินค้าเกม (เช็ค payee_info) ───────────────────────
@@ -77,8 +83,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 body: JSON.stringify(body),
                 agent,
             });
-            const data = await response.json();
-            return res.status(200).json(data);
+            const text = await response.text();
+            console.log('🎮 wePAY products raw response:', text.substring(0, 200));
+            try {
+                const data = JSON.parse(text);
+                return res.status(200).json(data);
+            } catch (e) {
+                return res.status(200).json({ raw: text, error: 'Invalid JSON' });
+            }
         }
 
         // ─── 3. ดึงรายการสินค้าทั้งหมดจาก comp_export ──────────────────────
@@ -88,8 +100,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 headers: { 'Content-Type': 'application/json' },
                 agent,
             });
-            const data = await response.json();
-            return res.status(200).json(data);
+            const text = await response.text();
+            try {
+                const data = JSON.parse(text);
+                return res.status(200).json(data);
+            } catch (e) {
+                console.error('❌ Failed to parse comp_export JSON:', text.substring(0, 100));
+                return res.status(200).json({ raw: text, error: 'Invalid JSON' });
+            }
         }
 
         // ─── 4. สั่งซื้อ / เติมเกม ──────────────────────────────────────────
