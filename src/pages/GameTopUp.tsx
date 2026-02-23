@@ -31,14 +31,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Helmet } from "react-helmet-async";
 
 import {
-  getPeamsubUserInfo,
-  getPeamsubGameProducts,
-  purchasePeamsubGame,
-  getPeamsubGameHistory,
-  PeamsubUserData,
-  PeamsubGameProduct,
-  PeamsubGameHistory,
-} from "@/lib/peamsubUtils";
+  getWepayBalance,
+  getWepayGameProducts,
+  purchaseWepayGame,
+  wepayErrorText,
+  WepayBalance,
+  WepayGameProduct,
+} from "@/lib/wepayGameUtils";
 import { addUserPurchaseReference, recordPurchaseWithSellPrice } from "@/lib/purchaseHistoryUtils";
 import { getProductSellPrice } from "@/lib/peamsubPriceUtils";
 import { doc, updateDoc, increment } from "firebase/firestore";
@@ -48,12 +47,11 @@ const GameTopUp = () => {
   const { user, userData } = useAuth();
   const isAdmin = userData?.role === "admin";
 
-  // User Info
-  const [userInfo, setUserInfo] = useState<PeamsubUserData | null>(null);
+  // User Info (wePAY balance)
+  const [wepayBalance, setWepayBalance] = useState<WepayBalance | null>(null);
 
   // Game Products
-  const [gameProducts, setGameProducts] = useState<PeamsubGameProduct[]>([]);
-  const [gameHistory, setGameHistory] = useState<PeamsubGameHistory[]>([]);
+  const [gameProducts, setGameProducts] = useState<WepayGameProduct[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showCategoryGames, setShowCategoryGames] = useState(false);
 
@@ -65,23 +63,23 @@ const GameTopUp = () => {
 
   // Game Purchase States
   const [gameDialogOpen, setGameDialogOpen] = useState(false);
-  const [selectedGameProduct, setSelectedGameProduct] = useState<PeamsubGameProduct | null>(null);
+  const [selectedGameProduct, setSelectedGameProduct] = useState<WepayGameProduct | null>(null);
   const [gameUID, setGameUID] = useState("");
   const [gamePurchasing, setGamePurchasing] = useState(false);
 
   // Price Management States
-  const [editingPrice, setEditingPrice] = useState<{ product: PeamsubGameProduct | null; field: 'price' | 'recommendedPrice' }>({ product: null, field: 'price' });
+  const [editingPrice, setEditingPrice] = useState<{ product: WepayGameProduct | null; field: 'price' | 'recommendedPrice' }>({ product: null, field: 'price' });
   const [tempPrice, setTempPrice] = useState("");
   const [priceDialogOpen, setPriceDialogOpen] = useState(false);
 
   // Package Price Management States
-  const [editingPackagePrice, setEditingPackagePrice] = useState<{ package: any | null; game: PeamsubGameProduct | null }>({ package: null, game: null });
+  const [editingPackagePrice, setEditingPackagePrice] = useState<{ package: any | null; game: WepayGameProduct | null }>({ package: null, game: null });
   const [tempPackagePrice, setTempPackagePrice] = useState("");
   const [packagePriceDialogOpen, setPackagePriceDialogOpen] = useState(false);
 
   // Game Detail States
   const [showGameDetail, setShowGameDetail] = useState(false);
-  const [selectedGame, setSelectedGame] = useState<PeamsubGameProduct | null>(null);
+  const [selectedGame, setSelectedGame] = useState<WepayGameProduct | null>(null);
   const [gamePackages, setGamePackages] = useState<any[]>([]);
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
   const [gameServer, setGameServer] = useState("");
@@ -114,9 +112,8 @@ const GameTopUp = () => {
     setLoading(true);
     try {
       await Promise.all([
-        loadUserInfo(),
+        loadBalance(),
         loadGameProducts(),
-        loadGameHistory(),
       ]);
     } catch (error) {
       console.error("Error loading data:", error);
@@ -126,35 +123,24 @@ const GameTopUp = () => {
     }
   };
 
-  const loadUserInfo = async () => {
+  const loadBalance = async () => {
     try {
-      const userData = await getPeamsubUserInfo();
-      setUserInfo(userData);
-      console.log("👤 User info loaded:", userData);
+      const balance = await getWepayBalance();
+      setWepayBalance(balance);
+      console.log("💰 wePAY balance loaded:", balance);
     } catch (error) {
-      console.error("Error loading user info:", error);
+      console.error("Error loading wePAY balance:", error);
     }
   };
 
   const loadGameProducts = async () => {
     try {
-      const allProducts = await getPeamsubGameProducts();
+      const allProducts = await getWepayGameProducts();
       setGameProducts(allProducts);
-      console.log("🎮 Loaded all game products:", allProducts.length);
-
+      console.log("🎮 Loaded all wePAY game products:", allProducts.length);
     } catch (error) {
       console.error("Error loading game products:", error);
       toast.error("เกิดข้อผิดพลาดในการโหลดเกม");
-    }
-  };
-
-  const loadGameHistory = async () => {
-    try {
-      const history = await getPeamsubGameHistory();
-      setGameHistory(history);
-      console.log("📋 Game history loaded:", history.length);
-    } catch (error) {
-      console.error("Error loading game history:", error);
     }
   };
 
@@ -172,7 +158,7 @@ const GameTopUp = () => {
   };
 
   // Game Detail Functions
-  const openGameDetail = (game: PeamsubGameProduct) => {
+  const openGameDetail = (game: WepayGameProduct) => {
     setSelectedGame(game);
     setShowGameDetail(true);
     setShowCategoryGames(false);
@@ -188,7 +174,7 @@ const GameTopUp = () => {
       amount: game.info,
       price: parseFloat(game.price) || 0,
       costPrice: parseFloat(game.recommendedPrice) || 0,
-      discount: parseFloat(game.discount) || 0,
+      discount: 0,
       description: game.info,
       details: '',
       icon: getGameIcon(game.category),
@@ -324,7 +310,7 @@ const GameTopUp = () => {
     openGameDialog(selectedGame);
   };
 
-  const openGameDialog = (game: PeamsubGameProduct) => {
+  const openGameDialog = (game: WepayGameProduct) => {
     setSelectedGameProduct(game);
     setGameDialogOpen(true);
   };
@@ -644,7 +630,7 @@ const GameTopUp = () => {
               const filtered = gameProducts.filter(game => game.category === selectedCategory);
 
               // จัดกลุ่มสินค้าเดียวกัน ต่างกันที่ราคา (ใช้ key จากชื่อเกม category)
-              const map = new Map<string, { key: string; category: string; img?: string; variants: PeamsubGameProduct[]; infoSample?: string }>();
+              const map = new Map<string, { key: string; category: string; img?: string; variants: WepayGameProduct[]; infoSample?: string }>();
               for (const g of filtered) {
                 const key = (g.category || '').trim().toLowerCase();
                 if (!map.has(key)) {
@@ -902,85 +888,85 @@ const GameTopUp = () => {
                   return;
                 }
 
-                // ตรวจสอบยอดเงิน
-                if (!userInfo) {
-                  toast.error("ไม่สามารถตรวจสอบยอดเงินได้");
-                  return;
-                }
-
                 // ตรวจสอบ balance จากฐานข้อมูลเว็บ (Firebase)
                 const webBalance = userData?.balance || 0;
-                const userBalance = parseFloat(userInfo.balance) || 0;
-
-                // ดึงราคาขาย (จาก admin price หรือ recommended price หรือ API price)
-                const apiPrice = parseFloat(selectedGameProduct.price) || 0; // ราคา API (ราคาทุน)
-                const recommendedPrice = parseFloat(selectedGameProduct.recommendedPrice) || 0; // ราคาแนะนำ (ราคาขายเริ่มต้น)
-                const rawSellPrice = await getProductSellPrice(selectedGameProduct.id, 'game', apiPrice, recommendedPrice);
-
-                // ปัดทศนิยมของราคาขาย
+                const apiPrice = parseFloat(selectedGameProduct.price) || 0;
+                const recommendedPrice = parseFloat(selectedGameProduct.recommendedPrice) || 0;
+                const rawSellPrice = await getProductSellPrice(selectedGameProduct.id as unknown as number, 'game', apiPrice, recommendedPrice);
                 const sellPrice = Math.round(rawSellPrice);
-
-                // ตรวจสอบ balance จากฐานข้อมูลเว็บก่อน
                 if (webBalance < sellPrice) {
                   toast.error(`ยอดเงินในระบบไม่พอ (ยอดเงิน: ${webBalance.toLocaleString()} บาท, ราคา: ${sellPrice.toLocaleString()} บาท) กรุณาเติมเงินก่อน`);
                   return;
                 }
 
-                // ตรวจสอบ balance จาก Peamsub API
-                if (userBalance < apiPrice) {
-                  toast.error(`ยอดเงินใน Peamsub ไม่พอ (ยอดเงิน: ${userBalance.toLocaleString()} บาท, ราคา: ${apiPrice.toLocaleString()} บาท) กรุณาเติมเงินก่อน`);
+                // ตรวจสอบ wePAY balance
+                const wepayAvailable = wepayBalance?.available_balance ?? Infinity;
+                if (wepayAvailable < apiPrice) {
+                  toast.error(`ยอดเงินใน wePAY ไม่พอ (คงเหลือ: ${wepayAvailable.toLocaleString()} บาท, ราคา: ${apiPrice.toLocaleString()} บาท)`);
                   return;
                 }
 
                 setGamePurchasing(true);
                 try {
-                  const reference = `GAME_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-                  await purchasePeamsubGame(selectedGameProduct.id, gameUID.trim(), reference, selectedGameProduct.indexgame_game_id);
+                  const dest_ref = `GAME_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+                  // แยก server ID ถ้ากรอกมาในรูป uid|server
+                  const [pay_to_ref1, pay_to_ref2] = gameUID.trim().split('|');
+
+                  const result = await purchaseWepayGame({
+                    dest_ref,
+                    pay_to_company: selectedGameProduct.pay_to_company,
+                    pay_to_amount: selectedGameProduct.pay_to_amount || String(apiPrice),
+                    pay_to_ref1: pay_to_ref1.trim(),
+                    pay_to_ref2: pay_to_ref2?.trim(),
+                  });
+
+                  console.log('✅ wePAY purchase result:', result);
 
                   // หักเงินจาก balance ในฐานข้อมูล
                   if (user) {
                     try {
                       const userRef = doc(db, "users", user.uid);
-                      await updateDoc(userRef, {
-                        balance: increment(-sellPrice) // หักเงิน
-                      });
+                      await updateDoc(userRef, { balance: increment(-sellPrice) });
                       console.log(`✅ หักเงิน ${sellPrice} บาทจาก balance สำเร็จ`);
-
-                      // รีเฟรชข้อมูลผู้ใช้เพื่ออัปเดต balance
                       await loadData();
                     } catch (balanceError) {
                       console.error('❌ ไม่สามารถหักเงินได้:', balanceError);
-                      toast.error("เงินหักจาก API แล้วแต่ไม่สามารถหักเงินจากระบบได้ กรุณาติดต่อผู้ดูแล");
+                      toast.error("ส่งคำสั่งซื้อแล้วแต่ไม่สามารถหักเงินจากระบบได้ กรุณาติดต่อผู้ดูแล");
                     }
-
-                    // บันทึกการซื้อพร้อมราคาขาย
                     try {
                       await recordPurchaseWithSellPrice(
                         user.uid,
                         'game',
-                        reference,
-                        selectedGameProduct.id,
+                        dest_ref,
+                        0,
                         sellPrice,
                         apiPrice,
                         selectedGameProduct.category,
-                        selectedGameProduct.id.toString(),
+                        selectedGameProduct.pay_to_company,
                         selectedGameProduct.info
                       );
                     } catch (recordError) {
                       console.warn('⚠️ ไม่สามารถบันทึกราคาขายได้:', recordError);
-                      // Fallback: บันทึก reference ธรรมดา
-                      await addUserPurchaseReference(user.uid, 'game', reference, sellPrice);
+                      await addUserPurchaseReference(user.uid, 'game', dest_ref, sellPrice);
                     }
                   }
 
-                  toast.success("เติมเกมสำเร็จ!");
+                  toast.success(`ส่งคำสั่งเติมเกมแล้ว! (Ref: ${result.transaction_id || dest_ref})`);
                   setGameDialogOpen(false);
                   setGameUID("");
                   setGameNotes("");
-                  await loadData(); // Reload เพื่ออัพเดตยอดเงิน
-                } catch (error) {
+                  await loadData();
+                } catch (error: any) {
                   console.error("Error purchasing game:", error);
-                  toast.error("เกิดข้อผิดพลาดในการเติมเกม");
+                  const msg = error?.message || '';
+                  // แปลง wePAY error code
+                  const codeMatch = msg.match(/wePAY error (\d+)/);
+                  if (codeMatch) {
+                    toast.error(wepayErrorText(codeMatch[1]));
+                  } else {
+                    toast.error(`เกิดข้อผิดพลาด: ${msg || 'ไม่ทราบสาเหตุ'}`);
+                  }
                 } finally {
                   setGamePurchasing(false);
                 }
