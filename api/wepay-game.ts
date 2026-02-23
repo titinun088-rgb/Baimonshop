@@ -7,20 +7,25 @@ const WEPAY_API_URL = 'https://www.wepay.in.th/client_api.json.php';
 const WEPAY_USERNAME = process.env.WEPAY_USERNAME || '';
 const WEPAY_PASSWORD = process.env.WEPAY_PASSWORD || '';
 const WEPAY_CALLBACK_URL = process.env.WEPAY_CALLBACK_URL || 'https://www.baimonshop.com/api/wepay-callback';
+const MY_VPS_PROXY = 'http://157.85.102.141:3002/proxy';
 
 function md5(str: string): string {
     return createHash('md5').update(str).digest('hex');
 }
 
-function getProxyAgent() {
-    const proxyUrl = process.env.FIXIE_URL || 'http://wuofakpk:obs41kiozcic@107.172.163.27:6543';
-    try {
-        console.log('🌐 Using Webshare Proxy:', proxyUrl.replace(/:([^:@]+)@/, ':***@'));
-        return new HttpsProxyAgent(proxyUrl);
-    } catch (e) {
-        console.error('⚠️ Failed to create proxy agent:', e);
-        return undefined;
-    }
+// ฟังก์ชันสำหรับส่งคำสั่งผ่าน VPS Proxy
+async function fetchViaVPS(url: string, options: any) {
+    const response = await fetch(MY_VPS_PROXY, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            targetUrl: url,
+            method: options.method,
+            headers: options.headers,
+            body: options.body
+        })
+    });
+    return response;
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -39,12 +44,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const password_hash = md5(WEPAY_PASSWORD);
     const { action, ...params } = req.body || {};
-    const agent = getProxyAgent();
 
     try {
         // ─── 1. ตรวจสอบยอดเงิน ─────────────────────────────────────────────
         if (action === 'balance') {
-            const response = await fetch(WEPAY_API_URL, {
+            const response = await fetchViaVPS(WEPAY_API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -52,7 +56,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                     password_hash,
                     type: 'balance_inquiry',
                 }),
-                agent,
             });
             const text = await response.text();
             console.log('💰 wePAY balance raw response:', text);
@@ -77,11 +80,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 body.payee_info = 'true';
             }
 
-            const response = await fetch(WEPAY_API_URL, {
+            const response = await fetchViaVPS(WEPAY_API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body),
-                agent,
             });
             const text = await response.text();
             console.log('🎮 wePAY products raw response:', text.substring(0, 200));
@@ -95,10 +97,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         // ─── 3. ดึงรายการสินค้าทั้งหมดจาก comp_export ──────────────────────
         if (action === 'game_list') {
-            const response = await fetch('https://www.wepay.in.th/comp_export.php?json', {
+            const response = await fetchViaVPS('https://www.wepay.in.th/comp_export.php?json', {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' },
-                agent,
             });
             const text = await response.text();
             try {
@@ -135,11 +136,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
             console.log('📤 wePAY purchase request:', { ...purchaseBody, password_hash: '***' });
 
-            const response = await fetch(WEPAY_API_URL, {
+            const response = await fetchViaVPS(WEPAY_API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(purchaseBody),
-                agent,
             });
 
             const text = await response.text();
@@ -162,7 +162,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 return res.status(400).json({ error: 'Missing transaction_id' });
             }
 
-            const response = await fetch(WEPAY_API_URL, {
+            const response = await fetchViaVPS(WEPAY_API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -171,7 +171,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                     type: 'get_output',
                     transaction_id,
                 }),
-                agent,
             });
 
             const data = await response.json();
