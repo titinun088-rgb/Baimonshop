@@ -1155,11 +1155,11 @@ const GameTopUp = () => {
             <div className="bg-slate-800/50 rounded-xl p-4 my-2 space-y-3 border border-slate-700">
               <div className="flex justify-between items-center text-sm">
                 <span className="text-slate-400">เกม:</span>
-                <span className="font-semibold">{purchaseDetails.gameName}</span>
+                <span className="font-semibold">{stripHtmlTags(purchaseDetails.gameName)}</span>
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-slate-400">แพ็กเกจ:</span>
-                <span className="font-semibold">{purchaseDetails.packageName}</span>
+                <span className="font-semibold">{stripHtmlTags(purchaseDetails.packageName)}</span>
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-slate-400">ยอดชำระ:</span>
