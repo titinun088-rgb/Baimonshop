@@ -25,6 +25,8 @@ import {
   X,
   DollarSign,
   ArrowLeft,
+  Loader2,
+  CheckCircle2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -85,6 +87,8 @@ const GameTopUp = () => {
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
   const [gameServer, setGameServer] = useState("");
   const [gameNotes, setGameNotes] = useState("");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [purchaseDetails, setPurchaseDetails] = useState<any>(null);
 
   // Load data on component mount
   useEffect(() => {
@@ -982,7 +986,16 @@ const GameTopUp = () => {
           <AlertDialogFooter>
             <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
             <AlertDialogAction
-              onClick={async () => {
+              disabled={gamePurchasing}
+              onClick={async (e) => {
+                // ป้องกันการปิด Dialog ทันทีถ้ายังโหลดอยู่ และป้องกันการกดซ้ำ
+                if (gamePurchasing) {
+                  e.preventDefault();
+                  return;
+                }
+
+                e.preventDefault(); // ปกติ AlertDialogAction จะปิดเอง เราต้องคุมเองถ้าต้องการรอมันหมุน 
+
                 if (!selectedGameProduct) {
                   toast.error("ไม่พบข้อมูลเกม");
                   return;
@@ -1069,7 +1082,8 @@ const GameTopUp = () => {
                         apiPrice,
                         selectedGameProduct.category,
                         selectedGameProduct.pay_to_company,
-                        selectedGameProduct.info
+                        selectedGameProduct.info,
+                        'success'
                       );
                     } catch (recordError) {
                       console.warn('⚠️ ไม่สามารถบันทึกราคาขายได้:', recordError);
@@ -1077,8 +1091,19 @@ const GameTopUp = () => {
                     }
                   }
 
-                  toast.success(`ส่งคำสั่งเติมเกมแล้ว! (Ref: ${result.transaction_id || dest_ref})`);
+                  // --- สำเร็จ: ปิดหน้าสั่งซื้อและเปิด Success Modal ---
+                  setPurchaseDetails({
+                    gameName: selectedGameProduct.category,
+                    packageName: selectedGameProduct.info,
+                    amount: sellPrice,
+                    destRef: dest_ref
+                  });
+
+                  setGamePurchasing(false);
                   setGameDialogOpen(false);
+                  setShowSuccessModal(true);
+
+                  toast.success("ส่งคำสั่งซื้อสำเร็จ!");
                   setGameUID("");
                   setGameAID("");
                   setGameNotes("");
@@ -1097,9 +1122,76 @@ const GameTopUp = () => {
                   setGamePurchasing(false);
                 }
               }}
-              disabled={gamePurchasing}
             >
-              {gamePurchasing ? "กำลังเติม..." : "เติมเกม"}
+              {gamePurchasing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  กำลังประมวลผล...
+                </>
+              ) : (
+                "ยืนยันการสั่งซื้อ"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Success Modal */}
+      <AlertDialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+        <AlertDialogContent className="bg-slate-900 border-none text-white max-w-md">
+          <AlertDialogHeader className="flex flex-col items-center text-center">
+            <div className="h-20 w-20 bg-green-500/20 rounded-full flex items-center justify-center mb-4">
+              <CheckCircle2 className="h-12 w-12 text-green-500" />
+            </div>
+            <AlertDialogTitle className="text-2xl font-bold text-green-500">
+              สั่งซื้อสำเร็จ!
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-300">
+              ระบบได้รับคำสั่งซื้อของคุณแล้วและกำลังดำเนินการเติมเข้าสู่ระบบเกม
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          {purchaseDetails && (
+            <div className="bg-slate-800/50 rounded-xl p-4 my-2 space-y-3 border border-slate-700">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-slate-400">เกม:</span>
+                <span className="font-semibold">{purchaseDetails.gameName}</span>
+              </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-slate-400">แพ็กเกจ:</span>
+                <span className="font-semibold">{purchaseDetails.packageName}</span>
+              </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-slate-400">ยอดชำระ:</span>
+                <span className="text-green-400 font-bold">{purchaseDetails.amount} บาท</span>
+              </div>
+              <div className="flex justify-between items-center text-xs text-slate-500 border-t border-slate-700 pt-2">
+                <span>Ref ID:</span>
+                <span className="font-mono">{purchaseDetails.destRef}</span>
+              </div>
+            </div>
+          )}
+
+          <AlertDialogFooter className="flex flex-col sm:flex-row gap-2 mt-4">
+            <Button
+              variant="outline"
+              className="w-full bg-transparent border-slate-700 hover:bg-slate-800 text-white"
+              onClick={() => {
+                setShowSuccessModal(false);
+                // นำทางไปหน้าประวัติ (ถ้ามี path นี้)
+                window.location.hash = "#history";
+                // หรือถ้าใช้ react-router
+                // navigate("/history");
+              }}
+            >
+              <History className="mr-2 h-4 w-4" />
+              ดูประวัติการสั่งซื้อ
+            </Button>
+            <AlertDialogAction
+              className="w-full bg-green-600 hover:bg-green-700 text-white border-none"
+              onClick={() => setShowSuccessModal(false)}
+            >
+              ตกลง
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -10,12 +10,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { 
-  Package, 
-  Calendar, 
-  CreditCard, 
-  User, 
-  Hash, 
+import {
+  Package,
+  Calendar,
+  CreditCard,
+  User,
+  Hash,
   Image as ImageIcon,
   CheckCircle,
   XCircle,
@@ -52,6 +52,19 @@ const ProductDetailsDialog = ({ isOpen, onClose, purchaseItem }: ProductDetailsD
     } catch {
       return dateString;
     }
+  };
+
+  const stripHtmlTags = (html: string) => {
+    if (!html) return "";
+    return html
+      .replace(/<[^>]*>/g, "")
+      .replace(/&nbsp;/g, " ")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&amp;/g, "&")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .trim();
   };
 
   const formatAmount = (amount: string | number) => {
@@ -177,9 +190,9 @@ const ProductDetailsDialog = ({ isOpen, onClose, purchaseItem }: ProductDetailsD
               <div className="space-y-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-white">ชื่อสินค้า</label>
-                  <p className="text-lg font-semibold text-white">{purchaseItem.productName}</p>
+                  <p className="text-lg font-semibold text-white">{stripHtmlTags(purchaseItem.productName)}</p>
                 </div>
-                
+
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-600">รหัสสินค้า</label>
                   <div className="flex items-center gap-2">
@@ -228,7 +241,7 @@ const ProductDetailsDialog = ({ isOpen, onClose, purchaseItem }: ProductDetailsD
                   <label className="text-sm font-medium text-gray-600">รายละเอียดสินค้า</label>
                   <div className="bg-gray-50 p-4 rounded-lg border">
                     <p className="text-sm text-black whitespace-pre-wrap leading-relaxed">
-                      {purchaseItem.prize}
+                      {stripHtmlTags(purchaseItem.prize)}
                     </p>
                   </div>
                 </div>
@@ -252,7 +265,7 @@ const ProductDetailsDialog = ({ isOpen, onClose, purchaseItem }: ProductDetailsD
                     {formatAmount(purchaseItem.price)} บาท
                   </p>
                 </div>
-                
+
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-white">วันที่ซื้อ</label>
                   <div className="flex items-center gap-2">
@@ -280,9 +293,9 @@ const ProductDetailsDialog = ({ isOpen, onClose, purchaseItem }: ProductDetailsD
                     {purchaseItem.id}
                   </p>
                 </div>
-                
+
                 <Separator />
-                
+
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-white">วันที่สร้าง</label>
                   <p className="text-sm text-white">{formatDate(purchaseItem.date)}</p>

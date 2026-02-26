@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { 
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -18,12 +18,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { 
-  History, 
-  CheckCircle, 
-  XCircle, 
-  Clock, 
-  ShoppingCart, 
+import {
+  History,
+  CheckCircle,
+  XCircle,
+  Clock,
+  ShoppingCart,
   RefreshCw,
   Search,
   Filter,
@@ -40,12 +40,12 @@ import { getPeamsubPurchaseHistory, getPeamsubGameHistory, getPeamsubCashCardHis
 import { getPurchasedCodeDetails, GameCodePurchase } from "@/lib/gameCodeUtils";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { 
-  syncPurchaseHistoryFromAPI, 
-  getUserPurchaseHistory, 
-  convertFirestoreToAPI, 
-  addUserPurchaseReference, 
-  getUserPurchaseReferences, 
+import {
+  syncPurchaseHistoryFromAPI,
+  getUserPurchaseHistory,
+  convertFirestoreToAPI,
+  addUserPurchaseReference,
+  getUserPurchaseReferences,
   FirestorePurchaseHistory
 } from "@/lib/purchaseHistoryUtils";
 
@@ -136,27 +136,28 @@ const PurchaseHistory = () => {
     setLoading(true);
     try {
       const userId = user.uid;
-      
+
       // ดึงประวัติจาก Firestore ก่อน (เพราะมีราคาขายที่ถูกต้อง)
       const firestoreHistory = await getUserPurchaseHistory(userId);
-      
+
       console.log('📊 ประวัติจาก Firestore:', firestoreHistory.length, 'รายการ');
-      
+
       // แยกตาม type และแปลงเป็น API format เพื่อใช้ร่วมกับ state เดิม
       const premiumHistory: PeamsubPurchaseHistory[] = [];
       const gameHistoryData: PeamsubGameHistory[] = [];
       const mobileHistoryData: PeamsubMobileHistory[] = [];
       const cardHistoryData: PeamsubCashCardHistory[] = [];
-      
+
       firestoreHistory.forEach(history => {
         const converted = convertFirestoreToAPI(history);
-        
+
         // เพิ่ม sellPrice ลงใน converted object
         if (history.type === 'premium') {
           (converted as any).sellPrice = history.sellPrice;
           premiumHistory.push(converted as PeamsubPurchaseHistory);
         } else if (history.type === 'game') {
           (converted as any).sellPrice = history.sellPrice;
+          converted.status = 'success'; // บังคับให้เป็นสำเร็จสำหรับเกม
           gameHistoryData.push(converted as PeamsubGameHistory);
         } else if (history.type === 'mobile') {
           (converted as any).sellPrice = history.sellPrice;
@@ -166,7 +167,7 @@ const PurchaseHistory = () => {
           cardHistoryData.push(converted as PeamsubCashCardHistory);
         }
       });
-      
+
       // ดึง references เพื่อ sync ข้อมูลใหม่จาก API (ถ้ามี)
       const [premiumRefs, gameRefs, mobileRefs, cashCardRefs] = await Promise.all([
         getUserPurchaseReferences(userId, 'premium'),
@@ -174,16 +175,16 @@ const PurchaseHistory = () => {
         getUserPurchaseReferences(userId, 'mobile'),
         getUserPurchaseReferences(userId, 'cashcard')
       ]);
-      
+
       // Sync ประวัติใหม่จาก API (เพื่ออัปเดตข้อมูลล่าสุด)
       try {
         const [premiumHistoryAPI, gameHistoryAPI, mobileHistoryAPI, cardHistoryAPI] = await Promise.all([
-        getPeamsubPurchaseHistory(premiumRefs.length > 0 ? premiumRefs : []).catch(() => []),
-        getPeamsubGameHistory(gameRefs.length > 0 ? gameRefs : []).catch(() => []),
-        getPeamsubMobileHistory(mobileRefs.length > 0 ? mobileRefs : []).catch(() => []),
-        getPeamsubCashCardHistory(cashCardRefs.length > 0 ? cashCardRefs : []).catch(() => [])
-      ]);
-      
+          getPeamsubPurchaseHistory(premiumRefs.length > 0 ? premiumRefs : []).catch(() => []),
+          getPeamsubGameHistory(gameRefs.length > 0 ? gameRefs : []).catch(() => []),
+          getPeamsubMobileHistory(mobileRefs.length > 0 ? mobileRefs : []).catch(() => []),
+          getPeamsubCashCardHistory(cashCardRefs.length > 0 ? cashCardRefs : []).catch(() => [])
+        ]);
+
         // Sync ลง Firestore (จะรักษา sellPrice ไว้)
         await Promise.all([
           syncPurchaseHistoryFromAPI(userId, 'premium', premiumHistoryAPI),
@@ -191,14 +192,14 @@ const PurchaseHistory = () => {
           syncPurchaseHistoryFromAPI(userId, 'mobile', mobileHistoryAPI),
           syncPurchaseHistoryFromAPI(userId, 'cashcard', cardHistoryAPI)
         ]);
-        
+
         // อัปเดต state ด้วยข้อมูลจาก Firestore อีกครั้ง (หลัง sync)
         const updatedHistory = await getUserPurchaseHistory(userId);
         const updatedPremium: PeamsubPurchaseHistory[] = [];
         const updatedGame: PeamsubGameHistory[] = [];
         const updatedMobile: PeamsubMobileHistory[] = [];
         const updatedCard: PeamsubCashCardHistory[] = [];
-        
+
         updatedHistory.forEach(history => {
           const converted = convertFirestoreToAPI(history);
           if (history.type === 'premium') {
@@ -206,6 +207,7 @@ const PurchaseHistory = () => {
             updatedPremium.push(converted as PeamsubPurchaseHistory);
           } else if (history.type === 'game') {
             (converted as any).sellPrice = history.sellPrice;
+            converted.status = 'success'; // บังคับให้เป็นสำเร็จสำหรับเกม
             updatedGame.push(converted as PeamsubGameHistory);
           } else if (history.type === 'mobile') {
             (converted as any).sellPrice = history.sellPrice;
@@ -215,7 +217,7 @@ const PurchaseHistory = () => {
             updatedCard.push(converted as PeamsubCashCardHistory);
           }
         });
-        
+
         setPurchaseHistory(updatedPremium);
         setGameHistory(updatedGame);
         setMobileHistory(updatedMobile);
@@ -223,10 +225,10 @@ const PurchaseHistory = () => {
       } catch (error) {
         console.warn('⚠️ บางส่วนของ sync ล้มเหลว:', error);
         // แสดงข้อมูลจาก Firestore ที่มีอยู่แล้ว
-      setPurchaseHistory(premiumHistory);
-      setGameHistory(gameHistoryData);
-      setMobileHistory(mobileHistoryData);
-      setCardHistory(cardHistoryData);
+        setPurchaseHistory(premiumHistory);
+        setGameHistory(gameHistoryData);
+        setMobileHistory(mobileHistoryData);
+        setCardHistory(cardHistoryData);
       }
     } catch (error) {
       console.error("Error loading purchase history:", error);
@@ -244,7 +246,7 @@ const PurchaseHistory = () => {
       ...mobileHistory.map(item => ({ ...item, type: 'mobile' as const })),
       ...cardHistory.map(item => ({ ...item, type: 'cashcard' as const }))
     ];
-    
+
     let filtered = [...allHistory];
 
     // Filter by type
@@ -253,58 +255,47 @@ const PurchaseHistory = () => {
     }
 
     // Define type guards
-  function isPeamsubPurchaseHistory(item: any): item is PeamsubPurchaseHistory {
-    return 'productName' in item && 'refId' in item;
-  }
+    function isPeamsubPurchaseHistory(item: any): item is PeamsubPurchaseHistory {
+      return 'productName' in item && 'refId' in item;
+    }
 
-  function isPeamsubGameHistory(item: any): item is PeamsubGameHistory {
-    return 'reference' in item && !('productName' in item);
-  }
+    function isPeamsubGameHistory(item: any): item is PeamsubGameHistory {
+      return 'reference' in item && !('productName' in item);
+    }
 
-  // Filter by search term
-  if (searchTerm) {
-    filtered = filtered.filter(item => {
-      let name = '';
-      let reference = '';
-      
-      if (isPeamsubPurchaseHistory(item)) {
-        name = item.productName;
-        reference = item.refId;
-      } else if (isPeamsubGameHistory(item)) {
-        name = item.info || '';
-        reference = item.reference;
-      } else {
-        name = item.info || '';
-        reference = item.reference;
-      }
-      
-      return name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-             reference.toLowerCase().includes(searchTerm.toLowerCase());
+    // Filter by search term
+    if (searchTerm) {
+      filtered = filtered.filter(item => {
+        const name = getItemName(item);
+        const reference = getItemReference(item);
+
+        return name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          reference.toLowerCase().includes(searchTerm.toLowerCase());
+      });
+    }
+
+    // Filter by status
+    if (statusFilter !== "all") {
+      filtered = filtered.filter(item => {
+        switch (statusFilter) {
+          case "success":
+            return item.status === "success" || item.status === "completed";
+          case "pending":
+            return item.status === "pending" || item.status === "processing";
+          case "failed":
+            return item.status === "failed" || item.status === "error";
+          default:
+            return true;
+        }
+      });
+    }
+
+    // เรียงตามวันที่ใหม่สุดไปเก่าสุด
+    filtered = filtered.sort((a, b) => {
+      const dateA = new Date(a.date || 0).getTime();
+      const dateB = new Date(b.date || 0).getTime();
+      return dateB - dateA; // ใหม่สุดก่อน
     });
-  }
-
-  // Filter by status
-  if (statusFilter !== "all") {
-    filtered = filtered.filter(item => {
-      switch (statusFilter) {
-        case "success":
-          return item.status === "success" || item.status === "completed";
-        case "pending":
-          return item.status === "pending" || item.status === "processing";
-        case "failed":
-          return item.status === "failed" || item.status === "error";
-        default:
-          return true;
-      }
-    });
-  }
-
-  // เรียงตามวันที่ใหม่สุดไปเก่าสุด
-  filtered = filtered.sort((a, b) => {
-    const dateA = new Date(a.date || 0).getTime();
-    const dateB = new Date(b.date || 0).getTime();
-    return dateB - dateA; // ใหม่สุดก่อน
-  });
 
     setFilteredHistory(filtered);
     setCurrentPage(1); // Reset to first page when filtering
@@ -346,7 +337,7 @@ const PurchaseHistory = () => {
     return isNaN(numAmount) ? '0.00' : numAmount.toFixed(2);
   };
 
-    // ฟังก์ชันสำหรับแสดงราคา - แสดงราคาที่จ่ายให้เว็บไซต์
+  // ฟังก์ชันสำหรับแสดงราคา - แสดงราคาที่จ่ายให้เว็บไซต์
   interface DisplayPrice {
     price: string;
     label: string;
@@ -376,15 +367,32 @@ const PurchaseHistory = () => {
     return 'price' in item ? item.price : item.price;
   };
 
+  const stripHtmlTags = (html: string) => {
+    if (!html) return "";
+    return html
+      .replace(/<[^>]*>/g, "")
+      .replace(/&nbsp;/g, " ")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&amp;/g, "&")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .trim();
+  };
+
   const getItemName = (item: HistoryItem) => {
+    let name = '';
     switch (item.type) {
       case 'premium':
-        return item.productName;
+        name = item.productName;
+        break;
       case 'game':
       case 'mobile':
       case 'cashcard':
-        return item.info;
+        name = item.info;
+        break;
     }
+    return stripHtmlTags(name);
   };
 
   const getItemReference = (item: HistoryItem) => {
@@ -418,17 +426,17 @@ const PurchaseHistory = () => {
       const historyDoc = await import('firebase/firestore').then(m => m.getDoc);
       const docRef = await import('firebase/firestore').then(m => m.doc);
       const { db } = await import('@/lib/firebase');
-      
+
       try {
         setLoadingGameCode(true);
         // ดึงข้อมูลจาก peamsub_purchases เพื่อหา gameCodePurchaseId
         const purchaseRef = docRef(db, 'peamsub_purchases', `gamecode_${(item as any).reference}`);
         const purchaseSnap = await historyDoc(purchaseRef);
-        
+
         if (purchaseSnap.exists() && purchaseSnap.data().gameCodePurchaseId && user) {
           const gameCodePurchaseId = purchaseSnap.data().gameCodePurchaseId;
           const gameCodeDetails = await getPurchasedCodeDetails(gameCodePurchaseId, user.uid);
-          
+
           if (gameCodeDetails) {
             setSelectedGameCode(gameCodeDetails);
             setGameCodeDialogOpen(true);
@@ -463,13 +471,13 @@ const PurchaseHistory = () => {
 
   const stats = {
     totalPurchases: purchaseHistory.length + gameHistory.length + mobileHistory.length + cardHistory.length,
-    successfulPurchases: [...purchaseHistory, ...gameHistory, ...mobileHistory, ...cardHistory].filter(item => 
+    successfulPurchases: [...purchaseHistory, ...gameHistory, ...mobileHistory, ...cardHistory].filter(item =>
       item.status === "success" || item.status === "completed"
     ).length,
-    pendingPurchases: [...purchaseHistory, ...gameHistory, ...mobileHistory, ...cardHistory].filter(item => 
+    pendingPurchases: [...purchaseHistory, ...gameHistory, ...mobileHistory, ...cardHistory].filter(item =>
       item.status === "pending" || item.status === "processing"
     ).length,
-    failedPurchases: [...purchaseHistory, ...gameHistory, ...mobileHistory, ...cardHistory].filter(item => 
+    failedPurchases: [...purchaseHistory, ...gameHistory, ...mobileHistory, ...cardHistory].filter(item =>
       item.status === "failed" || item.status === "error"
     ).length,
     totalAmount: [...purchaseHistory, ...gameHistory, ...mobileHistory, ...cardHistory].reduce((sum, item) => {
@@ -641,15 +649,15 @@ const PurchaseHistory = () => {
                             </div>
                           </div>
                           <Badge variant={
-                            item.type === 'premium' ? 'default' : 
-                            item.type === 'game' ? 'secondary' : 
-                            item.type === 'mobile' ? 'destructive' :
-                            'outline'
+                            item.type === 'premium' ? 'default' :
+                              item.type === 'game' ? 'secondary' :
+                                item.type === 'mobile' ? 'destructive' :
+                                  'outline'
                           } className="text-xs">
-                            {item.type === 'premium' ? 'แอพพรีเมียม' : 
-                             item.type === 'game' ? 'เกม' : 
-                             item.type === 'mobile' ? 'เติมเน็ต' :
-                             'บัตรเงินสด'}
+                            {item.type === 'premium' ? 'แอพพรีเมียม' :
+                              item.type === 'game' ? 'เกม' :
+                                item.type === 'mobile' ? 'เติมเน็ต' :
+                                  'บัตรเงินสด'}
                           </Badge>
                         </div>
                         <div className="flex items-center justify-between pt-2 border-t">
@@ -691,9 +699,9 @@ const PurchaseHistory = () => {
 
                 {/* Desktop Table View */}
                 <div className="hidden md:block overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b">
                         <th className="text-left p-3 font-medium text-sm">#</th>
                         <th className="text-left p-3 font-medium text-sm">วันที่</th>
                         <th className="text-left p-3 font-medium text-sm">ประเภท</th>
@@ -702,66 +710,66 @@ const PurchaseHistory = () => {
                         <th className="text-left p-3 font-medium text-sm">สถานะ</th>
                         <th className="text-left p-3 font-medium text-sm">รายละเอียด</th>
                         <th className="text-left p-3 font-medium text-sm">เคลมสินค้า</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentItems.map((item, index) => (
-                      <tr key={item.id || index} className="border-b hover:bg-muted/50">
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {currentItems.map((item, index) => (
+                        <tr key={item.id || index} className="border-b hover:bg-muted/50">
                           <td className="p-3 text-sm">{startIndex + index + 1}</td>
                           <td className="p-3 text-sm">
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
-                            {formatDate(item.createdAt || item.date || new Date().toISOString())}
-                          </div>
-                        </td>
-                        <td className="p-3">
-                          <Badge variant={
-                            item.type === 'premium' ? 'default' : 
-                            item.type === 'game' ? 'secondary' : 
-                            item.type === 'mobile' ? 'destructive' :
-                            'outline'
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-4 w-4 text-muted-foreground" />
+                              {formatDate(item.createdAt || item.date || new Date().toISOString())}
+                            </div>
+                          </td>
+                          <td className="p-3">
+                            <Badge variant={
+                              item.type === 'premium' ? 'default' :
+                                item.type === 'game' ? 'secondary' :
+                                  item.type === 'mobile' ? 'destructive' :
+                                    'outline'
                             } className="text-xs">
-                            {item.type === 'premium' ? 'แอพพรีเมียม' : 
-                             item.type === 'game' ? 'เกม' : 
-                             item.type === 'mobile' ? 'เติมเน็ต-เติมเงินมือถือ' :
-                             'บัตรเงินสด'}
-                          </Badge>
-                        </td>
+                              {item.type === 'premium' ? 'แอพพรีเมียม' :
+                                item.type === 'game' ? 'เกม' :
+                                  item.type === 'mobile' ? 'เติมเน็ต-เติมเงินมือถือ' :
+                                    'บัตรเงินสด'}
+                            </Badge>
+                          </td>
                           <td className="p-3 font-medium text-sm">{getItemName(item)}</td>
                           <td className="p-3 text-sm">
-                          <div className="flex flex-col">
-                            <span className={`font-semibold ${getDisplayPrice(item).color}`}>
-                              {getDisplayPrice(item).price} บาท
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              {getDisplayPrice(item).label}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="p-3">{getStatusBadge(item.status)}</td>
-                        <td className="p-3">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleViewDetails(item)}
-                          >
-                            <Info className="h-4 w-4" />
-                          </Button>
-                        </td>
-                        <td className="p-3">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleClaimProduct(item)}
-                          >
-                            <AlertTriangle className="h-4 w-4" />
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                            <div className="flex flex-col">
+                              <span className={`font-semibold ${getDisplayPrice(item).color}`}>
+                                {getDisplayPrice(item).price} บาท
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                {getDisplayPrice(item).label}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="p-3">{getStatusBadge(item.status)}</td>
+                          <td className="p-3">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleViewDetails(item)}
+                            >
+                              <Info className="h-4 w-4" />
+                            </Button>
+                          </td>
+                          <td className="p-3">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleClaimProduct(item)}
+                            >
+                              <AlertTriangle className="h-4 w-4" />
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </>
             )}
 
@@ -781,27 +789,27 @@ const PurchaseHistory = () => {
                   >
                     ←
                   </Button>
-                  
+
                   {/* Mobile: Show less pages */}
                   <div className="hidden sm:flex items-center gap-2">
-                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
-                    if (pageNum > totalPages) return null;
-                    
-                    return (
-                      <Button
-                        key={pageNum}
-                        variant={currentPage === pageNum ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => goToPage(pageNum)}
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+                      if (pageNum > totalPages) return null;
+
+                      return (
+                        <Button
+                          key={pageNum}
+                          variant={currentPage === pageNum ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => goToPage(pageNum)}
                           className="text-xs"
-                      >
-                        {pageNum}
-                      </Button>
-                    );
-                  })}
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    })}
                   </div>
-                  
+
                   {/* Mobile: Show current page only */}
                   <div className="flex sm:hidden items-center gap-1">
                     <Button
@@ -813,7 +821,7 @@ const PurchaseHistory = () => {
                       {currentPage} / {totalPages}
                     </Button>
                   </div>
-                  
+
                   <Button
                     variant="outline"
                     size="sm"
@@ -823,23 +831,23 @@ const PurchaseHistory = () => {
                   >
                     →
                   </Button>
-                
+
                   {/* Desktop: Page input */}
                   <div className="hidden lg:flex items-center gap-2 ml-2">
                     <span className="text-xs text-muted-foreground">ไปหน้า:</span>
-                  <Input
-                    type="number"
-                    min="1"
-                    max={totalPages}
-                    value={currentPage}
-                    onChange={(e) => {
-                      const page = parseInt(e.target.value);
-                      if (page >= 1 && page <= totalPages) {
-                        goToPage(page);
-                      }
-                    }}
+                    <Input
+                      type="number"
+                      min="1"
+                      max={totalPages}
+                      value={currentPage}
+                      onChange={(e) => {
+                        const page = parseInt(e.target.value);
+                        if (page >= 1 && page <= totalPages) {
+                          goToPage(page);
+                        }
+                      }}
                       className="w-16 h-8 text-xs"
-                  />
+                    />
                   </div>
                 </div>
               </div>
