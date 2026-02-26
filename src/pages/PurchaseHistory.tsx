@@ -363,8 +363,8 @@ const PurchaseHistory = () => {
     };
   };
 
-  const getItemPrice = (item: PeamsubPurchaseHistory | PeamsubGameHistory | PeamsubCashCardHistory | PeamsubMobileHistory) => {
-    return 'price' in item ? item.price : item.price;
+  const getItemPrice = (item: any) => {
+    return item.price;
   };
 
   const stripHtmlTags = (html: string) => {

@@ -27,6 +27,7 @@ import {
   ArrowLeft,
   Loader2,
   CheckCircle2,
+  Copy,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -336,6 +337,10 @@ const GameTopUp = () => {
     openGameDialog(selectedGame);
   };
 
+  const handlePurchase = () => {
+    proceedToPurchase();
+  };
+
   const openGameDialog = (game: WepayGameProduct) => {
     setSelectedGameProduct(game);
     setGameDialogOpen(true);
@@ -362,6 +367,37 @@ const GameTopUp = () => {
         <link rel="canonical" href="https://www.baimonshop.com/game-topup" />
       </Helmet>
 
+      <style dangerouslySetInnerHTML={{
+        __html: `
+        @keyframes meshGradient {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        .animated-mesh-bg {
+          background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #1e1b4b);
+          background-size: 400% 400%;
+          animation: meshGradient 15s ease infinite;
+        }
+        .glass-panel {
+          background: rgba(255, 255, 255, 0.03);
+          backdrop-filter: blur(12px);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        .game-card-hover {
+          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .game-card-hover:hover {
+          transform: translateY(-8px) scale(1.02);
+          box-shadow: 0 20px 40px rgba(139, 92, 246, 0.2);
+          border-color: rgba(139, 92, 246, 0.5);
+        }
+        .text-glow {
+          text-shadow: 0 0 10px rgba(139, 92, 246, 0.5), 0 0 20px rgba(139, 92, 246, 0.3);
+        }
+      `}} />
+
       {/* Schema Markup for Game Topup Service */}
       <SchemaMarkup
         type="service"
@@ -376,7 +412,7 @@ const GameTopUp = () => {
         }}
       />
 
-      <div className="relative bg-gradient-to-b from-[#0f0f2d] to-[#1a0033] text-white min-h-screen font-['Kanit',sans-serif] -mx-3 sm:-mx-4 lg:-mx-6 xl:-mx-8 overflow-hidden">
+      <div className="relative animated-mesh-bg text-white min-h-screen font-['Kanit',sans-serif] -mx-3 sm:-mx-4 lg:-mx-6 xl:-mx-8 overflow-hidden">
         {/* Gaming Background Effects */}
         <div className="absolute inset-0 pointer-events-none">
           {/* Circuit Pattern */}
@@ -415,253 +451,235 @@ const GameTopUp = () => {
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-radial from-blue-600/20 to-transparent blur-3xl animate-pulse" style={{ animationDelay: '3s' }} />
         </div>
         {/* Header */}
-        <header className="bg-black/20 backdrop-blur-sm border-b border-purple-500/30 p-4 sm:p-6">
-          <div className="flex flex-col gap-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">
-                เติมเกม เว็บเติมเกม รับเติมเกมราคาถูก BaimonShop
-              </h1>
-              <h2 className="text-lg sm:text-xl text-purple-200 mt-2">
-                เว็บเติมเกมออนไลน์อันดับ 1 | เติมเกม ROV Free Fire PUBG Mobile Legends Genshin Impact ราคาถูกที่สุด
-              </h2>
-              <p className="text-purple-300 mt-1 sm:mt-2 text-sm sm:text-base"><strong>รับเติมเกมออนไลน์</strong> • เว็ปเติมเกมราคาถูก • เติมเกมฟีฟาย เติมเพชร Free Fire คุ้มๆ • เติมเงิน ROV Garena • ร้านเติมเกมถูกๆ • บริการตลอด 24 ชั่วโมง</p>
-              <div className="mt-2 flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-purple-300">
-              </div>
+        <header className="relative z-10 p-6 sm:p-10 text-center">
+          <div className="max-w-4xl mx-auto space-y-6">
+            <div className="inline-block px-4 py-1.5 rounded-full bg-purple-500/20 border border-purple-500/30 text-purple-300 text-xs font-bold uppercase tracking-widest mb-2 animate-pulse">
+              Gaming Top-up Center
             </div>
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-purple-300" />
+            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold text-white tracking-tighter leading-tight text-glow">
+              <span className="bg-gradient-to-r from-white via-purple-200 to-purple-400 bg-clip-text text-transparent">BAIMON SHOP</span>
+            </h1>
+            <h2 className="text-lg sm:text-xl text-purple-200/80 max-w-2xl mx-auto font-light leading-relaxed">
+              สัมผัสประสบการณ์การเติมเกมที่เร็วที่สุด ปลอดภัยที่สุด และคุ้มค่าที่สุดในไทย
+            </h2>
+
+            <div className="pt-4 flex flex-col sm:flex-row gap-3 max-w-2xl mx-auto">
+              <div className="relative flex-1 group">
+                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-purple-400 group-focus-within:text-purple-300 transition-colors" />
                 <Input
-                  placeholder="ค้นหาเกม..."
+                  placeholder="ค้นหาเกมโปรดของคุณ..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 sm:pl-12 pr-4 py-2 sm:py-3 rounded-xl sm:rounded-2xl bg-black/30 backdrop-blur-sm text-white placeholder:text-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 w-full border-purple-500/30 text-sm sm:text-base"
+                  className="pl-12 pr-4 py-6 rounded-2xl bg-white/5 backdrop-blur-md text-white placeholder:text-purple-300/50 focus:outline-none focus:ring-2 focus:ring-purple-500/50 w-full border-white/10 text-lg transition-all"
                 />
               </div>
               <Button
                 onClick={handleRefresh}
                 disabled={loading}
                 variant="outline"
-                size="sm"
-                className="bg-black/30 backdrop-blur-sm border-purple-500/30 text-white hover:bg-purple-500/20 sm:w-auto"
+                className="py-6 rounded-2xl bg-purple-600/20 backdrop-blur-md border-purple-500/30 text-white hover:bg-purple-600/30 active:scale-95 transition-all px-8"
               >
-                <RefreshCw className={`h-4 w-4 sm:mr-2 ${loading ? 'animate-spin' : ''}`} />
-                <span className="hidden sm:inline">รีเฟรชข้อมูล</span>
+                <RefreshCw className={`h-5 w-5 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                <span>รีเฟรช</span>
               </Button>
             </div>
           </div>
         </header>
 
-        {/* Game Detail Page */}
+        {/* Status Bar / User Info */}
+        <div className="relative z-20 px-4 sm:px-10 py-4 flex flex-wrap items-center justify-between gap-4 border-b border-white/5 bg-black/40 backdrop-blur-xl">
+          <div className="flex items-center gap-4">
+            <div className="flex flex-col">
+              <span className="text-[10px] text-purple-400 font-bold uppercase tracking-wider">บัญชีผู้ใช้</span>
+              <span className="text-sm font-medium text-white/90">{userData?.username || "Guest User"}</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-6">
+            <div className="flex flex-col items-end">
+              <span className="text-[10px] text-green-400 font-bold uppercase tracking-wider">ยอดเงินในบัญชี</span>
+              <div className="flex items-center gap-2">
+                <span className="text-xl font-black text-white text-glow">฿{userData?.balance?.toLocaleString() || "0"}</span>
+                <div className="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center">
+                  <DollarSign className="h-3 w-3 text-green-400" />
+                </div>
+              </div>
+            </div>
+
+            {isAdmin && wepayBalance && (
+              <div className="px-4 py-2 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex flex-col items-end">
+                <span className="text-[10px] text-orange-400 font-bold uppercase tracking-wider">Admin: wePAY Balance</span>
+                <span className="text-sm font-bold text-orange-200">฿{parseFloat(wepayBalance.available_balance).toLocaleString()}</span>
+              </div>
+            )}
+          </div>
+        </div>
         {showGameDetail && selectedGame ? (
-          <section className="p-3 sm:p-4 md:p-6">
+          <section className="p-4 sm:p-8 max-w-7xl mx-auto relative z-10">
             {/* Back Button */}
-            <div className="mb-6 flex items-center justify-between">
+            <div className="mb-8">
               <button
                 onClick={backToGameList}
-                className="text-purple-400 hover:text-purple-300 flex items-center gap-2 transition-colors"
+                className="group flex items-center gap-3 text-purple-400 hover:text-white transition-all bg-white/5 pr-6 pl-4 py-2 rounded-full border border-white/10 hover:border-purple-500/50"
               >
-                <ArrowLeft className="h-5 w-5" />
-                กลับไปหน้ารวมเกม
+                <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center group-hover:bg-purple-500/40 transition-colors">
+                  <ArrowLeft className="h-4 w-4" />
+                </div>
+                <span className="font-medium">กลับไปเลือกเกม</span>
               </button>
             </div>
 
-            {/* Game Header */}
-            <div className="text-center mb-8">
-              <div className="w-32 h-32 mx-auto mb-4 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center overflow-hidden shadow-2xl">
-                {selectedGame.img ? (
-                  <img
-                    src={selectedGame.img}
-                    alt={`เติม ${selectedGame.category} - BaimonShop รับเติมเกมออนไลน์`}
-                    title={`เติมเกม ${selectedGame.category} - BaimonShop`}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                      const _sibling = e.currentTarget.nextElementSibling as HTMLElement | null;
-                      if (_sibling) _sibling.style.display = 'flex';
-                    }}
-                  />
-                ) : null}
-                <div className="w-full h-full flex items-center justify-center" style={{ display: selectedGame.img ? 'none' : 'flex' }}>
-                  <Gamepad2 className="h-16 w-16 text-white" />
-                </div>
-              </div>
-              <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                {selectedGame.category}
-              </h2>
-            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              {/* Left Column: Game Profile & Info */}
+              <div className="lg:col-span-5 space-y-6">
+                <div className="glass-panel p-8 rounded-3xl relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <Gamepad2 className="h-32 w-32" />
+                  </div>
 
-            {/* Game Info */}
-            <div className="mb-8">
-              <div className="bg-black/30 backdrop-blur-sm rounded-2xl p-6 border border-purple-500/30">
-                <h3 className="text-2xl font-bold text-center mb-4 text-white">ข้อมูลเกม</h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Game Details */}
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-400">ชื่อเกม:</span>
-                      <span className="text-white font-semibold">{selectedGame.category}</span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-400">รายละเอียด:</span>
-                      <span className="text-purple-300 text-sm">{formatGameInfo(selectedGame.info)}</span>
-                    </div>
-
-                    {isAdmin && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-400">ราคาต้นทุน:</span>
-                        <span className="text-orange-400 font-semibold">฿{selectedGame.price} บาท</span>
+                  <div className="relative z-10 space-y-6">
+                    <div className="w-40 h-40 bg-gradient-to-br from-purple-500 to-blue-600 rounded-3xl p-1 shadow-2xl">
+                      <div className="w-full h-full rounded-[1.4rem] overflow-hidden bg-zinc-900 flex items-center justify-center">
+                        {selectedGame.img ? (
+                          <img
+                            src={selectedGame.img}
+                            alt={selectedGame.category}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <Gamepad2 className="h-16 w-16 text-purple-500/50" />
+                        )}
                       </div>
-                    )}
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-400">ราคาขาย:</span>
-                      {(() => {
-                        const { text, hasFraction } = formatPriceDisplay(selectedGame.recommendedPrice);
-                        return (
-                          <span className="text-green-400 font-bold text-lg">{text} บาท</span>
-                        );
-                      })()}
                     </div>
 
-                    {isAdmin && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-400">กำไร:</span>
-                        <span className="text-purple-400 font-semibold">
-                          ฿{(parseFloat(selectedGame.recommendedPrice) - parseFloat(selectedGame.price)).toFixed(2)} บาท
-                        </span>
+                    <div>
+                      <h2 className="text-4xl sm:text-5xl font-extrabold text-glow tracking-tight">
+                        {selectedGame.category}
+                      </h2>
+                      <div className="flex items-center gap-2 mt-3">
+                        <Badge className="bg-green-500/20 text-green-400 border border-green-500/30">
+                          เปิดให้บริการ
+                        </Badge>
+                        <Badge className="bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                          ระบบอัตโนมัติ
+                        </Badge>
                       </div>
-                    )}
+                    </div>
 
-                    {selectedGame.format_id && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-400">รูปแบบ UID:</span>
-                        <div className="text-right">
-                          <span className="text-yellow-400 font-mono text-sm bg-black/20 px-2 py-1 rounded block">
-                            {selectedGame.format_id}
-                          </span>
-                          <span className="text-green-400 text-xs">
-                            {formatUIDPattern(selectedGame.format_id)}
+                    <div className="space-y-4 pt-4">
+                      <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                        <span className="text-xs font-bold text-purple-400 uppercase">รายละเอียดแพ็กเกจ</span>
+                        <p className="text-white/80 leading-relaxed italic">
+                          "{stripHtmlTags(selectedGame.info)}"
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                          <span className="text-xs text-white/50 block mb-1">ราคาเริ่มต้น</span>
+                          <span className="text-xl font-bold text-green-400">
+                            ฿{formatPriceDisplay(selectedGame.recommendedPrice).text}
                           </span>
                         </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Game Image */}
-                  <div className="flex justify-center">
-                    <div className="w-48 h-48 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center overflow-hidden">
-                      {selectedGame.img ? (
-                        <img
-                          src={selectedGame.img}
-                          alt={selectedGame.category}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                            const _sibling = e.currentTarget.nextElementSibling as HTMLElement | null;
-                            if (_sibling) _sibling.style.display = 'flex';
-                          }}
-                        />
-                      ) : null}
-                      <div className="w-full h-full flex items-center justify-center" style={{ display: selectedGame.img ? 'none' : 'flex' }}>
-                        <Gamepad2 className="h-20 w-20 text-white opacity-70" />
+                        <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                          <span className="text-xs text-white/50 block mb-1">ความเร็ว</span>
+                          <span className="text-xl font-bold text-blue-400">1-3 นาที</span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Order Form */}
-            <div className="bg-black/30 backdrop-blur-sm rounded-2xl p-6 border border-purple-500/30">
-              <h3 className="text-2xl font-bold text-center mb-6 text-white">ฟอร์มสั่งซื้อ</h3>
-              <div className="space-y-4">
-
-                {/* ─── Heartopia: 2 ช่อง AID + UID ─── */}
-                {isHeartopia(selectedGame) ? (
-                  <>
-                    <div className="bg-blue-900/30 border border-blue-500/40 rounded-xl p-3 text-sm text-blue-200">
-                      💡 <strong>Heartopia</strong> ต้องกรอก <strong>AID</strong> (หมายเลขบัญชี 18 หลัก) และ <strong>UID</strong> (รหัส 6 ตัว) แยกกัน
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-purple-300 mb-2">
-                        AID (หมายเลขบัญชี) *
-                        <span className="text-yellow-400 text-xs ml-2">(18 หลัก)</span>
-                      </label>
-                      <Input
-                        type="text"
-                        placeholder="กรอก AID 18 หลัก เช่น 123456789012345678"
-                        value={gameAID}
-                        onChange={(e) => setGameAID(e.target.value.trim())}
-                        className="w-full px-4 py-3 rounded-xl bg-black/50 backdrop-blur-sm text-white placeholder:text-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 border-purple-500/30 font-mono tracking-wide"
-                        maxLength={20}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-purple-300 mb-2">
-                        UID (รหัสผู้เล่น) *
-                        <span className="text-yellow-400 text-xs ml-2">(รหัส 6 ตัว)</span>
-                      </label>
-                      <Input
-                        type="text"
-                        placeholder="กรอก UID เช่น ab12cd"
-                        value={gameUID}
-                        onChange={(e) => setGameUID(e.target.value.trim())}
-                        className="w-full px-4 py-3 rounded-xl bg-black/50 backdrop-blur-sm text-white placeholder:text-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 border-purple-500/30 font-mono tracking-wide"
-                        maxLength={20}
-                      />
-                    </div>
-                  </>
-                ) : (
-                  /* ─── เกมทั่วไป: 1 ช่อง UID ─── */
+              {/* Right Column: Order Form */}
+              <div className="lg:col-span-7">
+                <div className="glass-panel p-8 rounded-3xl space-y-8">
                   <div>
-                    <label className="block text-sm font-semibold text-purple-300 mb-2">
-                      UID / ID ผู้เล่น *
-                      {selectedGame.format_id && (
-                        <span className="text-yellow-400 text-xs ml-2">
-                          (รูปแบบ: {formatUIDPattern(selectedGame.format_id)})
-                        </span>
-                      )}
-                    </label>
-                    <Input
-                      type="text"
-                      placeholder="กรอก UID หรือ ID ผู้เล่น"
-                      value={gameUID}
-                      onChange={(e) => setGameUID(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl bg-black/50 backdrop-blur-sm text-white placeholder:text-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 border-purple-500/30"
-                    />
-                    {selectedGame.format_id && (
-                      <div className="mt-2 space-y-1">
-                        <p className="text-xs text-yellow-400">
-                          💡 รูปแบบที่ต้องการ: {formatUIDPattern(selectedGame.format_id)}
-                        </p>
-                        <p className="text-xs text-gray-400 font-mono">
-                          Pattern: {selectedGame.format_id}
-                        </p>
+                    <h3 className="text-2xl font-bold flex items-center gap-3">
+                      <ShoppingCart className="h-6 w-6 text-purple-400" />
+                      ข้อมูลการสั่งซื้อ
+                    </h3>
+                    <p className="text-white/50 text-sm mt-1">กรุณากรอกข้อมูลให้ครบถ้วนเพื่อดำเนินการ</p>
+                  </div>
+
+                  <div className="space-y-6">
+                    {isHeartopia(selectedGame) ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <label className="text-sm font-semibold text-purple-300">AID (หมายเลขบัญชี)</label>
+                          <Input
+                            placeholder="18 หลัก"
+                            value={gameAID}
+                            onChange={(e) => setGameAID(e.target.value)}
+                            className="bg-white/5 border-white/10 rounded-2xl p-6 text-lg tracking-wider"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-semibold text-purple-300">UID (6 หลัก)</label>
+                          <Input
+                            placeholder="กรอก UID"
+                            value={gameUID}
+                            onChange={(e) => setGameUID(e.target.value)}
+                            className="bg-white/5 border-white/10 rounded-2xl p-6 text-lg tracking-wider"
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <label className="text-sm font-semibold text-purple-300">กรอก UID / Game ID</label>
+                        <Input
+                          placeholder="ตัวอย่าง: 123456789 หรือ UID|Server"
+                          value={gameUID}
+                          onChange={(e) => setGameUID(e.target.value)}
+                          className="bg-white/5 border-white/10 rounded-2xl p-6 text-lg tracking-wider"
+                        />
+                        <p className="text-[10px] text-white/40 italic">* {formatUIDPattern(selectedGame.format_id || "")}</p>
                       </div>
                     )}
-                  </div>
-                )}
 
-                <div>
-                  <label className="block text-sm font-semibold text-purple-300 mb-2">หมายเหตุเพิ่มเติม (ถ้ามี)</label>
-                  <Input
-                    placeholder="หมายเหตุเพิ่มเติม..."
-                    value={gameNotes}
-                    onChange={(e) => setGameNotes(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-black/50 backdrop-blur-sm text-white placeholder:text-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 border-purple-500/30"
-                  />
+                    <div className="grid grid-cols-1 gap-4">
+                      {gamePackages.map(pkg => (
+                        <div key={pkg.id} className="relative overflow-hidden p-6 rounded-2xl bg-gradient-to-r from-purple-500/20 to-blue-500/20 border border-purple-500/30">
+                          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                            <div className="text-center sm:text-left">
+                              <span className="text-xs font-bold text-purple-300 uppercase block mb-1">แพ็กเกจที่คุณเลือก</span>
+                              <h4 className="text-xl font-bold">{stripHtmlTags(pkg.amount)}</h4>
+                            </div>
+                            <div className="text-center sm:text-right">
+                              <span className="text-xs text-white/50 block mb-1">ยอดเงินที่ต้องชำระ</span>
+                              <span className="text-3xl font-black text-green-400">฿{formatPriceDisplay(pkg.costPrice).text}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <Button
+                      onClick={handlePurchase}
+                      disabled={gamePurchasing}
+                      className="w-full py-8 rounded-2xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-xl font-bold shadow-lg shadow-purple-600/30 active:scale-95 transition-all"
+                    >
+                      {gamePurchasing ? (
+                        <div className="flex items-center gap-3">
+                          <Loader2 className="h-6 w-6 animate-spin" />
+                          <span>กำลังตรวจสอบรายการ...</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-3">
+                          <ShoppingCart className="h-6 w-6" />
+                          <span>ยืนยันการสั่งซื้อ</span>
+                        </div>
+                      )}
+                    </Button>
+
+                    <div className="p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20 flex gap-3">
+                      <AlertCircle className="h-5 w-5 text-yellow-500 shrink-0" />
+                      <p className="text-[11px] text-yellow-200/80 leading-relaxed">
+                        โปรดตรวจสอบ UID/Game ID ให้ถูกต้อง หากกรอกข้อมูลผิดพลาด ทางระบบจะไม่รับผิดชอบในทุกกรณีและไม่สามารถขอคืนเงินได้
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <button
-                  onClick={proceedToPurchase}
-                  disabled={isHeartopia(selectedGame) ? (!gameAID.trim() || !gameUID.trim()) : !gameUID.trim()}
-                  className="w-full py-4 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold text-lg transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/25"
-                >
-                  ดำเนินการต่อ
-                </button>
               </div>
             </div>
           </section>
@@ -1152,22 +1170,39 @@ const GameTopUp = () => {
           </AlertDialogHeader>
 
           {purchaseDetails && (
-            <div className="bg-slate-800/50 rounded-xl p-4 my-2 space-y-3 border border-slate-700">
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-400">เกม:</span>
-                <span className="font-semibold">{stripHtmlTags(purchaseDetails.gameName)}</span>
+            <div className="bg-slate-900/80 rounded-3xl p-6 my-4 space-y-4 border border-white/10 relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 opacity-5">
+                <CheckCircle2 className="h-24 w-24" />
               </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-400">แพ็กเกจ:</span>
-                <span className="font-semibold">{stripHtmlTags(purchaseDetails.packageName)}</span>
+
+              <div className="flex justify-between items-center text-sm border-b border-white/5 pb-3">
+                <span className="text-slate-400 uppercase text-[10px] font-bold tracking-widest">ข้อมูลเกม</span>
+                <span className="font-bold text-white text-base">{stripHtmlTags(purchaseDetails.gameName)}</span>
               </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-400">ยอดชำระ:</span>
-                <span className="text-green-400 font-bold">{purchaseDetails.amount} บาท</span>
+              <div className="flex justify-between items-center text-sm border-b border-white/5 pb-3">
+                <span className="text-slate-400 uppercase text-[10px] font-bold tracking-widest">ชื่อแพ็กเกจ</span>
+                <span className="font-bold text-purple-300 text-base">{stripHtmlTags(purchaseDetails.packageName)}</span>
               </div>
-              <div className="flex justify-between items-center text-xs text-slate-500 border-t border-slate-700 pt-2">
-                <span>Ref ID:</span>
-                <span className="font-mono">{purchaseDetails.destRef}</span>
+              <div className="flex justify-between items-center text-sm border-b border-white/5 pb-3">
+                <span className="text-slate-400 uppercase text-[10px] font-bold tracking-widest">ยอดชำระทั้งสิ้น</span>
+                <span className="text-green-400 font-black text-2xl">฿{purchaseDetails.amount}</span>
+              </div>
+              <div className="flex flex-col gap-1 pt-2">
+                <span className="text-slate-500 uppercase text-[9px] font-bold tracking-widest">หมายเลขอ้างอิง (Ref ID)</span>
+                <div className="bg-black/40 p-3 rounded-xl border border-white/5 flex items-center justify-between">
+                  <span className="font-mono text-sm text-purple-200">{purchaseDetails.destRef}</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-white/30 hover:text-white"
+                    onClick={() => {
+                      navigator.clipboard.writeText(purchaseDetails.destRef);
+                      toast.success("คัดลอกรหัสอ้างอิงแล้ว");
+                    }}
+                  >
+                    <Copy className="h-3 w-3" />
+                  </Button>
+                </div>
               </div>
             </div>
           )}
