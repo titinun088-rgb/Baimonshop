@@ -607,7 +607,7 @@ const GameTopUp = () => {
                             placeholder="18 หลัก"
                             value={gameAID}
                             onChange={(e) => setGameAID(e.target.value)}
-                            className="bg-white/5 border-white/10 rounded-2xl p-6 text-lg tracking-wider"
+                            className="bg-white/5 border-white/10 rounded-2xl p-6 text-lg tracking-wider text-white"
                           />
                         </div>
                         <div className="space-y-2">
@@ -616,7 +616,7 @@ const GameTopUp = () => {
                             placeholder="กรอก UID"
                             value={gameUID}
                             onChange={(e) => setGameUID(e.target.value)}
-                            className="bg-white/5 border-white/10 rounded-2xl p-6 text-lg tracking-wider"
+                            className="bg-white/5 border-white/10 rounded-2xl p-6 text-lg tracking-wider text-white"
                           />
                         </div>
                       </div>
@@ -627,7 +627,7 @@ const GameTopUp = () => {
                           placeholder="ตัวอย่าง: 123456789 หรือ UID|Server"
                           value={gameUID}
                           onChange={(e) => setGameUID(e.target.value)}
-                          className="bg-white/5 border-white/10 rounded-2xl p-6 text-lg tracking-wider"
+                          className="bg-white/5 border-white/10 rounded-2xl p-6 text-lg tracking-wider text-white"
                         />
                         <p className="text-[10px] text-white/40 italic">* {formatUIDPattern(selectedGame.format_id || "")}</p>
                       </div>

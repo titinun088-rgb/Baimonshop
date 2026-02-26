@@ -32,7 +32,11 @@ import {
     TrendingUp,
     TrendingDown,
     Gamepad2,
+    FileDown,
+    FileUp,
+    Download,
 } from "lucide-react";
+import * as XLSX from "xlsx";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { getWepayGameProducts, WepayGameProduct } from "@/lib/wepayGameUtils";
@@ -58,6 +62,7 @@ const WepayPriceManagement = () => {
     const [editCost, setEditCost] = useState("");
     const [editSellPrice, setEditSellPrice] = useState("");
     const [saving, setSaving] = useState(false);
+    const [importing, setImporting] = useState(false);
 
     useEffect(() => {
         if (isAdmin) {
@@ -171,6 +176,120 @@ const WepayPriceManagement = () => {
         }
     };
 
+    // Export to Excel
+    const handleExportExcel = () => {
+        try {
+            const dataToExport = products.map(p => {
+                const adminPrice = adminPrices.get(p.id);
+                const cost = adminPrice && adminPrice.apiPrice !== undefined
+                    ? (typeof adminPrice.apiPrice === 'string' ? parseFloat(adminPrice.apiPrice) : adminPrice.apiPrice)
+                    : (parseFloat(p.price) || parseFloat(p.pay_to_amount) || 0);
+                const sellPrice = adminPrice?.sellPrice || cost;
+
+                return {
+                    "Game ID": p.id,
+                    "Category": p.category,
+                    "Product Details": p.info,
+                    "Current Cost (฿)": cost,
+                    "Current Sell Price (฿)": sellPrice,
+                    "API Cost (Ref)": parseFloat(p.price) || parseFloat(p.pay_to_amount) || 0
+                };
+            });
+
+            const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "WepayPrices");
+
+            // Auto-width columns
+            const maxWidths = [15, 25, 40, 15, 15, 15];
+            worksheet['!cols'] = maxWidths.map(w => ({ wch: w }));
+
+            XLSX.writeFile(workbook, `Wepay_Prices_${new Date().toISOString().split('T')[0]}.xlsx`);
+            toast.success("ส่งออกไฟล์ Excel สำเร็จ");
+        } catch (error) {
+            console.error("Export Error:", error);
+            toast.error("เกิดข้อผิดพลาดในการส่งออกไฟล์");
+        }
+    };
+
+    // Import from Excel (Only update Cost)
+    const handleImportExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !user) return;
+
+        setImporting(true);
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+            try {
+                const data = new Uint8Array(event.target?.result as ArrayBuffer);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+                const jsonData = XLSX.utils.sheet_to_json(worksheet) as any[];
+
+                let updateCount = 0;
+                const newAdminPrices = new Map(adminPrices);
+
+                for (const row of jsonData) {
+                    const productId = row["Game ID"]?.toString();
+                    const excelCost = parseFloat(row["Current Cost (฿)"]);
+                    const excelSellPrice = parseFloat(row["Current Sell Price (฿)"]);
+
+                    if (productId && (!isNaN(excelCost) || !isNaN(excelSellPrice))) {
+                        const product = products.find(p => p.id === productId);
+                        if (product) {
+                            const adminPrice = adminPrices.get(productId);
+                            const oldApiCost = parseFloat(product.price) || parseFloat(product.pay_to_amount) || 0;
+                            
+                            // Determine final values (Use Excel if valid, otherwise keep existing)
+                            const finalCost = !isNaN(excelCost) 
+                                ? excelCost 
+                                : (adminPrice && adminPrice.apiPrice !== undefined 
+                                    ? (typeof adminPrice.apiPrice === 'string' ? parseFloat(adminPrice.apiPrice) : adminPrice.apiPrice) 
+                                    : oldApiCost);
+                                    
+                            const finalSellPrice = !isNaN(excelSellPrice) 
+                                ? excelSellPrice 
+                                : (adminPrice?.sellPrice || finalCost);
+
+                            await setPeamsubProductPrice(
+                                productId,
+                                'wepay_game',
+                                finalSellPrice,
+                                finalCost,
+                                product.info,
+                                product.category,
+                                user.uid
+                            );
+
+                            newAdminPrices.set(productId, {
+                                id: `wepay_game_${productId}`,
+                                productType: 'wepay_game',
+                                apiPrice: finalCost,
+                                sellPrice: finalSellPrice,
+                                productName: product.info,
+                                updatedAt: new Date(),
+                                updatedBy: user.uid
+                            });
+                            updateCount++;
+                        }
+                    }
+                }
+
+                setAdminPrices(newAdminPrices);
+                toast.success(`นำเข้าสำเร็จ อัปเดตข้อมูลทั้งหมด ${updateCount} รายการ`);
+            } catch (error) {
+                console.error("Import Error:", error);
+                toast.error("เกิดข้อผิดพลาดในการนำเข้าไฟล์ ตรวจสอบรูปแบบไฟล์ให้ถูกต้อง");
+            } finally {
+                setImporting(false);
+                // Reset input
+                e.target.value = '';
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    };
+
     const filteredProducts = products.filter(p =>
         p.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.info.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -189,10 +308,43 @@ const WepayPriceManagement = () => {
                                 ตั้งราคาขายหน้าร้านและตรวจสอบผลกำไรเทียบกับต้นทุน wePAY
                             </p>
                         </div>
-                        <Button onClick={() => loadData(true)} disabled={loading} variant="outline">
-                            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                            โหลดข้อมูลใหม่ (API)
-                        </Button>
+                        <div className="flex flex-wrap gap-2">
+                            <div className="flex gap-2">
+                                <Button onClick={handleExportExcel} variant="outline" className="bg-zinc-900 border-zinc-800 hover:bg-zinc-800">
+                                    <FileDown className="mr-2 h-4 w-4" />
+                                    Export Excel
+                                </Button>
+                                <div className="relative">
+                                    <input
+                                        type="file"
+                                        accept=".xlsx, .xls"
+                                        className="hidden"
+                                        id="excel-import"
+                                        onChange={handleImportExcel}
+                                        disabled={importing}
+                                    />
+                                    <Button
+                                        asChild
+                                        variant="outline"
+                                        className="bg-zinc-900 border-zinc-800 hover:bg-zinc-800"
+                                        disabled={importing}
+                                    >
+                                        <label htmlFor="excel-import" className="cursor-pointer">
+                                            {importing ? (
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                            ) : (
+                                                <FileUp className="mr-2 h-4 w-4" />
+                                            )}
+                                            Import ต้นทุน
+                                        </label>
+                                    </Button>
+                                </div>
+                            </div>
+                            <Button onClick={() => loadData(true)} disabled={loading} variant="outline" className="bg-pink-600 hover:bg-pink-700 text-white border-none shadow-lg shadow-pink-600/20">
+                                <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                                รีเฟรชข้อมูล wePAY
+                            </Button>
+                        </div>
                     </div>
 
                     {/* Stats Overview */}
@@ -251,7 +403,7 @@ const WepayPriceManagement = () => {
                             placeholder="ค้นหาชื่อเกม, แพ็คเกจ หรือรหัสบริษัท..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-10 h-12 bg-card border-zinc-800 focus:ring-pink-500/50"
+                            className="pl-10 h-12 bg-card border-zinc-800 focus:ring-pink-500/50 text-white"
                         />
                     </div>
 
@@ -422,7 +574,7 @@ const WepayPriceManagement = () => {
                                                 type="number"
                                                 value={editCost}
                                                 onChange={(e) => setEditCost(e.target.value)}
-                                                className="h-12 font-bold bg-zinc-900 border-zinc-800"
+                                                className="h-12 font-bold bg-zinc-900 border-zinc-800 text-white"
                                                 placeholder="0.00"
                                             />
                                         </div>
@@ -439,7 +591,7 @@ const WepayPriceManagement = () => {
                                                 type="number"
                                                 value={editSellPrice}
                                                 onChange={(e) => setEditSellPrice(e.target.value)}
-                                                className="h-12 font-bold bg-zinc-900 border-zinc-700 border-2"
+                                                className="h-12 font-bold bg-zinc-900 border-zinc-700 border-2 text-white"
                                                 placeholder="0.00"
                                             />
                                         </div>
