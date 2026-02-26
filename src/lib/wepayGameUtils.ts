@@ -76,28 +76,47 @@ export const getWepayGameProducts = async (): Promise<WepayGameProduct[]> => {
     try {
         console.log('🎮 กำลังดึงรายการสินค้าเกม wePAY...');
         const data = await wepayRequest<any>({ action: 'game_list' });
+        console.log('📦 wePAY game_list raw:', JSON.stringify(data).substring(0, 300));
 
-        // comp_export.php?json คืน array ของ object หรือ object ที่มี array
+        // โครงสร้างจริง: { data: { mtopup: [...], cashcard: [...], gtopup: [...] } }
+        // ใช้เฉพาะ gtopup = เติมเกมโดยตรง (Free Fire, ROV, MLBB, PUBG ฯลฯ)
         let raw: any[] = [];
-        if (Array.isArray(data)) {
+        if (data?.data?.gtopup && Array.isArray(data.data.gtopup)) {
+            raw = data.data.gtopup;
+        } else if (Array.isArray(data)) {
             raw = data;
-        } else if (data && typeof data === 'object') {
-            // ลองหา key ที่เป็น array
-            const keys = Object.keys(data);
-            for (const k of keys) {
-                if (Array.isArray(data[k])) { raw = data[k]; break; }
-            }
         }
+
+        console.log(`📊 raw items count: ${raw.length}`);
 
         // map เป็น WepayGameProduct
         const products: WepayGameProduct[] = raw
-            .filter((item: any) => item && (item.code || item.company_code || item.pay_to_company))
-            .map((item: any, idx: number) => {
-                const company = item.code || item.company_code || item.pay_to_company || `GAME_${idx}`;
-                return {
+            .filter((item: any) => item && (item.company_id || item.code || item.company_code || item.pay_to_company))
+            .flatMap((item: any, idx: number) => {
+                const company = item.company_id || item.code || item.company_code || item.pay_to_company || `GAME_${idx}`;
+                const name = item.company_name || item.name || company;
+
+                if (item.denomination && Array.isArray(item.denomination) && item.denomination.length > 0) {
+                    return item.denomination.map((denom: any, dIdx: number) => ({
+                        id: `${company}_${dIdx}`,
+                        name,
+                        category: name,
+                        pay_to_company: company,
+                        pay_to_amount: String(denom.price || ''),
+                        info: denom.description || `${name} ${denom.price} บาท`,
+                        price: String(denom.price || '0'),
+                        recommendedPrice: String(denom.price || '0'),
+                        img: item.img || item.image || '',
+                        format_id: item.format || item.format_id || item.ref1_format || '',
+                        min_amount: Number(item.minimum_amount || 0),
+                        max_amount: Number(item.maximum_amount || 0),
+                    }));
+                }
+
+                return [{
                     id: `${company}_${idx}`,
-                    name: item.name || item.company_name || company,
-                    category: item.group || item.category || item.company_name || company,
+                    name,
+                    category: name,
                     pay_to_company: company,
                     pay_to_amount: String(item.amount || item.pay_to_amount || ''),
                     info: item.detail || item.description || item.info || '',
@@ -105,9 +124,9 @@ export const getWepayGameProducts = async (): Promise<WepayGameProduct[]> => {
                     recommendedPrice: String(item.sell_price || item.price || item.amount || '0'),
                     img: item.img || item.image || '',
                     format_id: item.format || item.format_id || item.ref1_format || '',
-                    min_amount: Number(item.min_amount || 0),
-                    max_amount: Number(item.max_amount || 0),
-                };
+                    min_amount: Number(item.minimum_amount || item.min_amount || 0),
+                    max_amount: Number(item.maximum_amount || item.max_amount || 0),
+                }];
             });
 
         console.log(`✅ ดึงสินค้าเกม wePAY: ${products.length} รายการ`);
@@ -118,6 +137,7 @@ export const getWepayGameProducts = async (): Promise<WepayGameProduct[]> => {
         return [];
     }
 };
+
 
 /** ดึงข้อมูลสินค้าของเกมเฉพาะตัว (payee_info) */
 export const getWepayGamePayeeInfo = async (pay_to_company: string): Promise<any> => {
@@ -136,18 +156,30 @@ export const purchaseWepayGame = async (params: {
     pay_to_ref2?: string; // Server ID (ถ้ามี)
 }): Promise<WepayPurchaseResult> => {
     console.log('🎮 กำลังเติมเกมผ่าน wePAY...', { ...params });
-    const data = await wepayRequest<WepayPurchaseResult>({
+    const data = await wepayRequest<any>({
         action: 'purchase',
         ...params,
     });
-    console.log('✅ wePAY purchase result:', data);
+    console.log('📥 wePAY purchase full response:', JSON.stringify(data));
 
-    if (data.code !== '00000') {
-        throw new Error(`wePAY error ${data.code}: ${data.message || 'Unknown error'}`);
+    // กรณี VPS ส่ง raw text กลับมา (JSON parse ล้มเหลว)
+    if (data.raw !== undefined) {
+        throw new Error(`wePAY ตอบกลับผิดปกติ: ${String(data.raw).substring(0, 100)}`);
     }
 
-    return data;
+    // กรณีไม่มี code field เลย
+    if (data.code === undefined) {
+        throw new Error(`wePAY ไม่ตอบสนอง: ${JSON.stringify(data).substring(0, 150)}`);
+    }
+
+    if (data.code !== '00000') {
+        const errorText = wepayErrorText(data.code);
+        throw new Error(`wePAY: ${errorText} (code: ${data.code})`);
+    }
+
+    return data as WepayPurchaseResult;
 };
+
 
 /** ตรวจสอบสถานะ order */
 export const checkWepayOrder = async (transaction_id: string): Promise<WepayOrderStatus> => {
