@@ -124,7 +124,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 password_hash,
                 resp_url: WEPAY_CALLBACK_URL,
                 dest_ref,
-                type: 'gtopup',  // ✅ ใช้ gtopup สำหรับเติมเกมโดยตรง
+                type: params.type || 'gtopup',  // ✅ รับประเภทจาก frontend (gtopup, mtopup, หรือ cashcard)
                 pay_to_company,
                 pay_to_amount: String(pay_to_amount),
                 pay_to_ref1,

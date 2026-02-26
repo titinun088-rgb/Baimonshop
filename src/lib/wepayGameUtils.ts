@@ -23,6 +23,7 @@ export interface WepayGameProduct {
     recommendedPrice: string;     // ราคาขาย (admin กำหนด หรือ = price * markup)
     img: string;                  // รูปภาพ (ถ้ามี)
     format_id: string;            // regex สำหรับ validate ref1 (UID)
+    type: string;                 // gtopup, mtopup, cashcard
     min_amount?: number;
     max_amount?: number;
 }
@@ -74,66 +75,124 @@ export const getWepayBalance = async (): Promise<WepayBalance> => {
 /** ดึงรายการสินค้าเกมทั้งหมดจาก comp_export */
 export const getWepayGameProducts = async (): Promise<WepayGameProduct[]> => {
     try {
-        console.log('🎮 กำลังดึงรายการสินค้าเกม wePAY...');
+        console.log('🎮 กำลังดึงรายการสินค้าเกม wePAY (Full Scan)...');
         const data = await wepayRequest<any>({ action: 'game_list' });
-        console.log('📦 wePAY game_list raw:', JSON.stringify(data).substring(0, 300));
 
-        // โครงสร้างจริง: { data: { mtopup: [...], cashcard: [...], gtopup: [...] } }
-        // ใช้เฉพาะ gtopup = เติมเกมโดยตรง (Free Fire, ROV, MLBB, PUBG ฯลฯ)
-        let raw: any[] = [];
-        if (data?.data?.gtopup && Array.isArray(data.data.gtopup)) {
-            raw = data.data.gtopup;
-        } else if (Array.isArray(data)) {
-            raw = data;
+        let allItems: WepayGameProduct[] = [];
+
+        // wePAY จะแบ่งหมวดหมู่ใน data.data: { gtopup: [], mtopup: [], cashcard: [] }
+        const categories = [
+            { key: 'gtopup', type: 'gtopup' },
+            { key: 'mtopup', type: 'mtopup' },
+            { key: 'cashcard', type: 'cashcard' }
+        ];
+
+        const sourceData = data?.data || {};
+
+        categories.forEach(cat => {
+            const rawItems = sourceData[cat.key];
+            if (rawItems && Array.isArray(rawItems)) {
+                console.log(`📦 Analyzing ${rawItems.length} items in ${cat.key}`);
+
+                const products = rawItems
+                    .filter((item: any) => {
+                        if (!item) return false;
+                        const company = (item.company_id || item.code || item.company_code || item.pay_to_company || '').toUpperCase();
+                        const name = (item.company_name || item.name || '').toUpperCase();
+
+                        // รายการที่จะให้ "ข้าม" (Non-Game Blacklist - จัดหนัก)
+                        const blacklist = [
+                            '12CALL', 'AIS', 'DTAC', 'TMVH', 'TRUE', 'MY', 'PENGUIN', 'CAT', 'TOT', // มือถือ
+                            'REFILL', 'TOPUP', 'TOP-UP', 'PREPAID', 'POSTPAID', 'MOBILE', // คำที่เกี่ยวกับเติมเงิน
+                            'MEA', 'MWA', 'PEA', 'PWA', 'ELECTRIC', 'WATER', // บิลค่าน้ำค่าไฟ
+                            'BILL', 'EXPRESSWAY', 'INSURANCE', 'EASY PASS', // บริการอื่นๆ
+                            '3BB', 'FIBRE', 'SINET', 'CINET', 'INTERNET', // อินเทอร์เน็ตบ้าน
+                            'TRUEMONEY', 'TMN', 'WALLET', 'BEEPAY', // กระเป๋าเงิน
+                            'AEON', 'KTC', 'FIRST CHOICE', 'UMAY', 'PROMISE', // บัตรเครดิต/เงินกู้
+                            'LEASING', 'CAR', 'MOTORCYCLE', // เช่าซื้อ
+                            'GRAB', 'LINEMAN', 'LALAMOVE', 'FOOD', // ขนส่ง/อาหาร
+                            'SURVEY', 'DONATION', 'MEMBER', 'CARD', // สมาชิก/บริจาค
+                            'NETFLIX', 'VIU', 'MONOMAX', 'SPOTIFY', 'YOUTUBE', // สตรีมมิ่ง
+                            'JOOX', 'WETV', 'IQIYI', 'TIKTOK', // โซเชียล/บันเทิงทั่วไป
+                            'เติมเงิน', 'รายเดือน', 'เน็ต' // คำภาษาไทยที่เกี่ยวกับเติมเงิน
+                        ];
+
+                        // รายการเกมที่อนุญาต (Whitelist)
+                        const gameWhitelist = [
+                            'HEARTOPIA', 'ROV', 'FREE FIRE', 'PUBG', 'GENSHIN',
+                            'VALORANT', 'ROBLOX', 'STEAM', 'RAZER', 'GARENA',
+                            'MOBILE LEGENDS', 'MLBB', 'ARENA OF VALOR', 'GAME'
+                        ];
+
+                        // ถ้าเป็นหมวด mtopup (ซึ่ง 99% เป็นเติมเงินมือถือ) 
+                        // จะให้อนุญาตเฉพาะตัวที่อยู่ใน Whitelist เท่านั้น
+                        if (cat.type === 'mtopup') {
+                            return gameWhitelist.some(w => name.includes(w) || company.includes(w));
+                        }
+
+                        // สำหรับหมวดอื่น ถ้าอยู่ใน blacklist ให้ข้ามไปเลย 
+                        if (blacklist.some(b => company.includes(b) || name.includes(b))) {
+                            // ยกเว้นถ้าชื่ออยู่ใน whitelist จริงๆ
+                            if (gameWhitelist.some(w => name.includes(w) || company.includes(w))) return true;
+                            return false;
+                        }
+
+                        return !!(item.company_id || item.code || item.company_code || item.pay_to_company);
+                    })
+                    .flatMap((item: any, idx: number) => {
+                        const company = item.company_id || item.code || item.company_code || item.pay_to_company || `${cat.key}_${idx}`;
+                        const name = item.company_name || item.name || company;
+
+                        // กรณีมี denomination (แพ็คเกจย่อย)
+                        if (item.denomination && Array.isArray(item.denomination) && item.denomination.length > 0) {
+                            return item.denomination.map((denom: any, dIdx: number) => ({
+                                id: `${company}_${dIdx}`,
+                                name,
+                                category: name,
+                                pay_to_company: company,
+                                pay_to_amount: String(denom.price || ''),
+                                info: denom.description || `${name} ${denom.price} บาท`,
+                                price: String(denom.price || '0'),
+                                recommendedPrice: String(denom.price || '0'),
+                                img: item.img || item.image || '',
+                                format_id: item.refs_format?.ref1 || item.format || item.format_id || item.ref1_format || '',
+                                type: cat.type,
+                                min_amount: Number(item.minimum_amount || 0),
+                                max_amount: Number(item.maximum_amount || 0),
+                            }));
+                        }
+
+                        // กรณีเป็นสินค้าเดี่ยว
+                        return [{
+                            id: `${company}_${idx}`,
+                            name,
+                            category: name,
+                            pay_to_company: company,
+                            pay_to_amount: String(item.amount || item.pay_to_amount || '0'),
+                            info: item.detail || item.description || item.info || '',
+                            price: String(item.cost_price || item.price || item.amount || '0'),
+                            recommendedPrice: String(item.sell_price || item.price || item.amount || '0'),
+                            img: item.img || item.image || '',
+                            format_id: item.refs_format?.ref1 || item.format || item.format_id || item.ref1_format || '',
+                            type: cat.type,
+                            min_amount: Number(item.minimum_amount || item.min_amount || 0),
+                            max_amount: Number(item.maximum_amount || item.max_amount || 0),
+                        }];
+                    });
+
+                allItems = [...allItems, ...products];
+            }
+        });
+
+        // กรณี API ส่งมาเป็น array ตรงๆ (legacy/fallback)
+        if (allItems.length === 0 && Array.isArray(data)) {
+            // ... (keep fallback if needed, but comp_export usually follows the categorical structure above)
         }
 
-        console.log(`📊 raw items count: ${raw.length}`);
-
-        // map เป็น WepayGameProduct
-        const products: WepayGameProduct[] = raw
-            .filter((item: any) => item && (item.company_id || item.code || item.company_code || item.pay_to_company))
-            .flatMap((item: any, idx: number) => {
-                const company = item.company_id || item.code || item.company_code || item.pay_to_company || `GAME_${idx}`;
-                const name = item.company_name || item.name || company;
-
-                if (item.denomination && Array.isArray(item.denomination) && item.denomination.length > 0) {
-                    return item.denomination.map((denom: any, dIdx: number) => ({
-                        id: `${company}_${dIdx}`,
-                        name,
-                        category: name,
-                        pay_to_company: company,
-                        pay_to_amount: String(denom.price || ''),
-                        info: denom.description || `${name} ${denom.price} บาท`,
-                        price: String(denom.price || '0'),
-                        recommendedPrice: String(denom.price || '0'),
-                        img: item.img || item.image || '',
-                        format_id: item.format || item.format_id || item.ref1_format || '',
-                        min_amount: Number(item.minimum_amount || 0),
-                        max_amount: Number(item.maximum_amount || 0),
-                    }));
-                }
-
-                return [{
-                    id: `${company}_${idx}`,
-                    name,
-                    category: name,
-                    pay_to_company: company,
-                    pay_to_amount: String(item.amount || item.pay_to_amount || ''),
-                    info: item.detail || item.description || item.info || '',
-                    price: String(item.cost_price || item.price || item.amount || '0'),
-                    recommendedPrice: String(item.sell_price || item.price || item.amount || '0'),
-                    img: item.img || item.image || '',
-                    format_id: item.format || item.format_id || item.ref1_format || '',
-                    min_amount: Number(item.minimum_amount || item.min_amount || 0),
-                    max_amount: Number(item.maximum_amount || item.max_amount || 0),
-                }];
-            });
-
-        console.log(`✅ ดึงสินค้าเกม wePAY: ${products.length} รายการ`);
-        return products;
+        console.log(`✅ ดึงสินค้า wePAY สำเร็จ: ทั้งหมด ${allItems.length} รายการ`);
+        return allItems;
     } catch (error) {
-        console.error('❌ Error getting wePAY game products:', error);
-        console.warn('⚠️ Returning empty array for graceful degradation');
+        console.error('❌ Error getting wePAY products:', error);
         return [];
     }
 };
@@ -154,6 +213,7 @@ export const purchaseWepayGame = async (params: {
     pay_to_amount: string;
     pay_to_ref1: string;  // UID / ID ผู้เล่น
     pay_to_ref2?: string; // Server ID (ถ้ามี)
+    type?: string;        // gtopup, mtopup, cashcard
 }): Promise<WepayPurchaseResult> => {
     console.log('🎮 กำลังเติมเกมผ่าน wePAY...', { ...params });
     const data = await wepayRequest<any>({
@@ -203,10 +263,15 @@ export const wepayStatusText = (status: string | undefined): string => {
 export const wepayErrorText = (code: string): string => {
     const map: Record<string, string> = {
         '00000': 'สำเร็จ',
-        '30016': 'รหัสอ้างอิงซ้ำ (dest_ref ซ้ำ)',
-        '30019': 'ยอดเงินไม่พอ',
-        '30005': 'Callback URL ไม่ถูกต้อง',
         '20005': 'IP ไม่ได้รับอนุญาต (ต้องแจ้ง wePAY whitelist)',
+        '30005': 'Callback URL ไม่ถูกต้อง',
+        '30006': 'ไม่พบบัญชีผู้เล่นในระบบเกม (AID หรือ UID ไม่ถูกต้อง) กรุณาตรวจสอบ ID ในเกมอีกครั้ง',
+        '30016': 'รหัสอ้างอิงซ้ำ (dest_ref ซ้ำ)',
+        '30017': 'ไม่พบบริการนี้',
+        '30018': 'จำนวนเงินไม่ถูกต้อง',
+        '30019': 'ยอดเงินไม่พอ',
+        '30020': 'ระบบปลายทางผิดพลาด กรุณาลองใหม่',
+        '30021': 'บัญชีผู้เล่นไม่ถูกต้อง',
     };
     return map[code] || `Error code: ${code}`;
 };

@@ -65,6 +65,7 @@ const GameTopUp = () => {
   const [gameDialogOpen, setGameDialogOpen] = useState(false);
   const [selectedGameProduct, setSelectedGameProduct] = useState<WepayGameProduct | null>(null);
   const [gameUID, setGameUID] = useState("");
+  const [gameAID, setGameAID] = useState(""); // AID (ref1) สำหรับ Heartopia
   const [gamePurchasing, setGamePurchasing] = useState(false);
 
   // Price Management States
@@ -189,6 +190,7 @@ const GameTopUp = () => {
 
     // Reset form
     setGameUID("");
+    setGameAID("");
     setGameServer("");
     setGameNotes("");
   };
@@ -276,6 +278,13 @@ const GameTopUp = () => {
     }
   };
 
+  /** ตรวจจับว่าเกมนี้คือ Heartopia หรือไม่ */
+  const isHeartopia = (game: WepayGameProduct | null): boolean => {
+    if (!game) return false;
+    const name = (game.category || game.pay_to_company || '').toLowerCase();
+    return name.includes('heartopia');
+  };
+
   const validateUID = (uid: string, formatId: string): boolean => {
     try {
       console.log('🔍 Debug UID Validation:');
@@ -301,9 +310,22 @@ const GameTopUp = () => {
       toast.error("ไม่พบข้อมูลเกม");
       return;
     }
-    if (!gameUID.trim()) {
-      toast.error("กรุณากรอก UID/ไอดีเกม");
-      return;
+
+    if (isHeartopia(selectedGame)) {
+      // Heartopia ต้องการ AID (ref1) และ UID (ref2) แยกกัน
+      if (!gameAID.trim()) {
+        toast.error("กรุณากรอก AID (หมายเลขบัญชี) ของ Heartopia");
+        return;
+      }
+      if (!gameUID.trim()) {
+        toast.error("กรุณากรอก UID ของ Heartopia");
+        return;
+      }
+    } else {
+      if (!gameUID.trim()) {
+        toast.error("กรุณากรอก UID/ไอดีเกม");
+        return;
+      }
     }
 
     // เปิด dialog สำหรับการซื้อ โดยให้ API ตรวจสอบ UID
@@ -553,33 +575,73 @@ const GameTopUp = () => {
             <div className="bg-black/30 backdrop-blur-sm rounded-2xl p-6 border border-purple-500/30">
               <h3 className="text-2xl font-bold text-center mb-6 text-white">ฟอร์มสั่งซื้อ</h3>
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-semibold text-purple-300 mb-2">
-                    UID / ID ผู้เล่น *
-                    {selectedGame.format_id && (
-                      <span className="text-yellow-400 text-xs ml-2">
-                        (รูปแบบ: {formatUIDPattern(selectedGame.format_id)})
-                      </span>
-                    )}
-                  </label>
-                  <Input
-                    type="text"
-                    placeholder="กรอก UID หรือ ID ผู้เล่น"
-                    value={gameUID}
-                    onChange={(e) => setGameUID(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-black/50 backdrop-blur-sm text-white placeholder:text-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 border-purple-500/30"
-                  />
-                  {selectedGame.format_id && (
-                    <div className="mt-2 space-y-1">
-                      <p className="text-xs text-yellow-400">
-                        💡 รูปแบบที่ต้องการ: {formatUIDPattern(selectedGame.format_id)}
-                      </p>
-                      <p className="text-xs text-gray-400 font-mono">
-                        Pattern: {selectedGame.format_id}
-                      </p>
+
+                {/* ─── Heartopia: 2 ช่อง AID + UID ─── */}
+                {isHeartopia(selectedGame) ? (
+                  <>
+                    <div className="bg-blue-900/30 border border-blue-500/40 rounded-xl p-3 text-sm text-blue-200">
+                      💡 <strong>Heartopia</strong> ต้องกรอก <strong>AID</strong> (หมายเลขบัญชี 18 หลัก) และ <strong>UID</strong> (รหัส 6 ตัว) แยกกัน
                     </div>
-                  )}
-                </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-purple-300 mb-2">
+                        AID (หมายเลขบัญชี) *
+                        <span className="text-yellow-400 text-xs ml-2">(18 หลัก)</span>
+                      </label>
+                      <Input
+                        type="text"
+                        placeholder="กรอก AID 18 หลัก เช่น 123456789012345678"
+                        value={gameAID}
+                        onChange={(e) => setGameAID(e.target.value.trim())}
+                        className="w-full px-4 py-3 rounded-xl bg-black/50 backdrop-blur-sm text-white placeholder:text-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 border-purple-500/30 font-mono tracking-wide"
+                        maxLength={20}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-purple-300 mb-2">
+                        UID (รหัสผู้เล่น) *
+                        <span className="text-yellow-400 text-xs ml-2">(รหัส 6 ตัว)</span>
+                      </label>
+                      <Input
+                        type="text"
+                        placeholder="กรอก UID เช่น ab12cd"
+                        value={gameUID}
+                        onChange={(e) => setGameUID(e.target.value.trim())}
+                        className="w-full px-4 py-3 rounded-xl bg-black/50 backdrop-blur-sm text-white placeholder:text-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 border-purple-500/30 font-mono tracking-wide"
+                        maxLength={20}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  /* ─── เกมทั่วไป: 1 ช่อง UID ─── */
+                  <div>
+                    <label className="block text-sm font-semibold text-purple-300 mb-2">
+                      UID / ID ผู้เล่น *
+                      {selectedGame.format_id && (
+                        <span className="text-yellow-400 text-xs ml-2">
+                          (รูปแบบ: {formatUIDPattern(selectedGame.format_id)})
+                        </span>
+                      )}
+                    </label>
+                    <Input
+                      type="text"
+                      placeholder="กรอก UID หรือ ID ผู้เล่น"
+                      value={gameUID}
+                      onChange={(e) => setGameUID(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl bg-black/50 backdrop-blur-sm text-white placeholder:text-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 border-purple-500/30"
+                    />
+                    {selectedGame.format_id && (
+                      <div className="mt-2 space-y-1">
+                        <p className="text-xs text-yellow-400">
+                          💡 รูปแบบที่ต้องการ: {formatUIDPattern(selectedGame.format_id)}
+                        </p>
+                        <p className="text-xs text-gray-400 font-mono">
+                          Pattern: {selectedGame.format_id}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <div>
                   <label className="block text-sm font-semibold text-purple-300 mb-2">หมายเหตุเพิ่มเติม (ถ้ามี)</label>
                   <Input
@@ -591,7 +653,7 @@ const GameTopUp = () => {
                 </div>
                 <button
                   onClick={proceedToPurchase}
-                  disabled={!gameUID.trim()}
+                  disabled={isHeartopia(selectedGame) ? (!gameAID.trim() || !gameUID.trim()) : !gameUID.trim()}
                   className="w-full py-4 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold text-lg transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/25"
                 >
                   ดำเนินการต่อ
@@ -839,7 +901,7 @@ const GameTopUp = () => {
 
           <div className="space-y-4">
             {selectedGameProduct && (
-              <div className="bg-muted p-4 rounded-lg">
+              <div className="bg-muted p-4 rounded-lg space-y-1">
                 <h3 className="font-semibold">{selectedGameProduct.category}</h3>
                 <p className="text-sm text-muted-foreground whitespace-pre-line">
                   {formatGameInfo(selectedGameProduct.info)}
@@ -855,18 +917,56 @@ const GameTopUp = () => {
                     </div>
                   );
                 })()}
+                {/* ── debug: แสดง format_id จาก wePAY ── */}
+                {selectedGameProduct.format_id && (
+                  <p className="text-xs text-yellow-600 dark:text-yellow-400 font-mono break-all">
+                    ⚠️ format_id: {selectedGameProduct.format_id}
+                  </p>
+                )}
               </div>
             )}
 
-            <div className="space-y-2">
-              <Label htmlFor="gameUID">UID / ไอดีเกม *</Label>
-              <Input
-                id="gameUID"
-                placeholder="กรอก UID หรือ ID ผู้เล่น"
-                value={gameUID}
-                onChange={(e) => setGameUID(e.target.value)}
-              />
-            </div>
+            {selectedGameProduct && isHeartopia(selectedGameProduct) ? (
+              /* ─── Heartopia: 2 ช่อง ─── */
+              <>
+                <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-500/40 rounded-lg p-3 text-sm text-blue-700 dark:text-blue-200">
+                  💡 Heartopia ต้องกรอก <strong>AID</strong> และ <strong>UID</strong> แยกกัน
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="gameAID">AID (หมายเลขบัญชี 18 หลัก) *</Label>
+                  <Input
+                    id="gameAID"
+                    placeholder="เช่น 123456789012345678"
+                    value={gameAID}
+                    onChange={(e) => setGameAID(e.target.value.trim())}
+                    className="font-mono tracking-wide"
+                    maxLength={20}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="gameUID">UID (รหัสผู้เล่น 6 ตัว) *</Label>
+                  <Input
+                    id="gameUID"
+                    placeholder="เช่น ab12cd"
+                    value={gameUID}
+                    onChange={(e) => setGameUID(e.target.value.trim())}
+                    className="font-mono tracking-wide"
+                    maxLength={20}
+                  />
+                </div>
+              </>
+            ) : (
+              /* ─── เกมทั่วไป: 1 ช่อง ─── */
+              <div className="space-y-2">
+                <Label htmlFor="gameUID">UID / ไอดีเกม *</Label>
+                <Input
+                  id="gameUID"
+                  placeholder="กรอก UID หรือ ID ผู้เล่น"
+                  value={gameUID}
+                  onChange={(e) => setGameUID(e.target.value)}
+                />
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="gameNotes">หมายเหตุเพิ่มเติม</Label>
@@ -883,7 +983,16 @@ const GameTopUp = () => {
             <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
             <AlertDialogAction
               onClick={async () => {
-                if (!selectedGameProduct || !gameUID.trim()) {
+                if (!selectedGameProduct) {
+                  toast.error("ไม่พบข้อมูลเกม");
+                  return;
+                }
+                if (isHeartopia(selectedGameProduct)) {
+                  if (!gameAID.trim() || !gameUID.trim()) {
+                    toast.error("กรุณากรอก AID และ UID ให้ครบถ้วน");
+                    return;
+                  }
+                } else if (!gameUID.trim()) {
                   toast.error("กรุณากรอกข้อมูลให้ครบถ้วน");
                   return;
                 }
@@ -908,17 +1017,33 @@ const GameTopUp = () => {
 
                 setGamePurchasing(true);
                 try {
-                  const dest_ref = `GAME_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                  // สร้าง dest_ref ให้สั้นลง (ห้ามเกิน 20 ตัวอักษรตาม spec wePAY)
+                  // ใช้ timestamp 10 หลักหลัง + สุ่ม 5 หลัก = 15 หลัก (ปลอดภัย)
+                  const dest_ref = `G${Date.now().toString().slice(-10)}${Math.random().toString(36).substring(2, 7)}`.toUpperCase();
 
-                  // แยก server ID ถ้ากรอกมาในรูป uid|server
-                  const [pay_to_ref1, pay_to_ref2] = gameUID.trim().split('|');
+                  // Heartopia: AID = ref1, UID = ref2
+                  // เกมอื่น: split uid|server (ถ้ามี | )
+                  let pay_to_ref1: string;
+                  let pay_to_ref2: string | undefined;
+
+                  if (isHeartopia(selectedGameProduct)) {
+                    pay_to_ref1 = `${gameAID.trim()} ${gameUID.trim()}`;
+                    pay_to_ref2 = undefined;
+                    console.log(`🎮 Heartopia ref1 prepared.`);
+                  } else {
+                    // แยก server ID ถ้ากรอกมาในรูป uid|server
+                    const parts = gameUID.trim().split('|');
+                    pay_to_ref1 = parts[0].trim();
+                    pay_to_ref2 = parts[1]?.trim();
+                  }
 
                   const result = await purchaseWepayGame({
                     dest_ref,
                     pay_to_company: selectedGameProduct.pay_to_company,
                     pay_to_amount: selectedGameProduct.pay_to_amount || String(apiPrice),
-                    pay_to_ref1: pay_to_ref1.trim(),
-                    pay_to_ref2: pay_to_ref2?.trim(),
+                    pay_to_ref1,
+                    pay_to_ref2,
+                    type: selectedGameProduct.type,
                   });
 
                   console.log('✅ wePAY purchase result:', result);
@@ -955,6 +1080,7 @@ const GameTopUp = () => {
                   toast.success(`ส่งคำสั่งเติมเกมแล้ว! (Ref: ${result.transaction_id || dest_ref})`);
                   setGameDialogOpen(false);
                   setGameUID("");
+                  setGameAID("");
                   setGameNotes("");
                   await loadData();
                 } catch (error: any) {
