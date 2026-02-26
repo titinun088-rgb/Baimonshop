@@ -43,6 +43,7 @@ import {
 } from "@/lib/wepayGameUtils";
 import { addUserPurchaseReference, recordPurchaseWithSellPrice } from "@/lib/purchaseHistoryUtils";
 import { getProductSellPrice } from "@/lib/peamsubPriceUtils";
+import { getAllCustomGameImages } from "@/lib/gameImageUtils";
 import { doc, updateDoc, increment } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
@@ -139,11 +140,21 @@ const GameTopUp = () => {
     }
   };
 
-  const loadGameProducts = async () => {
+  const loadGameProducts = async (force = false) => {
     try {
-      const allProducts = await getWepayGameProducts();
-      setGameProducts(allProducts);
-      console.log("🎮 Loaded all wePAY game products:", allProducts.length);
+      const [allProducts, customImages] = await Promise.all([
+        getWepayGameProducts(force),
+        getAllCustomGameImages()
+      ]);
+
+      // นำรูปภาพที่แอดมินกำหนดเองมาทับรูปมาตรฐาน
+      const updatedProducts = allProducts.map(product => ({
+        ...product,
+        img: customImages[product.pay_to_company] || product.img
+      }));
+
+      setGameProducts(updatedProducts);
+      console.log(`🎮 Loaded all wePAY game products with custom images (Force: ${force}):`, updatedProducts.length);
     } catch (error) {
       console.error("Error loading game products:", error);
       toast.error("เกิดข้อผิดพลาดในการโหลดเกม");
@@ -236,11 +247,8 @@ const GameTopUp = () => {
   const formatGameInfo = (info: string) => {
     if (!info) return '';
 
-    // ลบ HTML tags
-    let cleanInfo = stripHtmlTags(info);
-
-    // แทนที่ HTML entities
-    cleanInfo = cleanInfo
+    // 1. แทนที่ HTML entities ก่อน เพื่อให้กลายเป็น < และ > จริงๆ
+    let cleanInfo = info
       .replace(/&nbsp;/g, ' ')
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
@@ -248,7 +256,10 @@ const GameTopUp = () => {
       .replace(/&quot;/g, '"')
       .replace(/&#39;/g, "'");
 
-    // ลบช่องว่างเกิน
+    // 2. ลบ HTML tags ทั้งหมด (เรียกใช้ stripHtmlTags ทีหลัง)
+    cleanInfo = stripHtmlTags(cleanInfo);
+
+    // 3. ลบช่องว่างเกินและตัดช่องว่างหัวท้าย
     cleanInfo = cleanInfo.replace(/\s+/g, ' ').trim();
 
     return cleanInfo;
@@ -346,8 +357,20 @@ const GameTopUp = () => {
     setGameDialogOpen(true);
   };
 
-  const handleRefresh = () => {
-    loadData();
+  const handleRefresh = async () => {
+    setLoading(true);
+    try {
+      await Promise.all([
+        loadBalance(),
+        loadGameProducts(true),
+      ]);
+      toast.success("รีเฟรชข้อมูลสำเร็จ");
+    } catch (error) {
+      console.error("Error refreshing data:", error);
+      toast.error("ไม่สามารถรีเฟรชข้อมูลได้");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -369,16 +392,7 @@ const GameTopUp = () => {
 
       <style dangerouslySetInnerHTML={{
         __html: `
-        @keyframes meshGradient {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        .animated-mesh-bg {
-          background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #1e1b4b);
-          background-size: 400% 400%;
-          animation: meshGradient 15s ease infinite;
-        }
+
         .glass-panel {
           background: rgba(255, 255, 255, 0.03);
           backdrop-filter: blur(12px);
@@ -390,11 +404,11 @@ const GameTopUp = () => {
         }
         .game-card-hover:hover {
           transform: translateY(-8px) scale(1.02);
-          box-shadow: 0 20px 40px rgba(139, 92, 246, 0.2);
-          border-color: rgba(139, 92, 246, 0.5);
+          box-shadow: 0 20px 40px rgba(236, 72, 153, 0.2);
+          border-color: rgba(236, 72, 153, 0.5);
         }
         .text-glow {
-          text-shadow: 0 0 10px rgba(139, 92, 246, 0.5), 0 0 20px rgba(139, 92, 246, 0.3);
+          text-shadow: 0 0 10px rgba(236, 72, 153, 0.5), 0 0 20px rgba(236, 72, 153, 0.3);
         }
       `}} />
 
@@ -412,72 +426,35 @@ const GameTopUp = () => {
         }}
       />
 
-      <div className="relative animated-mesh-bg text-white min-h-screen font-['Kanit',sans-serif] -mx-3 sm:-mx-4 lg:-mx-6 xl:-mx-8 overflow-hidden">
-        {/* Gaming Background Effects */}
-        <div className="absolute inset-0 pointer-events-none">
-          {/* Circuit Pattern */}
-          <div
-            className="absolute inset-0 opacity-5"
-            style={{
-              backgroundImage: `
-                  linear-gradient(rgba(139, 92, 246, 0.3) 1px, transparent 1px),
-                  linear-gradient(90deg, rgba(139, 92, 246, 0.3) 1px, transparent 1px)
-                `,
-              backgroundSize: '30px 30px',
-              animation: 'gridMove 30s linear infinite'
-            }}
-          />
-
-          {/* Gaming Particles */}
-          {[...Array(10)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-1 h-1 bg-purple-400/60 rounded-full gaming-particle"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 4}s`,
-                animationDuration: `${3 + Math.random() * 3}s`
-              }}
-            />
-          ))}
-
-          {/* Energy Waves */}
-          <div className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-purple-500/40 to-transparent gaming-scanline" />
-          <div className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-blue-500/30 to-transparent gaming-scanline" style={{ animationDelay: '2s', animationDuration: '5s' }} />
-
-          {/* Corner Effects */}
-          <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-radial from-purple-600/20 to-transparent blur-3xl animate-pulse" />
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-radial from-blue-600/20 to-transparent blur-3xl animate-pulse" style={{ animationDelay: '3s' }} />
-        </div>
+      <div className="relative text-white min-h-screen font-['Kanit',sans-serif] -mx-3 sm:-mx-4 lg:-mx-6 xl:-mx-8 overflow-hidden">
         {/* Header */}
         <header className="relative z-10 p-6 sm:p-10 text-center">
           <div className="max-w-4xl mx-auto space-y-6">
-            <div className="inline-block px-4 py-1.5 rounded-full bg-purple-500/20 border border-purple-500/30 text-purple-300 text-xs font-bold uppercase tracking-widest mb-2 animate-pulse">
+            <div className="inline-block px-4 py-1.5 rounded-full bg-pink-500/20 border border-pink-500/30 text-pink-300 text-xs font-bold uppercase tracking-widest mb-2 animate-pulse">
               Gaming Top-up Center
             </div>
-            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold text-white tracking-tighter leading-tight text-glow">
-              <span className="bg-gradient-to-r from-white via-purple-200 to-purple-400 bg-clip-text text-transparent">BAIMON SHOP</span>
+            <h1 className="text-3xl sm:text-5xl lg:text-7xl font-extrabold text-white tracking-tighter leading-tight text-glow">
+              <span className="bg-gradient-to-r from-white via-pink-200 to-pink-400 bg-clip-text text-transparent">BAIMON SHOP</span>
             </h1>
-            <h2 className="text-lg sm:text-xl text-purple-200/80 max-w-2xl mx-auto font-light leading-relaxed">
+            <h2 className="text-base sm:text-xl text-pink-200/80 max-w-2xl mx-auto font-light leading-relaxed px-4">
               สัมผัสประสบการณ์การเติมเกมที่เร็วที่สุด ปลอดภัยที่สุด และคุ้มค่าที่สุดในไทย
             </h2>
 
             <div className="pt-4 flex flex-col sm:flex-row gap-3 max-w-2xl mx-auto">
               <div className="relative flex-1 group">
-                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-purple-400 group-focus-within:text-purple-300 transition-colors" />
+                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-pink-400 group-focus-within:text-pink-300 transition-colors" />
                 <Input
                   placeholder="ค้นหาเกมโปรดของคุณ..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-12 pr-4 py-6 rounded-2xl bg-white/5 backdrop-blur-md text-white placeholder:text-purple-300/50 focus:outline-none focus:ring-2 focus:ring-purple-500/50 w-full border-white/10 text-lg transition-all"
+                  className="pl-12 pr-4 py-6 rounded-2xl bg-white/5 backdrop-blur-md text-white placeholder:text-pink-300/50 focus:outline-none focus:ring-2 focus:ring-pink-500/50 w-full border-white/10 text-lg transition-all"
                 />
               </div>
               <Button
                 onClick={handleRefresh}
                 disabled={loading}
                 variant="outline"
-                className="py-6 rounded-2xl bg-purple-600/20 backdrop-blur-md border-purple-500/30 text-white hover:bg-purple-600/30 active:scale-95 transition-all px-8"
+                className="py-6 rounded-2xl bg-pink-600/20 backdrop-blur-md border-pink-500/30 text-white hover:bg-pink-600/30 active:scale-95 transition-all px-8"
               >
                 <RefreshCw className={`h-5 w-5 mr-2 ${loading ? 'animate-spin' : ''}`} />
                 <span>รีเฟรช</span>
@@ -487,29 +464,29 @@ const GameTopUp = () => {
         </header>
 
         {/* Status Bar / User Info */}
-        <div className="relative z-20 px-4 sm:px-10 py-4 flex flex-wrap items-center justify-between gap-4 border-b border-white/5 bg-black/40 backdrop-blur-xl">
-          <div className="flex items-center gap-4">
+        <div className="relative z-20 px-4 sm:px-10 py-4 flex flex-col xs:flex-row items-center justify-between gap-4 border-b border-white/5 bg-black/40 backdrop-blur-xl">
+          <div className="flex items-center gap-4 w-full xs:w-auto">
             <div className="flex flex-col">
-              <span className="text-[10px] text-purple-400 font-bold uppercase tracking-wider">บัญชีผู้ใช้</span>
-              <span className="text-sm font-medium text-white/90">{userData?.username || "Guest User"}</span>
+              <span className="text-[10px] text-pink-400 font-bold uppercase tracking-wider"></span>
+              <span className="text-sm font-medium text-white/90 truncate max-w-[150px] xs:max-w-none">{userData?.username || ""}</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4 sm:gap-6 w-full xs:w-auto justify-between xs:justify-end">
             <div className="flex flex-col items-end">
               <span className="text-[10px] text-green-400 font-bold uppercase tracking-wider">ยอดเงินในบัญชี</span>
               <div className="flex items-center gap-2">
-                <span className="text-xl font-black text-white text-glow">฿{userData?.balance?.toLocaleString() || "0"}</span>
-                <div className="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center">
+                <span className="text-lg sm:text-xl font-black text-white text-glow">฿{userData?.balance?.toLocaleString() || "0"}</span>
+                <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-green-500/20 flex items-center justify-center">
                   <DollarSign className="h-3 w-3 text-green-400" />
                 </div>
               </div>
             </div>
 
             {isAdmin && wepayBalance && (
-              <div className="px-4 py-2 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex flex-col items-end">
-                <span className="text-[10px] text-orange-400 font-bold uppercase tracking-wider">Admin: wePAY Balance</span>
-                <span className="text-sm font-bold text-orange-200">฿{parseFloat(wepayBalance.available_balance).toLocaleString()}</span>
+              <div className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl bg-orange-500/10 border border-orange-500/20 flex flex-col items-end">
+                <span className="text-[9px] sm:text-[10px] text-orange-400 font-bold uppercase tracking-wider line-clamp-1">wePAY</span>
+                <span className="text-xs sm:text-sm font-bold text-orange-200">฿{parseFloat(wepayBalance.available_balance).toLocaleString()}</span>
               </div>
             )}
           </div>
@@ -520,9 +497,9 @@ const GameTopUp = () => {
             <div className="mb-8">
               <button
                 onClick={backToGameList}
-                className="group flex items-center gap-3 text-purple-400 hover:text-white transition-all bg-white/5 pr-6 pl-4 py-2 rounded-full border border-white/10 hover:border-purple-500/50"
+                className="group flex items-center gap-3 text-pink-400 hover:text-white transition-all bg-white/5 pr-6 pl-4 py-2 rounded-full border border-white/10 hover:border-pink-500/50"
               >
-                <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center group-hover:bg-purple-500/40 transition-colors">
+                <div className="w-8 h-8 rounded-full bg-pink-500/20 flex items-center justify-center group-hover:bg-pink-500/40 transition-colors">
                   <ArrowLeft className="h-4 w-4" />
                 </div>
                 <span className="font-medium">กลับไปเลือกเกม</span>
@@ -538,7 +515,7 @@ const GameTopUp = () => {
                   </div>
 
                   <div className="relative z-10 space-y-6">
-                    <div className="w-40 h-40 bg-gradient-to-br from-purple-500 to-blue-600 rounded-3xl p-1 shadow-2xl">
+                    <div className="w-40 h-40 bg-gradient-to-br from-pink-500 to-rose-600 rounded-3xl p-1 shadow-2xl">
                       <div className="w-full h-full rounded-[1.4rem] overflow-hidden bg-zinc-900 flex items-center justify-center">
                         {selectedGame.img ? (
                           <img
@@ -547,13 +524,13 @@ const GameTopUp = () => {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <Gamepad2 className="h-16 w-16 text-purple-500/50" />
+                          <Gamepad2 className="h-16 w-16 text-pink-500/50" />
                         )}
                       </div>
                     </div>
 
                     <div>
-                      <h2 className="text-4xl sm:text-5xl font-extrabold text-glow tracking-tight">
+                      <h2 className="text-2xl sm:text-5xl font-extrabold text-glow tracking-tight leading-tight">
                         {selectedGame.category}
                       </h2>
                       <div className="flex items-center gap-2 mt-3">
@@ -568,7 +545,7 @@ const GameTopUp = () => {
 
                     <div className="space-y-4 pt-4">
                       <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
-                        <span className="text-xs font-bold text-purple-400 uppercase">รายละเอียดแพ็กเกจ</span>
+                        <span className="text-xs font-bold text-pink-400 uppercase">รายละเอียดแพ็กเกจ</span>
                         <p className="text-white/80 leading-relaxed italic">
                           "{stripHtmlTags(selectedGame.info)}"
                         </p>
@@ -583,7 +560,7 @@ const GameTopUp = () => {
                         </div>
                         <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
                           <span className="text-xs text-white/50 block mb-1">ความเร็ว</span>
-                          <span className="text-xl font-bold text-blue-400">1-3 นาที</span>
+                          <span className="text-xl font-bold text-pink-400">1-3 นาที</span>
                         </div>
                       </div>
                     </div>
@@ -596,7 +573,7 @@ const GameTopUp = () => {
                 <div className="glass-panel p-8 rounded-3xl space-y-8">
                   <div>
                     <h3 className="text-2xl font-bold flex items-center gap-3">
-                      <ShoppingCart className="h-6 w-6 text-purple-400" />
+                      <ShoppingCart className="h-6 w-6 text-pink-400" />
                       ข้อมูลการสั่งซื้อ
                     </h3>
                     <p className="text-white/50 text-sm mt-1">กรุณากรอกข้อมูลให้ครบถ้วนเพื่อดำเนินการ</p>
@@ -606,7 +583,7 @@ const GameTopUp = () => {
                     {isHeartopia(selectedGame) ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                          <label className="text-sm font-semibold text-purple-300">AID (หมายเลขบัญชี)</label>
+                          <label className="text-sm font-semibold text-pink-300">AID (หมายเลขบัญชี)</label>
                           <Input
                             placeholder="18 หลัก"
                             value={gameAID}
@@ -615,7 +592,7 @@ const GameTopUp = () => {
                           />
                         </div>
                         <div className="space-y-2">
-                          <label className="text-sm font-semibold text-purple-300">UID (6 หลัก)</label>
+                          <label className="text-sm font-semibold text-pink-300">UID (6 หลัก)</label>
                           <Input
                             placeholder="กรอก UID"
                             value={gameUID}
@@ -626,7 +603,7 @@ const GameTopUp = () => {
                       </div>
                     ) : (
                       <div className="space-y-2">
-                        <label className="text-sm font-semibold text-purple-300">กรอก UID / Game ID</label>
+                        <label className="text-sm font-semibold text-pink-300">กรอก UID / Game ID</label>
                         <Input
                           placeholder="ตัวอย่าง: 123456789 หรือ UID|Server"
                           value={gameUID}
@@ -639,10 +616,10 @@ const GameTopUp = () => {
 
                     <div className="grid grid-cols-1 gap-4">
                       {gamePackages.map(pkg => (
-                        <div key={pkg.id} className="relative overflow-hidden p-6 rounded-2xl bg-gradient-to-r from-purple-500/20 to-blue-500/20 border border-purple-500/30">
+                        <div key={pkg.id} className="relative overflow-hidden p-6 rounded-2xl bg-gradient-to-r from-pink-500/20 to-rose-500/20 border border-pink-500/30">
                           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                             <div className="text-center sm:text-left">
-                              <span className="text-xs font-bold text-purple-300 uppercase block mb-1">แพ็กเกจที่คุณเลือก</span>
+                              <span className="text-xs font-bold text-pink-300 uppercase block mb-1">แพ็กเกจที่คุณเลือก</span>
                               <h4 className="text-xl font-bold">{stripHtmlTags(pkg.amount)}</h4>
                             </div>
                             <div className="text-center sm:text-right">
@@ -657,7 +634,7 @@ const GameTopUp = () => {
                     <Button
                       onClick={handlePurchase}
                       disabled={gamePurchasing}
-                      className="w-full py-8 rounded-2xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-xl font-bold shadow-lg shadow-purple-600/30 active:scale-95 transition-all"
+                      className="w-full py-8 rounded-2xl bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-xl font-bold shadow-lg shadow-pink-600/30 active:scale-95 transition-all"
                     >
                       {gamePurchasing ? (
                         <div className="flex items-center gap-3">
@@ -690,7 +667,7 @@ const GameTopUp = () => {
             <div className="mb-6 flex items-center justify-between">
               <button
                 onClick={backToCategories}
-                className="text-purple-400 hover:text-purple-300 flex items-center gap-2 transition-colors"
+                className="text-pink-400 hover:text-pink-300 flex items-center gap-2 transition-colors"
               >
                 <ArrowLeft className="h-5 w-5" />
                 กลับไปหน้ารวมหมวดหมู่
@@ -699,13 +676,13 @@ const GameTopUp = () => {
 
             {/* Category Header */}
             <div className="text-center mb-8">
-              <div className="w-32 h-32 mx-auto mb-4 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center overflow-hidden shadow-2xl">
+              <div className="w-32 h-32 mx-auto mb-4 bg-gradient-to-br from-pink-500 to-rose-500 rounded-2xl flex items-center justify-center overflow-hidden shadow-2xl">
                 <Gamepad2 className="h-16 w-16 text-white" />
               </div>
-              <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              <h2 className="text-4xl font-bold bg-gradient-to-r from-rose-400 to-pink-400 bg-clip-text text-transparent">
                 {selectedCategory}
               </h2>
-              <p className="text-purple-300 mt-2">เลือกแพ็คเกจราคาในหมวดหมู่นี้</p>
+              <p className="text-pink-300 mt-2">เลือกแพ็คเกจราคาในหมวดหมู่นี้</p>
             </div>
 
             {/* Games Grid (Grouped variants per game) */}
@@ -732,7 +709,7 @@ const GameTopUp = () => {
 
               if (groups.length === 0) {
                 return (
-                  <div className="text-center text-purple-300">ไม่พบเกมในหมวดหมู่นี้</div>
+                  <div className="text-center text-pink-300">ไม่พบเกมในหมวดหมู่นี้</div>
                 );
               }
 
@@ -741,10 +718,10 @@ const GameTopUp = () => {
                   {groups.map(group => (
                     <div
                       key={group.key}
-                      className="group bg-black/30 backdrop-blur-sm rounded-2xl shadow-lg p-6 transition-all duration-300 hover:bg-black/40 hover:shadow-purple-500/25 border border-purple-500/30"
+                      className="group bg-black/30 backdrop-blur-sm rounded-2xl shadow-lg p-6 transition-all duration-300 hover:bg-black/40 hover:shadow-pink-500/25 border border-pink-500/30"
                     >
                       {/* Game Image */}
-                      <div className="w-48 h-48 mx-auto bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl mb-4 flex items-center justify-center overflow-hidden">
+                      <div className="w-48 h-48 mx-auto bg-gradient-to-br from-pink-500 to-rose-500 rounded-xl mb-4 flex items-center justify-center overflow-hidden">
                         {group.img ? (
                           <img
                             src={group.img}
@@ -762,20 +739,20 @@ const GameTopUp = () => {
                         </div>
                       </div>                        {/* Game Info */}
                       <div className="text-center">
-                        <h2 className="text-xl font-bold text-white mb-2 group-hover:text-purple-300 transition-colors text-center">
+                        <h2 className="text-lg sm:text-xl font-bold text-white mb-2 group-hover:text-pink-300 transition-colors text-center line-clamp-2">
                           {group.category}
                         </h2>
                         {group.infoSample && (
-                          <p className="text-purple-300 text-sm mb-3 whitespace-pre-line text-center">{formatGameInfo(group.infoSample)}</p>
+                          <p className="text-pink-300 text-sm mb-3 whitespace-pre-line text-center">{formatGameInfo(group.infoSample)}</p>
                         )}
                       </div>
 
                       {/* Variants (prices) */}
                       <div className="space-y-2">
-                        <p className="text-sm text-purple-300">เลือกราคา</p>
+                        <p className="text-sm text-pink-300">เลือกราคา</p>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {group.variants.map(variant => (
-                            <div key={variant.id} className="flex flex-col gap-2 rounded-xl border border-purple-500/30 bg-black/20 p-3 md:p-4">
+                            <div key={variant.id} className="flex flex-col gap-2 rounded-xl border border-pink-500/30 bg-black/20 p-3 md:p-4">
                               <div className="min-w-0">
                                 {isAdmin && (
                                   <div className="mb-2">
@@ -789,7 +766,7 @@ const GameTopUp = () => {
                                     const { text, hasFraction } = formatPriceDisplay(variant.recommendedPrice);
                                     return (
                                       <>
-                                        <div className="font-semibold text-green-400 truncate">{text} บาท</div>
+                                        <div className="font-semibold text-green-400 text-sm sm:text-base">{text} บาท</div>
                                         {hasFraction && (
                                           <span className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 h-3 w-3 rounded-full bg-green-400 ring-2 ring-black" />
                                         )}
@@ -799,7 +776,7 @@ const GameTopUp = () => {
                                 </div>
                                 {isAdmin && (
                                   <div className="mt-1">
-                                    <div className="text-xs text-purple-300">
+                                    <div className="text-xs text-pink-300">
                                       กำไร: ฿{(parseFloat(variant.recommendedPrice) - parseFloat(variant.price)).toFixed(2)}
                                     </div>
                                   </div>
@@ -848,11 +825,11 @@ const GameTopUp = () => {
               if (apiCategories.length === 0) {
                 return (
                   <div className="text-center py-16">
-                    <div className="w-32 h-32 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                      <Gamepad2 className="h-16 w-16 text-purple-400" />
+                    <div className="w-32 h-32 bg-gradient-to-br from-pink-500/20 to-rose-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <Gamepad2 className="h-16 w-16 text-pink-400" />
                     </div>
                     <h3 className="text-2xl font-bold text-white mb-4">ยังไม่มีข้อมูลเกม</h3>
-                    <p className="text-purple-300">โปรดลองรีเฟรชหรือกลับมาใหม่ภายหลัง</p>
+                    <p className="text-pink-300">โปรดลองรีเฟรชหรือกลับมาใหม่ภายหลัง</p>
                   </div>
                 );
               }
@@ -863,38 +840,53 @@ const GameTopUp = () => {
                     <div
                       key={category.name}
                       onClick={() => openCategory(category.name)}
-                      className="group bg-black/30 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg p-3 sm:p-4 md:p-6 cursor-pointer hover:bg-black/40 transition-all duration-300 hover:scale-105 hover:shadow-purple-500/25 border border-purple-500/30"
+                      className="group bg-black/30 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg p-3 sm:p-4 md:p-6 cursor-pointer hover:bg-black/40 transition-all duration-300 hover:scale-105 hover:shadow-pink-500/25 border border-pink-500/30"
                     >
-                      {/* Category Image */}
-                      <div className="aspect-square bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg sm:rounded-xl mb-2 sm:mb-4 flex items-center justify-center overflow-hidden">
-                        {category.img ? (
-                          <img
-                            src={category.img}
-                            alt={category.name}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                          />
-                        ) : (
-                          <Gamepad2 className="h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 text-white opacity-70" />
-                        )}
-                      </div>                        {/* Category Info */}
-                      <div className="text-center">
-                        <h2 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold text-white mb-1 sm:mb-2 md:mb-4 group-hover:text-purple-300 transition-colors line-clamp-2">
-                          {category.name}
-                        </h2>
-                        <div className="flex items-center justify-center mb-2 sm:mb-0">
-                          <Badge variant="secondary" className="text-[10px] sm:text-xs">
-                            {category.count} รายการ
-                          </Badge>
+                      <div className="relative aspect-[4/5] rounded-3xl overflow-hidden glass-panel border border-white/5 group-hover:border-pink-500/50 transition-colors">
+                        {/* Shimmer effect */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-pink-500/10 via-transparent to-black/40 z-10" />
+
+                        {/* Image */}
+                        <div className="absolute inset-0">
+                          {category.img ? (
+                            <img
+                              src={category.img}
+                              alt={category.name}
+                              className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-zinc-900">
+                              <Gamepad2 className="h-16 w-16 text-pink-500/50" />
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Title Overlay */}
+                        <div className="absolute inset-x-0 bottom-0 p-4 sm:p-6 z-20">
+                          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
+                          <div className="relative">
+                            <h3 className="text-sm sm:text-lg lg:text-xl font-bold text-white line-clamp-2 group-hover:text-pink-300 transition-colors leading-tight">
+                              {category.name}
+                            </h3>
+                            <div className="flex items-center flex-nowrap gap-2 mt-1">
+                              <Badge className="bg-pink-600/40 text-pink-200 border-none text-[10px] py-0 px-2 whitespace-nowrap">
+                                {category.count} แพ็กเกจ
+                              </Badge>
+                              <div className="h-1 w-1 rounded-full bg-white/30 shrink-0" />
+                              <span className="text-white/50 text-[10px] font-medium whitespace-nowrap">Auto</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
 
-                      {/* Action Button */}
+                      {/* Outer Glow */}
+                      <div className="absolute -inset-2 bg-pink-600/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity rounded-[2rem] -z-10" />
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           openCategory(category.name);
                         }}
-                        className="w-full mt-2 sm:mt-4 py-2 sm:py-3 px-2 sm:px-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/25"
+                        className="w-full mt-2 sm:mt-4 py-2 sm:py-3 px-2 sm:px-4 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm transition-all duration-300 hover:shadow-lg hover:shadow-pink-500/25"
                       >
                         <span className="hidden sm:inline">ดูแพ็คในเกม</span>
                         <span className="sm:hidden">ดูเกม</span>
@@ -951,7 +943,7 @@ const GameTopUp = () => {
             {selectedGameProduct && isHeartopia(selectedGameProduct) ? (
               /* ─── Heartopia: 2 ช่อง ─── */
               <>
-                <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-500/40 rounded-lg p-3 text-sm text-blue-700 dark:text-blue-200">
+                <div className="bg-pink-50 dark:bg-pink-900/30 border border-pink-200 dark:border-pink-500/40 rounded-lg p-3 text-sm text-pink-700 dark:text-pink-200">
                   💡 Heartopia ต้องกรอก <strong>AID</strong> และ <strong>UID</strong> แยกกัน
                 </div>
                 <div className="space-y-2">
@@ -1170,9 +1162,9 @@ const GameTopUp = () => {
           </AlertDialogHeader>
 
           {purchaseDetails && (
-            <div className="bg-slate-900/80 rounded-3xl p-6 my-4 space-y-4 border border-white/10 relative overflow-hidden">
+            <div className="bg-slate-900/80 rounded-2xl sm:rounded-3xl p-4 sm:p-6 my-4 space-y-4 border border-white/10 relative overflow-hidden">
               <div className="absolute top-0 right-0 p-4 opacity-5">
-                <CheckCircle2 className="h-24 w-24" />
+                <CheckCircle2 className="h-16 sm:h-24 w-16 sm:w-24" />
               </div>
 
               <div className="flex justify-between items-center text-sm border-b border-white/5 pb-3">
@@ -1181,7 +1173,7 @@ const GameTopUp = () => {
               </div>
               <div className="flex justify-between items-center text-sm border-b border-white/5 pb-3">
                 <span className="text-slate-400 uppercase text-[10px] font-bold tracking-widest">ชื่อแพ็กเกจ</span>
-                <span className="font-bold text-purple-300 text-base">{stripHtmlTags(purchaseDetails.packageName)}</span>
+                <span className="font-bold text-pink-300 text-base">{formatGameInfo(purchaseDetails.packageName)}</span>
               </div>
               <div className="flex justify-between items-center text-sm border-b border-white/5 pb-3">
                 <span className="text-slate-400 uppercase text-[10px] font-bold tracking-widest">ยอดชำระทั้งสิ้น</span>
@@ -1190,7 +1182,7 @@ const GameTopUp = () => {
               <div className="flex flex-col gap-1 pt-2">
                 <span className="text-slate-500 uppercase text-[9px] font-bold tracking-widest">หมายเลขอ้างอิง (Ref ID)</span>
                 <div className="bg-black/40 p-3 rounded-xl border border-white/5 flex items-center justify-between">
-                  <span className="font-mono text-sm text-purple-200">{purchaseDetails.destRef}</span>
+                  <span className="font-mono text-sm text-pink-200">{purchaseDetails.destRef}</span>
                   <Button
                     variant="ghost"
                     size="icon"

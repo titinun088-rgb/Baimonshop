@@ -38,6 +38,7 @@ import PeamsubAPI from "./pages/PeamsubAPI";
 import PremiumApp from "./pages/PremiumApp";
 import GameTopUp from "./pages/GameTopUp";
 import CardTopUp from "./pages/CardTopUp";
+import GameImageManagement from "./pages/GameImageManagement";
 import CategoryManagement from "./pages/CategoryManagement";
 import PurchaseHistory from "./pages/PurchaseHistory";
 import PeamsubPriceManagement from "./pages/PeamsubPriceManagement";
@@ -50,7 +51,7 @@ const queryClient = new QueryClient();
 
 const AppRoutes = () => {
   const { userData } = useAuth();
-  
+
   return (
     <BrowserRouter
       future={{
@@ -65,12 +66,12 @@ const AppRoutes = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/terms" element={<Terms />} />
-        
+
         {/* Semi-Protected Routes - ต้องล็อกอินแต่ไม่ต้องยืนยันอีเมล */}
         <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/not-verified" element={<NotVerified />} />
         <Route path="/suspended" element={<Suspended />} />
-        
+
         {/* Protected Routes - ต้องล็อกอินและยืนยันอีเมล */}
         <Route
           path="/home"
@@ -240,14 +241,14 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
-    <Route
-      path="/cash-card"
-      element={
-        <ProtectedRoute requireEmailVerification={true}>
-          <CashCard />
-        </ProtectedRoute>
-      }
-    />
+        <Route
+          path="/cash-card"
+          element={
+            <ProtectedRoute requireEmailVerification={true}>
+              <CashCard />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/game-topup"
           element={
@@ -261,6 +262,14 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute requireEmailVerification={true}>
               <CardTopUp />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/game-image-management"
+          element={
+            <ProtectedRoute requireEmailVerification={true} requireAdmin={true}>
+              <GameImageManagement />
             </ProtectedRoute>
           }
         />
@@ -312,7 +321,7 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
-        
+
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

@@ -72,8 +72,26 @@ export const getWepayBalance = async (): Promise<WepayBalance> => {
     return data;
 };
 
-/** ดึงรายการสินค้าเกมทั้งหมดจาก comp_export */
-export const getWepayGameProducts = async (): Promise<WepayGameProduct[]> => {
+// ────────── Cache ──────────
+let cachedGameProducts: WepayGameProduct[] | null = null;
+let lastFetchTime: number = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 นาที
+
+/** ล้าง Cache สินค้าเกม */
+export const clearGameProductsCache = () => {
+    cachedGameProducts = null;
+    lastFetchTime = 0;
+};
+
+/** ดึงรายการสินค้าเกมทั้งหมดจาก comp_export พร้อมระบบ Cache */
+export const getWepayGameProducts = async (forceRefresh = false): Promise<WepayGameProduct[]> => {
+    // ใช้ Cache ถ้ายังไม่หมดอายุและไม่ได้สั่ง Force Refresh
+    const now = Date.now();
+    if (!forceRefresh && cachedGameProducts && (now - lastFetchTime < CACHE_DURATION)) {
+        console.log('🚀 Using cached wePAY game products');
+        return cachedGameProducts;
+    }
+
     try {
         console.log('🎮 กำลังดึงรายการสินค้าเกม wePAY (Full Scan)...');
         const data = await wepayRequest<any>({ action: 'game_list' });
@@ -190,6 +208,11 @@ export const getWepayGameProducts = async (): Promise<WepayGameProduct[]> => {
         }
 
         console.log(`✅ ดึงสินค้า wePAY สำเร็จ: ทั้งหมด ${allItems.length} รายการ`);
+
+        // บันทึกลง Cache
+        cachedGameProducts = allItems;
+        lastFetchTime = Date.now();
+
         return allItems;
     } catch (error) {
         console.error('❌ Error getting wePAY products:', error);

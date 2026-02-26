@@ -41,6 +41,7 @@ import {
   Home,
   DollarSign,
   ChevronDown,
+  Image as ImageIcon,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -73,45 +74,45 @@ const Layout = ({ children }: LayoutProps) => {
   // เมนูทั้งหมด
   const allNavigation: NavItem[] = [
     // หลัก
-    { 
-      name: "หน้าหลัก", 
-      href: "/home", 
+    {
+      name: "หน้าหลัก",
+      href: "/home",
       icon: Home,
       roles: ['admin', 'seller']
     },
-    
+
     // ซื้อ/เติม
-    { 
-      name: "เติมเกม", 
-      href: "/game-topup", 
+    {
+      name: "เติมเกม",
+      href: "/game-topup",
       icon: Gamepad2,
       roles: ['admin', 'seller']
     },
-    { 
-      name: "แอปพรีเมียม", 
-      href: "/premium-app", 
+    {
+      name: "แอปพรีเมียม",
+      href: "/premium-app",
       icon: Package,
       roles: ['admin', 'seller']
     },
-    { 
-      name: "บัตรเติมเงิน", 
-      href: "/card-topup", 
+    {
+      name: "บัตรเติมเงิน",
+      href: "/card-topup",
       icon: CreditCard,
       roles: ['admin', 'seller']
     },
-    { 
+    {
       name: "บัตรเงินสด",
       href: "/cash-card",
       icon: CreditCard,
       roles: ['admin', 'seller']
     },
-    { 
+    {
       name: "รหัสเกม",
       href: "/game-codes",
       icon: Gamepad2,
       roles: ['admin', 'seller']
     },
-    
+
     // ประวัติ
     {
       name: "ประวัติการซื้อสินค้า",
@@ -119,95 +120,101 @@ const Layout = ({ children }: LayoutProps) => {
       icon: Package,
       roles: ['admin', 'seller']
     },
-    { 
-      name: "ประวัติการเติมเงิน", 
-      href: "/top-up-history", 
+    {
+      name: "ประวัติการเติมเงิน",
+      href: "/top-up-history",
       icon: History,
       roles: ['admin', 'seller']
     },
-    { 
-      name: "ประวัติสลิป", 
-      href: "/slip-history", 
+    {
+      name: "ประวัติสลิป",
+      href: "/slip-history",
       icon: Receipt,
       roles: ['admin', 'seller']
     },
-    
+
     // การเงิน
-    { 
-      name: "เติมเงิน", 
-      href: "/top-up", 
+    {
+      name: "เติมเงิน",
+      href: "/top-up",
       icon: Wallet,
       roles: ['admin', 'seller']
     },
-    { 
-      name: "ข้อมูลบัญชี", 
-      href: "/account-info", 
+    {
+      name: "ข้อมูลบัญชี",
+      href: "/account-info",
       icon: Building2,
       roles: ['admin', 'seller']
     },
-    
+
     // แจ้งเตือน
-    { 
+    {
       name: "แจ้งเตือน",
-      href: "/notifications", 
+      href: "/notifications",
       icon: Bell,
       roles: ['admin', 'seller']
     },
-    { 
-      name: "แจ้งปัญหา", 
-      href: "/my-reports", 
+    {
+      name: "แจ้งปัญหา",
+      href: "/my-reports",
       icon: MessageSquare,
       roles: ['seller']
     },
-    
+
     // จัดการ (Admin)
-    { 
-      name: "Dashboard", 
-      href: "/dashboard", 
+    {
+      name: "Dashboard",
+      href: "/dashboard",
       icon: LayoutDashboard,
       roles: ['admin']
     },
-    { 
-      name: "เกม", 
-      href: "/games", 
+    {
+      name: "เกม",
+      href: "/games",
       icon: Gamepad2,
       roles: ['admin']
     },
-    { 
-      name: "ยอดขาย", 
-      href: "/sales", 
+    {
+      name: "ยอดขาย",
+      href: "/sales",
       icon: ShoppingCart,
       roles: ['admin']
     },
-    { 
-      name: "ผู้ใช้", 
-      href: "/users", 
+    {
+      name: "ผู้ใช้",
+      href: "/users",
       icon: Users,
       roles: ['admin']
     },
-    { 
-      name: "รายงานปัญหา", 
-      href: "/reports", 
+    {
+      name: "รายงานปัญหา",
+      href: "/reports",
       icon: AlertCircle,
       roles: ['admin']
     },
-    { 
-      name: "Peamsub API", 
-      href: "/peamsub-api", 
+    {
+      name: "Peamsub API",
+      href: "/peamsub-api",
       icon: Wifi,
       roles: ['admin']
     },
-    { 
-      name: "จัดการขายไอดีเกม", 
-      href: "/game-code-management", 
+    {
+      name: "จัดการขายไอดีเกม",
+      href: "/game-code-management",
       icon: Gamepad2,
       roles: ['admin']
     },
-    
+    {
+      name: "จัดการรูปเกม wePAY",
+      href: "/game-image-management",
+      icon: ImageIcon,
+      roles: ['admin']
+    },
+
     // โปรไฟล์
-    { 
-      name: "โปรไฟล์", 
-      href: "/profile", 
+    {
+      name: "โปรไฟล์",
+      href: "/profile",
       icon: User,
       roles: ['admin', 'seller']
     },
@@ -222,44 +229,44 @@ const Layout = ({ children }: LayoutProps) => {
 
   // จัดหมวดหมู่เมนู
   const getCategorizedMenus = (): NavCategory[] => {
-  const userRole = effectiveRole; // ใช้ role ที่แมปแล้ว (user -> seller)
+    const userRole = effectiveRole; // ใช้ role ที่แมปแล้ว (user -> seller)
     const categories: NavCategory[] = [
       {
         name: "หลัก",
         icon: Home,
-        items: navigation.filter(item => 
+        items: navigation.filter(item =>
           item.name === "หน้าหลัก" && item.roles.includes(userRole)
         )
       },
       {
         name: "ซื้อ/เติม",
         icon: ShoppingCart,
-        items: navigation.filter(item => 
-          ["เติมเกม", "แอปพรีเมียม", "บัตรเติมเงิน", "บัตรเงินสด", "รหัสเกม"].includes(item.name) && 
+        items: navigation.filter(item =>
+          ["เติมเกม", "แอปพรีเมียม", "บัตรเติมเงิน", "บัตรเงินสด", "รหัสเกม"].includes(item.name) &&
           item.roles.includes(userRole)
         )
       },
       {
         name: "ประวัติ",
         icon: History,
-        items: navigation.filter(item => 
-          ["ประวัติการซื้อสินค้า", "ประวัติการเติมเงิน", "ประวัติสลิป"].includes(item.name) && 
+        items: navigation.filter(item =>
+          ["ประวัติการซื้อสินค้า", "ประวัติการเติมเงิน", "ประวัติสลิป"].includes(item.name) &&
           item.roles.includes(userRole)
         )
       },
       {
         name: "การเงิน",
         icon: Wallet,
-        items: navigation.filter(item => 
-          ["เติมเงิน", "ข้อมูลบัญชี"].includes(item.name) && 
+        items: navigation.filter(item =>
+          ["เติมเงิน", "ข้อมูลบัญชี"].includes(item.name) &&
           item.roles.includes(userRole)
         )
       },
       {
         name: "แจ้งเตือน",
         icon: Bell,
-        items: navigation.filter(item => 
-          ["แจ้งเตือน", "แจ้งปัญหา"].includes(item.name) && 
+        items: navigation.filter(item =>
+          ["แจ้งเตือน", "แจ้งปัญหา"].includes(item.name) &&
           item.roles.includes(userRole)
         )
       },
@@ -270,8 +277,8 @@ const Layout = ({ children }: LayoutProps) => {
       categories.push({
         name: "จัดการ",
         icon: LayoutDashboard,
-        items: navigation.filter(item => 
-          ["Dashboard", "เกม", "ยอดขาย", "ผู้ใช้", "รายงานปัญหา", "Peamsub API", "จัดการราคา Peamsub", "จัดการขายไอดีเกม"].includes(item.name) && 
+        items: navigation.filter(item =>
+          ["Dashboard", "เกม", "ยอดขาย", "ผู้ใช้", "รายงานปัญหา", "Peamsub API", "จัดการราคา Peamsub", "จัดการขายไอดีเกม", "จัดการรูปเกม wePAY"].includes(item.name) &&
           item.roles.includes('admin')
         )
       });
@@ -309,9 +316,9 @@ const Layout = ({ children }: LayoutProps) => {
       <div className="flex h-20 items-center border-b border-border px-6 bg-gradient-cute shadow-pink">
         <div className="flex items-center gap-4">
           <div className="relative">
-            <img 
-              src="/logo.png" 
-              alt="BaimonShop Logo" 
+            <img
+              src="/logo.png"
+              alt="BaimonShop Logo"
               className="h-12 w-12 object-contain drop-shadow-lg"
             />
             <div className="absolute -top-1 -right-1 h-4 w-4 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
@@ -355,7 +362,7 @@ const Layout = ({ children }: LayoutProps) => {
                   <CategoryIcon className="h-3 w-3 lg:h-4 lg:w-4" />
                   <span>{category.name}</span>
                 </div>
-                
+
                 {/* Category Items */}
                 <div className="space-y-0.5">
                   {category.items.map((item) => {
@@ -378,8 +385,8 @@ const Layout = ({ children }: LayoutProps) => {
                         <Icon className="h-4 w-4 lg:h-5 lg:w-5 flex-shrink-0" />
                         <span className="flex-1 truncate">{item.name}</span>
                         {item.badge && (
-                          <Badge 
-                            variant="destructive" 
+                          <Badge
+                            variant="destructive"
                             className="ml-auto h-4 lg:h-5 min-w-4 lg:min-w-5 px-1 lg:px-1.5 text-[10px] lg:text-xs font-bold flex-shrink-0"
                           >
                             {item.badge}
@@ -398,8 +405,8 @@ const Layout = ({ children }: LayoutProps) => {
 
       {/* User section */}
       <div className="border-t border-border p-4">
-        <Link 
-          to="/profile" 
+        <Link
+          to="/profile"
           onClick={() => {
             if (onNavigate) onNavigate();
           }}
@@ -407,9 +414,9 @@ const Layout = ({ children }: LayoutProps) => {
         >
           <div className="relative">
             <Avatar className="h-10 w-10">
-              <AvatarImage 
-                src={userData?.photoURL || undefined} 
-                alt={user?.displayName || "User"} 
+              <AvatarImage
+                src={userData?.photoURL || undefined}
+                alt={user?.displayName || "User"}
               />
               <AvatarFallback className="bg-gradient-secondary text-primary-foreground">
                 {user?.displayName?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || "U"}
@@ -437,7 +444,7 @@ const Layout = ({ children }: LayoutProps) => {
             </p>
           </div>
         </Link>
-        
+
         <Button
           onClick={handleSignOut}
           variant="ghost"
@@ -456,7 +463,7 @@ const Layout = ({ children }: LayoutProps) => {
       {/* Gaming Background Effects */}
       <div className="fixed inset-0 pointer-events-none z-0">
         {/* Subtle Grid */}
-        <div 
+        <div
           className="absolute inset-0 opacity-5"
           style={{
             backgroundImage: `
@@ -467,7 +474,7 @@ const Layout = ({ children }: LayoutProps) => {
             animation: 'gridMove 25s linear infinite'
           }}
         />
-        
+
         {/* Floating Particles */}
         {[...Array(8)].map((_, i) => (
           <div
@@ -481,10 +488,10 @@ const Layout = ({ children }: LayoutProps) => {
             }}
           />
         ))}
-        
+
         {/* Corner Glows */}
         <div className="absolute top-0 left-0 w-64 h-64 bg-gradient-radial from-blue-500/10 to-transparent blur-3xl animate-pulse" />
-        <div className="absolute bottom-0 right-0 w-64 h-64 bg-gradient-radial from-purple-500/10 to-transparent blur-3xl animate-pulse" style={{animationDelay: '2s'}} />
+        <div className="absolute bottom-0 right-0 w-64 h-64 bg-gradient-radial from-purple-500/10 to-transparent blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
       {/* Desktop Top Navbar */}
       <header className="fixed top-0 left-0 right-0 z-50 h-16 border-b border-border/20 bg-transparent backdrop-blur-md shadow-sm overflow-hidden">
@@ -492,9 +499,9 @@ const Layout = ({ children }: LayoutProps) => {
         <div className="absolute inset-0 -z-10">
           {/* Transparent Gradient Background */}
           <div className="absolute inset-0 bg-gradient-to-r from-black/5 via-black/10 to-black/5 dark:from-white/5 dark:via-white/10 dark:to-white/5"></div>
-          
+
           {/* Moving Grid Pattern */}
-          <div 
+          <div
             className="absolute inset-0 opacity-[0.08] dark:opacity-[0.15]"
             style={{
               backgroundImage: `
@@ -505,7 +512,7 @@ const Layout = ({ children }: LayoutProps) => {
               animation: 'gridMove 15s linear infinite'
             }}
           />
-          
+
           {/* Floating Particles */}
           {[...Array(8)].map((_, i) => (
             <div
@@ -519,36 +526,36 @@ const Layout = ({ children }: LayoutProps) => {
               }}
             />
           ))}
-          
+
           {/* Subtle Scanlines */}
-          <div 
-            className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-blue-400/40 to-transparent" 
+          <div
+            className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-blue-400/40 to-transparent"
             style={{
               top: '25%',
               animation: 'scanlineV 6s linear infinite'
-            }} 
+            }}
           />
-          <div 
-            className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-purple-400/30 to-transparent" 
+          <div
+            className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-purple-400/30 to-transparent"
             style={{
               top: '75%',
               animation: 'scanlineV 8s linear infinite 2s'
-            }} 
+            }}
           />
-          
+
           {/* Corner Glow Effects */}
           <div className="absolute top-0 left-0 w-32 h-full bg-gradient-to-r from-blue-500/10 to-transparent blur-xl"></div>
           <div className="absolute top-0 right-0 w-32 h-full bg-gradient-to-l from-purple-500/10 to-transparent blur-xl"></div>
         </div>
-        
+
         <div className="h-full px-4 relative z-10">
           <div className="flex items-center justify-between h-full px-6">
             {/* BaimonShop Brand Logo */}
             <Link to="/home" className="flex items-center gap-4 flex-shrink-0 group hover:scale-105 transition-transform duration-200">
               <div className="relative">
-                <img 
-                  src="/logo.png" 
-                  alt="BaimonShop Logo" 
+                <img
+                  src="/logo.png"
+                  alt="BaimonShop Logo"
                   className="h-10 w-10 object-contain drop-shadow-lg group-hover:drop-shadow-xl transition-all duration-200"
                 />
                 <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
@@ -567,7 +574,7 @@ const Layout = ({ children }: LayoutProps) => {
             <nav className="flex-1 flex items-center justify-center gap-1 h-full">
               {categorizedMenus.map((category) => {
                 const CategoryIcon = category.icon;
-                
+
                 // ถ้ามีแค่ 1 item และเป็น "หน้าหลัก" ให้แสดงเป็น link ธรรมดา
                 if (category.items.length === 1 && category.items[0].name === "หน้าหลัก") {
                   const item = category.items[0];
@@ -659,9 +666,9 @@ const Layout = ({ children }: LayoutProps) => {
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-ring">
                     <Avatar className="h-9 w-9">
-                      <AvatarImage 
-                        src={userData?.photoURL || undefined} 
-                        alt={user?.displayName || "User"} 
+                      <AvatarImage
+                        src={userData?.photoURL || undefined}
+                        alt={user?.displayName || "User"}
                       />
                       <AvatarFallback className="bg-gradient-secondary text-primary-foreground">
                         {user?.displayName?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || "U"}
@@ -693,7 +700,7 @@ const Layout = ({ children }: LayoutProps) => {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem 
+                  <DropdownMenuItem
                     onClick={handleSignOut}
                     className="text-destructive focus:text-destructive cursor-pointer"
                   >
@@ -713,9 +720,9 @@ const Layout = ({ children }: LayoutProps) => {
         <div className="absolute inset-0 -z-10">
           {/* Transparent Gradient Background */}
           <div className="absolute inset-0 bg-gradient-to-r from-black/5 via-black/10 to-black/5 dark:from-white/5 dark:via-white/10 dark:to-white/5"></div>
-          
+
           {/* Moving Grid Pattern */}
-          <div 
+          <div
             className="absolute inset-0 opacity-[0.08] dark:opacity-[0.15]"
             style={{
               backgroundImage: `
@@ -726,7 +733,7 @@ const Layout = ({ children }: LayoutProps) => {
               animation: 'gridMove 12s linear infinite'
             }}
           />
-          
+
           {/* Floating Particles - Less for mobile */}
           {[...Array(4)].map((_, i) => (
             <div
@@ -740,27 +747,27 @@ const Layout = ({ children }: LayoutProps) => {
               }}
             />
           ))}
-          
+
           {/* Subtle Scanline */}
-          <div 
-            className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-purple-400/30 to-transparent" 
+          <div
+            className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-purple-400/30 to-transparent"
             style={{
               top: '60%',
               animation: 'scanlineV 5s linear infinite'
-            }} 
+            }}
           />
-          
+
           {/* Corner Glow Effects */}
           <div className="absolute top-0 left-0 w-24 h-full bg-gradient-to-r from-blue-500/10 to-transparent blur-lg"></div>
           <div className="absolute top-0 right-0 w-24 h-full bg-gradient-to-l from-purple-500/10 to-transparent blur-lg"></div>
         </div>
-        
+
         <div className="flex items-center justify-between h-full px-4 relative z-10">
           {/* Logo */}
           <Link to="/home" className="flex items-center gap-2">
-            <img 
-              src="/logo.png" 
-              alt="BaimonShop Logo" 
+            <img
+              src="/logo.png"
+              alt="BaimonShop Logo"
               className="h-8 w-8 object-contain"
             />
             <span className="text-lg font-bold text-gradient-pink animate-bounce-cute">
@@ -802,8 +809,8 @@ const Layout = ({ children }: LayoutProps) => {
         rel="noopener noreferrer"
         className="fixed bottom-4 right-4 z-50"
       >
-        <Button 
-          size="icon" 
+        <Button
+          size="icon"
           className="lg:size-auto lg:px-4 lg:py-2 bg-blue-600 hover:bg-blue-700 text-white shadow-lg flex items-center gap-2 rounded-full lg:rounded-md"
         >
           <MessageSquare className="h-5 w-5" />
