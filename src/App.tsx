@@ -39,6 +39,7 @@ import PremiumApp from "./pages/PremiumApp";
 import GameTopUp from "./pages/GameTopUp";
 import CardTopUp from "./pages/CardTopUp";
 import GameImageManagement from "./pages/GameImageManagement";
+import WepayPriceManagement from "./pages/WepayPriceManagement";
 import CategoryManagement from "./pages/CategoryManagement";
 import PurchaseHistory from "./pages/PurchaseHistory";
 import PeamsubPriceManagement from "./pages/PeamsubPriceManagement";
@@ -270,6 +271,14 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute requireEmailVerification={true} requireAdmin={true}>
               <GameImageManagement />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/wepay-price-management"
+          element={
+            <ProtectedRoute requireEmailVerification={true} requireAdmin={true}>
+              <WepayPriceManagement />
             </ProtectedRoute>
           }
         />

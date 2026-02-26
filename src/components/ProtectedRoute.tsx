@@ -12,8 +12,8 @@ interface ProtectedRouteProps {
   requireAdmin?: boolean; // เพิ่ม prop สำหรับหน้าที่ต้องการสิทธิ์ Admin
 }
 
-const ProtectedRoute = ({ 
-  children, 
+const ProtectedRoute = ({
+  children,
   requireEmailVerification = true,
   requireAdmin = false
 }: ProtectedRouteProps) => {
@@ -73,17 +73,19 @@ const ProtectedRoute = ({
       userData.suspended,
       userData.suspendedUntil
     );
-    
+
     // ถ้ายังถูกพักอยู่ redirect ไปหน้า suspended
     if (suspensionStatus.isSuspended) {
       return <Navigate to="/suspended" replace />;
     }
   }
 
-  // ถ้าต้องการตรวจสอบอีเมลและยังไม่ได้ยืนยัน redirect ไปหน้ายืนยันอีเมล
+  // ตรวจสอบว่าได้รับการยืนยันอีเมลหรือไม่ (ปิดการตรวจสอบตามคำขอผู้ใช้)
+  /*
   if (requireEmailVerification && !user.emailVerified) {
     return <Navigate to="/verify-email" replace />;
   }
+  */
 
   // ตรวจสอบว่าได้รับการอนุมัติจาก admin หรือยัง (verified)
   // ยกเว้น admin ที่สามารถเข้าถึงได้เสมอ
@@ -94,12 +96,12 @@ const ProtectedRoute = ({
   // ตรวจสอบสิทธิ์ Admin (ถ้าหน้านั้นต้องการสิทธิ์ Admin)
   if (requireAdmin && userData?.role !== 'admin') {
     return (
-      <Navigate 
-        to="/" 
-        replace 
-        state={{ 
-          error: "คุณไม่มีสิทธิ์เข้าถึงหน้านี้ (ต้องเป็น Admin เท่านั้น)" 
-        }} 
+      <Navigate
+        to="/"
+        replace
+        state={{
+          error: "คุณไม่มีสิทธิ์เข้าถึงหน้านี้ (ต้องเป็น Admin เท่านั้น)"
+        }}
       />
     );
   }

@@ -42,7 +42,7 @@ import {
   WepayGameProduct,
 } from "@/lib/wepayGameUtils";
 import { addUserPurchaseReference, recordPurchaseWithSellPrice } from "@/lib/purchaseHistoryUtils";
-import { getProductSellPrice } from "@/lib/peamsubPriceUtils";
+import { getProductSellPrice, getAllPeamsubProductPrices, PeamsubProductPrice } from "@/lib/peamsubPriceUtils";
 import { getAllCustomGameImages } from "@/lib/gameImageUtils";
 import { doc, updateDoc, increment } from "firebase/firestore";
 import { db } from "@/lib/firebase";
@@ -56,6 +56,7 @@ const GameTopUp = () => {
 
   // Game Products
   const [gameProducts, setGameProducts] = useState<WepayGameProduct[]>([]);
+  const [adminPrices, setAdminPrices] = useState<Map<string, PeamsubProductPrice>>(new Map());
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showCategoryGames, setShowCategoryGames] = useState(false);
 
@@ -142,10 +143,21 @@ const GameTopUp = () => {
 
   const loadGameProducts = async (force = false) => {
     try {
-      const [allProducts, customImages] = await Promise.all([
+      const [allProducts, customImages, allAdminPrices] = await Promise.all([
         getWepayGameProducts(force),
-        getAllCustomGameImages()
+        getAllCustomGameImages(),
+        getAllPeamsubProductPrices()
       ]);
+
+      // Map admin prices for fast lookup
+      const priceMap = new Map<string, PeamsubProductPrice>();
+      allAdminPrices.forEach(p => {
+        if (p.productType === 'wepay_game') {
+          const productId = p.id.replace('wepay_game_', '');
+          priceMap.set(productId, p);
+        }
+      });
+      setAdminPrices(priceMap);
 
       // นำรูปภาพที่แอดมินกำหนดเองมาทับรูปมาตรฐาน
       const updatedProducts = allProducts.map(product => ({
@@ -154,7 +166,7 @@ const GameTopUp = () => {
       }));
 
       setGameProducts(updatedProducts);
-      console.log(`🎮 Loaded all wePAY game products with custom images (Force: ${force}):`, updatedProducts.length);
+      console.log(`🎮 Loaded all wePAY game products with admin prices (Force: ${force}):`, updatedProducts.length);
     } catch (error) {
       console.error("Error loading game products:", error);
       toast.error("เกิดข้อผิดพลาดในการโหลดเกม");
@@ -175,22 +187,30 @@ const GameTopUp = () => {
   };
 
   // Game Detail Functions
-  const openGameDetail = (game: WepayGameProduct) => {
+  const openGameDetail = async (game: WepayGameProduct) => {
     setSelectedGame(game);
     setShowGameDetail(true);
     setShowCategoryGames(false);
 
     console.log("🎮 GameTopUp: เปิดรายละเอียดเกม:", game.category);
-    console.log("💰 GameTopUp: ราคาต้นทุน (price):", game.price);
-    console.log("💎 GameTopUp: ราคาขาย (recommendedPrice):", game.recommendedPrice);
 
-    // สร้างแพ็คเกจเดียวจากข้อมูล API โดยตรง
+    // ดึงราคาขายที่ตั้งไว้ ถ้าไม่มีให้ใช้ราคาต้นทุนจาก API เลย (เลิกใช้ราคาแนะนำเดิม)
+    const adminData = adminPrices.get(game.id);
+    const apiCost = adminData && adminData.apiPrice !== undefined
+      ? (typeof adminData.apiPrice === 'string' ? parseFloat(adminData.apiPrice) : adminData.apiPrice)
+      : (parseFloat(game.price) || parseFloat(game.pay_to_amount) || 0);
+    const sellPrice = adminData?.sellPrice || apiCost;
+
+    console.log("💰 GameTopUp: ราคาต้นทุน (แอดมิน/API):", apiCost);
+    console.log("💎 GameTopUp: ราคาขายหน้าร้าน:", sellPrice);
+
+    // สร้างแพ็คเกจเดี่ยวจากข้อมูล API และราคาที่แอดมินตั้ง
     const gamePackage = {
       id: game.id,
       name: game.category,
       amount: game.info,
-      price: parseFloat(game.price) || 0,
-      costPrice: parseFloat(game.recommendedPrice) || 0,
+      price: apiCost, // ต้นทุน API
+      costPrice: sellPrice, // ราคาขายให้ลูกค้า (ในหน้านี้ใช้ชื่อ costPrice ในคอมโพเนนต์)
       discount: 0,
       description: game.info,
       details: '',
@@ -200,9 +220,8 @@ const GameTopUp = () => {
       formatId: game.format_id
     };
 
-    console.log("📦 แพ็คเกจที่แสดง:", gamePackage);
     setGamePackages([gamePackage]);
-    setSelectedPackage(gamePackage); // เลือกแพ็คเกจเดียวทันที
+    setSelectedPackage(gamePackage);
 
     // Reset form
     setGameUID("");
@@ -704,8 +723,13 @@ const GameTopUp = () => {
                 }
               }
               const groups = Array.from(map.values());
-              // เรียงแต่ละกลุ่มตามราคาขายจากถูกไปแพง
-              groups.forEach(gr => gr.variants.sort((a, b) => (parseFloat(a.recommendedPrice || a.price) || 0) - (parseFloat(b.recommendedPrice || b.price) || 0)));
+              groups.forEach(gr => gr.variants.sort((a, b) => {
+                const adminA = adminPrices.get(a.id);
+                const adminB = adminPrices.get(b.id);
+                const sellA = adminA?.sellPrice || (parseFloat(a.price) || parseFloat(a.pay_to_amount) || 0);
+                const sellB = adminB?.sellPrice || (parseFloat(b.price) || parseFloat(b.pay_to_amount) || 0);
+                return sellA - sellB;
+              }));
 
               if (groups.length === 0) {
                 return (
@@ -754,36 +778,41 @@ const GameTopUp = () => {
                           {group.variants.map(variant => (
                             <div key={variant.id} className="flex flex-col gap-2 rounded-xl border border-pink-500/30 bg-black/20 p-3 md:p-4">
                               <div className="min-w-0">
-                                {isAdmin && (
-                                  <div className="mb-2">
-                                    <div className="text-xs text-orange-400">ราคาต้นทุน</div>
-                                    <div className="text-sm text-orange-300 font-medium">฿{variant.price} บาท</div>
-                                  </div>
-                                )}
-                                <div className="text-xs text-gray-400">ราคาขาย</div>
-                                <div className="relative">
-                                  {(() => {
-                                    const { text, hasFraction } = formatPriceDisplay(variant.recommendedPrice);
-                                    return (
-                                      <>
-                                        <div className="font-semibold text-green-400 text-sm sm:text-base">{text} บาท</div>
-                                        {hasFraction && (
-                                          <span className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 h-3 w-3 rounded-full bg-green-400 ring-2 ring-black" />
-                                        )}
-                                      </>
-                                    );
-                                  })()}
-                                </div>
-                                {isAdmin && (
-                                  <div className="mt-1">
-                                    <div className="text-xs text-pink-300">
-                                      กำไร: ฿{(parseFloat(variant.recommendedPrice) - parseFloat(variant.price)).toFixed(2)}
-                                    </div>
-                                  </div>
-                                )}
+                                {(() => {
+                                  // คำนวณราคาขายและต้นทุนที่แอดมินตั้งไว้
+                                  const adminData = adminPrices.get(variant.id);
+                                  const cost = adminData && adminData.apiPrice !== undefined
+                                    ? (typeof adminData.apiPrice === 'string' ? parseFloat(adminData.apiPrice) : adminData.apiPrice)
+                                    : (parseFloat(variant.price) || parseFloat(variant.pay_to_amount) || 0);
+                                  const sellPrice = adminData?.sellPrice || cost;
+
+                                  return (
+                                    <>
+                                      {isAdmin && (
+                                        <div className="mb-2">
+                                          <div className="text-xs text-orange-400 font-medium">ราคาต้นทุน wePAY</div>
+                                          <div className="text-sm text-orange-300 font-bold">฿{cost.toLocaleString(undefined, { minimumFractionDigits: 2 })} บาท</div>
+                                        </div>
+                                      )}
+                                      <div className="text-xs text-gray-400 font-medium uppercase tracking-wider mb-0.5">ราคาขายหน้าเว็บ</div>
+                                      <div className="relative">
+                                        <div className="font-extrabold text-green-400 text-base sm:text-lg">
+                                          ฿{sellPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })} บาท
+                                        </div>
+                                      </div>
+                                      {isAdmin && (
+                                        <div className="mt-1">
+                                          <div className={`text-xs font-bold ${sellPrice - cost > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                            กำไรจริง: ฿{(sellPrice - cost).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                          </div>
+                                        </div>
+                                      )}
+                                    </>
+                                  );
+                                })()}
                               </div>
                               {variant.info && (
-                                <div className="text-xs text-gray-400 whitespace-pre-line">{formatGameInfo(variant.info)}</div>
+                                <div className="text-xs text-gray-400 whitespace-pre-line mt-1">{formatGameInfo(variant.info)}</div>
                               )}
                               <Button
                                 size="sm"
@@ -920,17 +949,13 @@ const GameTopUp = () => {
                 <p className="text-sm text-muted-foreground whitespace-pre-line">
                   {formatGameInfo(selectedGameProduct.info)}
                 </p>
-                {(() => {
-                  const { text, hasFraction } = formatPriceDisplay(selectedGameProduct.recommendedPrice);
-                  return (
-                    <div className="relative">
-                      <p className="text-lg font-bold text-green-600">{text} บาท</p>
-                      {hasFraction && (
-                        <span className="absolute top-2 right-2 h-3 w-3 rounded-full bg-green-400 ring-2 ring-black" />
-                      )}
-                    </div>
-                  );
-                })()}
+                {selectedPackage && (
+                  <div className="relative">
+                    <p className="text-lg font-bold text-green-600">
+                      {selectedPackage.costPrice.toLocaleString()} บาท
+                    </p>
+                  </div>
+                )}
                 {/* ── debug: แสดง format_id จาก wePAY ── */}
                 {selectedGameProduct.format_id && (
                   <p className="text-xs text-yellow-600 dark:text-yellow-400 font-mono break-all">

@@ -11,7 +11,7 @@ import { Loader2, Mail } from "lucide-react";
 const Register = () => {
   const navigate = useNavigate();
   const { signUp } = useAuth();
-  
+
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -38,7 +38,7 @@ const Register = () => {
       toast.error("รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร");
       return;
     }
-    
+
     if (formData.password !== formData.confirmPassword) {
       toast.error("รหัสผ่านไม่ตรงกัน");
       return;
@@ -48,13 +48,13 @@ const Register = () => {
 
     try {
       await signUp(formData.email, formData.password, formData.shopName);
-      toast.success("สมัครสมาชิกสำเร็จ! กรุณายืนยันอีเมลของคุณ", {
-        duration: 5000,
+      toast.success("สมัครสมาชิกสำเร็จ!", {
+        duration: 3000,
       });
-      navigate("/verify-email");
+      navigate("/home");
     } catch (error: any) {
       console.error("Register error:", error);
-      
+
       // แปลข้อความ error
       if (error.code === "auth/email-already-in-use") {
         toast.error("อีเมลนี้ถูกใช้งานแล้ว");
@@ -75,10 +75,10 @@ const Register = () => {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="mb-8 text-center">
-            <div className="flex items-center justify-center gap-3 mb-2">
-            <img 
-              src="/logo.png" 
-              alt="BaimonShop Logo" 
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <img
+              src="/logo.png"
+              alt="BaimonShop Logo"
               className="h-12 w-12 object-contain"
             />
             <h1 className="text-3xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
@@ -159,8 +159,8 @@ const Register = () => {
               {/* Terms Agreement */}
               <div className="text-sm text-center text-muted-foreground pt-2">
                 เมื่อคลิกสมัครสมาชิก ถือว่าคุณยอมรับ
-                <Link 
-                  to="/terms" 
+                <Link
+                  to="/terms"
                   className="text-primary hover:underline ml-1"
                   target="_blank"
                   rel="noopener noreferrer"

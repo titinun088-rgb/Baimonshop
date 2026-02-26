@@ -88,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Priority: 1) ร้านที่ดูแล (ถ้ามี), 2) ตัวเองถ้าเป็น seller/admin, 3) fallback ตัวเอง
         console.log("👤 User role:", userData.role);
         console.log("🏪 Number of managed shops:", shops.length);
-        
+
         if (shops.length > 0 && userData.role !== "admin") {
           // มีร้านที่ดูแล และไม่ใช่ admin → เป็นผู้ดูแลร้าน
           console.log("✅ User is shop manager, using shop owner ID:", shops[0]);
@@ -103,7 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           console.log("⚠️ User has no shop, using own ID as fallback:", user.uid);
           setCurrentShopOwnerId(user.uid);
         }
-        
+
         console.log("🎯 Final currentShopOwnerId:", shops.length > 0 && userData.role !== "admin" ? shops[0] : user.uid);
 
         // โหลดจำนวนคำขอ
@@ -171,8 +171,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         displayName: shopName,
         shopName: shopName,
         role: 'seller', // default role เป็น seller
-        verified: false, // ต้องรอ admin อนุมัติ
-        emailVerified: false,
+        verified: true, // ตั้งค่าเป็น true เลยตามคำขอผู้ใช้
+        emailVerified: true, // ตั้งค่าเป็น true เลยตามคำขอผู้ใช้
         suspended: false, // ไม่ถูกพัก
         createdAt: new Date(),
         balance: 0, // ยอดเงินเริ่มต้น
@@ -180,9 +180,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       await setDoc(doc(db, "users", user.uid), userData);
 
-      // ส่งอีเมลยืนยัน
-      await sendEmailVerification(user);
-      
+      // ไม่ส่งอีเมลยืนยันแล้วตามคำขอผู้ใช้
+      // await sendEmailVerification(user);
+
     } catch (error) {
       console.error("Error signing up:", error);
       throw error;
@@ -197,7 +197,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // ตรวจสอบว่ามีข้อมูลใน Firestore หรือยัง
       const userDoc = await getDoc(doc(db, "users", user.uid));
-      
+
       if (!userDoc.exists()) {
         // ถ้ายังไม่มีข้อมูล ให้สร้างใหม่
         const userData: UserData = {
@@ -259,17 +259,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       if (auth.currentUser) {
         console.log("🔄 Refreshing user...");
-        
+
         // Reload user จาก Firebase Auth
         await auth.currentUser.reload();
-        
+
         // ดึง user ใหม่จาก auth
         const updatedUser = auth.currentUser;
         console.log("✅ User reloaded, emailVerified:", updatedUser.emailVerified);
-        
+
         // อัปเดต state
         setUser(updatedUser);
-        
+
         // ถ้ายืนยันอีเมลแล้ว อัปเดตใน Firestore
         if (updatedUser.emailVerified) {
           console.log("✅ Updating Firestore...");
@@ -279,7 +279,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             { merge: true }
           );
         }
-        
+
         // โหลด userData ใหม่เสมอ
         await loadUserData(updatedUser);
         console.log("✅ User data updated");
@@ -297,11 +297,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const newBalance = (userData.balance || 0) + amount;
-      
+
       // อัปเดตใน Firestore
       await setDoc(
         doc(db, "users", user.uid),
-        { 
+        {
           balance: newBalance,
           lastTopUp: new Date()
         },

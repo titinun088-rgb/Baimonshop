@@ -17,30 +17,30 @@ import { db } from "./firebase";
 
 // Types
 export interface PeamsubProductPrice {
-  id: string; // Product ID from Peamsub API
-  productType: 'premium' | 'preorder' | 'game' | 'mobile' | 'cashcard';
-  
+  id: string; // Product ID from API
+  productType: 'premium' | 'preorder' | 'game' | 'mobile' | 'cashcard' | 'wepay_game';
+
   // ราคาจาก API (ราคาทุน)
   apiPrice: number | string; // ราคาที่ต้องจ่ายให้ API
-  
+
   // ราคาขายที่แอดมินตั้ง
   sellPrice: number; // ราคาที่ขายให้ลูกค้า
-  
+
   // ข้อมูลเพิ่มเติม
   productName?: string;
   category?: string;
-  
+
   // Metadata
   updatedAt: Date;
   updatedBy: string; // User ID ของแอดมินที่แก้ไข
 }
 
 /**
- * ตั้งราคาขายสินค้า Peamsub
+ * ตั้งราคาขายสินค้า
  */
 export async function setPeamsubProductPrice(
   productId: number | string,
-  productType: 'premium' | 'preorder' | 'game' | 'mobile' | 'cashcard',
+  productType: 'premium' | 'preorder' | 'game' | 'mobile' | 'cashcard' | 'wepay_game',
   sellPrice: number,
   apiPrice: number | string,
   productName?: string,
@@ -48,42 +48,42 @@ export async function setPeamsubProductPrice(
   updatedBy?: string
 ): Promise<void> {
   try {
-    console.log('💾 กำลังตั้งราคาสินค้า Peamsub...', { productId, productType, sellPrice });
-    
+    console.log('💾 กำลังตั้งราคาสินค้า...', { productId, productType, sellPrice });
+
     const docId = `${productType}_${productId}`;
     const docRef = doc(db, "peamsub_product_prices", docId);
-    
+
     const priceData: Omit<PeamsubProductPrice, 'id'> = {
       productType,
       apiPrice,
       sellPrice,
-      productName,
-      category,
+      productName: productName || '',
+      category: category || '',
       updatedAt: new Date(),
       updatedBy: updatedBy || '',
     };
-    
+
     await setDoc(docRef, priceData, { merge: true });
-    
+
     console.log('✅ ตั้งราคาสินค้าสำเร็จ');
   } catch (error) {
-    console.error('❌ Error setting Peamsub product price:', error);
+    console.error('❌ Error setting product price:', error);
     throw error;
   }
 }
 
 /**
- * ดึงราคาขายสินค้า Peamsub (ถ้าไม่มีให้คืนค่า null)
+ * ดึงราคาขายสินค้า (ถ้าไม่มีให้คืนค่า null)
  */
 export async function getPeamsubProductPrice(
   productId: number | string,
-  productType: 'premium' | 'preorder' | 'game' | 'mobile' | 'cashcard'
+  productType: 'premium' | 'preorder' | 'game' | 'mobile' | 'cashcard' | 'wepay_game'
 ): Promise<PeamsubProductPrice | null> {
   try {
     const docId = `${productType}_${productId}`;
     const docRef = doc(db, "peamsub_product_prices", docId);
     const docSnap = await getDoc(docRef);
-    
+
     if (docSnap.exists()) {
       const data = docSnap.data();
       return {
@@ -92,22 +92,22 @@ export async function getPeamsubProductPrice(
         updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : new Date(data.updatedAt),
       } as PeamsubProductPrice;
     }
-    
+
     return null;
   } catch (error) {
-    console.error('❌ Error getting Peamsub product price:', error);
+    console.error('❌ Error getting product price:', error);
     return null;
   }
 }
 
 /**
- * ดึงราคาสินค้า Peamsub ทั้งหมด
+ * ดึงราคาสินค้าทั้งหมด
  */
 export async function getAllPeamsubProductPrices(): Promise<PeamsubProductPrice[]> {
   try {
     const pricesRef = collection(db, "peamsub_product_prices");
     const snapshot = await getDocs(pricesRef);
-    
+
     const prices: PeamsubProductPrice[] = [];
     snapshot.forEach((doc) => {
       const data = doc.data();
@@ -117,25 +117,25 @@ export async function getAllPeamsubProductPrices(): Promise<PeamsubProductPrice[
         updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : new Date(data.updatedAt),
       } as PeamsubProductPrice);
     });
-    
+
     return prices;
   } catch (error) {
-    console.error('❌ Error getting all Peamsub product prices:', error);
+    console.error('❌ Error getting all product prices:', error);
     return [];
   }
 }
 
 /**
- * ดึงราคาสินค้า Peamsub ตามประเภท
+ * ดึงราคาสินค้าตามประเภท
  */
 export async function getPeamsubProductPricesByType(
-  productType: 'premium' | 'preorder' | 'game' | 'mobile' | 'cashcard'
+  productType: 'premium' | 'preorder' | 'game' | 'mobile' | 'cashcard' | 'wepay_game'
 ): Promise<PeamsubProductPrice[]> {
   try {
     const pricesRef = collection(db, "peamsub_product_prices");
     const q = query(pricesRef, where("productType", "==", productType));
     const snapshot = await getDocs(q);
-    
+
     const prices: PeamsubProductPrice[] = [];
     snapshot.forEach((doc) => {
       const data = doc.data();
@@ -145,20 +145,20 @@ export async function getPeamsubProductPricesByType(
         updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : new Date(data.updatedAt),
       } as PeamsubProductPrice);
     });
-    
+
     return prices;
   } catch (error) {
-    console.error('❌ Error getting Peamsub product prices by type:', error);
+    console.error('❌ Error getting product prices by type:', error);
     return [];
   }
 }
 
 /**
- * ลบราคาสินค้า Peamsub
+ * ลบราคาสินค้า
  */
 export async function deletePeamsubProductPrice(
   productId: number | string,
-  productType: 'premium' | 'preorder' | 'game' | 'mobile' | 'cashcard'
+  productType: 'premium' | 'preorder' | 'game' | 'mobile' | 'cashcard' | 'wepay_game'
 ): Promise<void> {
   try {
     const docId = `${productType}_${productId}`;
@@ -166,7 +166,7 @@ export async function deletePeamsubProductPrice(
     await deleteDoc(docRef);
     console.log('✅ ลบราคาสินค้าสำเร็จ');
   } catch (error) {
-    console.error('❌ Error deleting Peamsub product price:', error);
+    console.error('❌ Error deleting product price:', error);
     throw error;
   }
 }
@@ -177,7 +177,7 @@ export async function deletePeamsubProductPrice(
  */
 export async function getProductSellPrice(
   productId: number | string,
-  productType: 'premium' | 'preorder' | 'game' | 'mobile' | 'cashcard',
+  productType: 'premium' | 'preorder' | 'game' | 'mobile' | 'cashcard' | 'wepay_game',
   apiPrice: number | string,
   recommendedPrice?: number | string // ราคาแนะนำจาก API (จะใช้เป็นราคาขายเริ่มต้น)
 ): Promise<number> {
@@ -187,17 +187,17 @@ export async function getProductSellPrice(
     if (adminPrice && adminPrice.sellPrice > 0) {
       return adminPrice.sellPrice;
     }
-    
+
     // 2. ถ้าไม่มี admin price ให้ใช้ recommended price (ราคาแนะนำ)
     if (recommendedPrice !== undefined && recommendedPrice !== null) {
-      const recommendedPriceNum = typeof recommendedPrice === 'string' 
-        ? parseFloat(recommendedPrice) 
+      const recommendedPriceNum = typeof recommendedPrice === 'string'
+        ? parseFloat(recommendedPrice)
         : recommendedPrice;
       if (!isNaN(recommendedPriceNum) && recommendedPriceNum > 0) {
         return recommendedPriceNum;
       }
     }
-    
+
     // 3. ถ้าไม่มี recommended price ให้ใช้ API price (ราคาปกติ)
     const apiPriceNum = typeof apiPrice === 'string' ? parseFloat(apiPrice) : apiPrice;
     return isNaN(apiPriceNum) ? 0 : apiPriceNum;
@@ -205,8 +205,8 @@ export async function getProductSellPrice(
     console.error('❌ Error getting product sell price:', error);
     // Fallback: ใช้ recommended price ก่อน, แล้วค่อย API price
     if (recommendedPrice !== undefined && recommendedPrice !== null) {
-      const recommendedPriceNum = typeof recommendedPrice === 'string' 
-        ? parseFloat(recommendedPrice) 
+      const recommendedPriceNum = typeof recommendedPrice === 'string'
+        ? parseFloat(recommendedPrice)
         : recommendedPrice;
       if (!isNaN(recommendedPriceNum) && recommendedPriceNum > 0) {
         return recommendedPriceNum;

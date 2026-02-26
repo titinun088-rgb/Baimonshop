@@ -68,11 +68,24 @@ async function handler(req: VercelRequest, res: VercelResponse): Promise<VercelR
     // Call Peamsub API with Basic Auth
     const authHeader = `Basic ${Buffer.from(apiKey).toString('base64')}`;
 
-    // Configure Proxy Agent (Fixie)
-    const proxyUrl = process.env.FIXIE_URL;
-    const agent = proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined;
+    // --- VPS PROXY CONFIGURATION ---
+    const MY_VPS_PROXY = 'http://157.85.102.141:3002/proxy';
 
-    const response = await fetch('https://api.peamsub24hr.com/v2/order/check', {
+    // Helper function to send request via Fixed IP VPS
+    const fetchViaVPS = async (url: string, options: any) => {
+      return fetch(MY_VPS_PROXY, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          targetUrl: url,
+          method: options.method,
+          headers: options.headers,
+          body: options.body
+        })
+      });
+    };
+
+    const response = await fetchViaVPS('https://api.peamsub24hr.com/v2/order/check', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -80,8 +93,7 @@ async function handler(req: VercelRequest, res: VercelResponse): Promise<VercelR
       },
       body: JSON.stringify({
         order_id: orderId
-      }),
-      agent
+      })
     });
 
     const data = await response.json() as any;

@@ -205,6 +205,12 @@ const Layout = ({ children }: LayoutProps) => {
       roles: ['admin']
     },
     {
+      name: "จัดการราคา wePAY",
+      href: "/wepay-price-management",
+      icon: DollarSign,
+      roles: ['admin']
+    },
+    {
       name: "จัดการรูปเกม wePAY",
       href: "/game-image-management",
       icon: ImageIcon,
@@ -278,7 +284,7 @@ const Layout = ({ children }: LayoutProps) => {
         name: "จัดการ",
         icon: LayoutDashboard,
         items: navigation.filter(item =>
-          ["Dashboard", "เกม", "ยอดขาย", "ผู้ใช้", "รายงานปัญหา", "Peamsub API", "จัดการราคา Peamsub", "จัดการขายไอดีเกม", "จัดการรูปเกม wePAY"].includes(item.name) &&
+          ["Dashboard", "เกม", "ยอดขาย", "ผู้ใช้", "รายงานปัญหา", "Peamsub API", "จัดการราคา Peamsub", "จัดการราคา wePAY", "จัดการขายไอดีเกม", "จัดการรูปเกม wePAY"].includes(item.name) &&
           item.roles.includes('admin')
         )
       });
