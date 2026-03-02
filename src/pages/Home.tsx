@@ -20,10 +20,10 @@ import {
   Award,
   Phone
 } from "lucide-react";
-import { 
-  getPeamsubProducts, 
-  PeamsubProduct, 
-  getPeamsubGameProducts, 
+import {
+  getPeamsubProducts,
+  PeamsubProduct,
+  getPeamsubGameProducts,
   PeamsubGameProduct,
   getPeamsubMobileProducts,
   PeamsubMobileProduct,
@@ -71,14 +71,14 @@ const Home = () => {
 
       // รวมเกมจาก wePAY และ Peamsub (เอา wePAY ขึ้นก่อน)
       const mergedGameData = [...wepayGames, ...peamsubGames];
-      
-      // อัปเดตรูปภาพจาก customImages
-      mergedGameData.forEach(p => {
-        if (p.id && !p.img && customImages[p.id]) {
-          p.img = customImages[p.id];
-        } else if (p.category && !p.img && customImages[p.category]) {
-          p.img = customImages[p.category];
-        }
+
+      // อัปเดตรูปภาพจาก customImages (ใช้ pay_to_company เป็น key หลัก เหมือนหน้า GameTopUp)
+      mergedGameData.forEach((p: any) => {
+        const img =
+          customImages[(p as any).pay_to_company] ||  // wePAY games ใช้ pay_to_company
+          customImages[p.category] ||                   // fallback: category name
+          customImages[String(p.id)];                   // fallback: id
+        if (img) p.img = img;
       });
 
       setProducts(premiumData);
@@ -145,25 +145,25 @@ const Home = () => {
 
       // สุ่มสินค้าแบบคละหมวดหมู่
       const shuffled = [...allProducts].sort(() => Math.random() - 0.5);
-      
+
       // เลือกสินค้าให้คละกันดี โดยพยายามให้แต่ละหมวดมีสัดส่วนใกล้เคียงกัน
       const selectedProducts: MixedProduct[] = [];
       const categoryCounts = { game: 0, premium: 0, mobile: 0, cashcard: 0 };
       const maxPerCategory = 10; // จำกัดแต่ละหมวดไม่เกิน 10 รายการ
-      
+
       for (const product of shuffled) {
         if (selectedProducts.length >= 40) break; // เพิ่มเป็น 40 รายการ
-        
+
         // ถ้าหมวดนี้ยังไม่เต็ม ให้เพิ่มได้
         if (categoryCounts[product.category] < maxPerCategory) {
           selectedProducts.push(product);
           categoryCounts[product.category]++;
         }
       }
-      
+
       // สุ่มอีกครั้งเพื่อให้คละกันมากขึ้น
       const finalShuffled = selectedProducts.sort(() => Math.random() - 0.5);
-      
+
       // ทำซ้ำสินค้าเพื่อให้เลื่อนได้ต่อเนื่อง
       setRandomProducts([...finalShuffled, ...finalShuffled, ...finalShuffled]);
 
@@ -244,22 +244,14 @@ const Home = () => {
     }
   ];
 
-  // จัดกลุ่มเกมตามหมวดหมู่จาก API แล้วสุ่มลำดับเกมยอดนิยม
   const getPopularGames = () => {
     if (gameProducts.length === 0) return [];
 
-    // จัดกลุ่มเกมตาม category (เอาเฉพาะเกมที่มีรูป)
+    // จัดกลุ่มเกมตาม category (ไม่ต้องมีรูปก็ได้)
     const uniqueGames: { name: string; img: string; category: string }[] = [];
     const seenCategories = new Set<string>();
 
-    // กรองเอาเฉพาะเกมที่มีรูป
-    const gamesWithImages = gameProducts.filter(
-      (product) => product.img && product.img.trim() !== ""
-    );
-
-    // ดึงเกมแต่ละ category ไม่ซ้ำกัน
-    for (const product of gamesWithImages) {
-      // สร้างชื่อเกมที่เรียบง่าย
+    for (const product of gameProducts) {
       const categoryLower = product.category.toLowerCase();
       let simpleName = product.category;
 
@@ -282,22 +274,19 @@ const Home = () => {
       else if (categoryLower.includes("clash")) simpleName = "Clash of Clans";
       else if (categoryLower.includes("subway")) simpleName = "Subway Surfers";
 
-      // ถ้ายังไม่เคยเพิ่ม category นี้
       if (!seenCategories.has(simpleName)) {
         uniqueGames.push({
           name: simpleName,
-          img: product.img,
+          img: product.img || "", // ใช้รูปถ้ามี ถ้าไม่มีก็ใช้ fallback
           category: product.category,
         });
         seenCategories.add(simpleName);
-
-        // ถ้าครบ 21 เกมแล้วให้หยุด
-        if (uniqueGames.length >= 21) break;
+        if (uniqueGames.length >= 30) break;
       }
     }
 
-    // สุ่มลำดับเกมยอดนิยมก่อนส่งออกไปแสดง และจำกัดให้เหลือ 8 เกม
-    return uniqueGames.sort(() => Math.random() - 0.5).slice(0, 8);
+    // สุ่มลำดับและจำกัดให้เหลือ 10 เกม
+    return uniqueGames.sort(() => Math.random() - 0.5).slice(0, 10);
   };
 
   const popularGames = getPopularGames();
@@ -500,18 +489,18 @@ const Home = () => {
                 </h2>
                 <p className="text-gray-400">สินค้ายอดนิยมที่คุณไม่ควรพลาด</p>
               </div>
-              
-              <div 
+
+              <div
                 ref={scrollRef}
                 className="flex gap-4 overflow-x-hidden py-4 px-4"
                 style={{ scrollBehavior: 'auto' }}
               >
                 {randomProducts.map((product, index) => {
                   // เลือก icon ตามประเภท
-                  const CategoryIcon = product.category === 'game' ? Gamepad2 
+                  const CategoryIcon = product.category === 'game' ? Gamepad2
                     : product.category === 'mobile' ? Smartphone
-                    : product.category === 'cashcard' ? CreditCard
-                    : Sparkles;
+                      : product.category === 'cashcard' ? CreditCard
+                        : Sparkles;
 
                   return (
                     <Card
@@ -537,10 +526,10 @@ const Home = () => {
                         )}
                         {/* Category Badge */}
                         <div className="absolute top-2 right-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
-                          {product.category === 'game' ? '🎮 เกม' 
+                          {product.category === 'game' ? '🎮 เกม'
                             : product.category === 'mobile' ? '📱 มือถือ'
-                            : product.category === 'cashcard' ? '💳 บัตร'
-                            : '⭐ พรีเมียม'}
+                              : product.category === 'cashcard' ? '💳 บัตร'
+                                : '⭐ พรีเมียม'}
                         </div>
                       </div>
                       <CardContent className="p-4 bg-gradient-to-br from-purple-900/30 to-blue-900/30">
@@ -663,7 +652,7 @@ const Home = () => {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-5 gap-4">
                   {popularGames.map((game, index) => (
                     <Card
                       key={index}
@@ -671,16 +660,24 @@ const Home = () => {
                       onClick={() => navigate("/game-topup")}
                     >
                       <div className="aspect-square relative overflow-hidden">
-                        <img
-                          src={game.img}
-                          alt={`เติม ${game.name} - BaimonShop รับเติมเกม`}
-                          title={`เติม ${game.name} ราคาถูก`}
-                          className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-500"
-                          loading="lazy"
-                          onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                          }}
-                        />
+                        {game.img ? (
+                          <img
+                            src={game.img}
+                            alt={`เติม ${game.name} - BaimonShop รับเติมเกม`}
+                            title={`เติม ${game.name} ราคาถูก`}
+                            className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-500"
+                            loading="lazy"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                              e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                            }}
+                          />
+                        ) : null}
+                        {/* Fallback เมื่อไม่มีรูป */}
+                        <div className={`${game.img ? 'hidden' : ''} w-full h-full bg-gradient-to-br from-purple-800 to-blue-900 flex flex-col items-center justify-center gap-2`}>
+                          <Gamepad2 className="w-10 h-10 text-purple-300" />
+                          <span className="text-xs text-purple-200 font-bold text-center px-1 leading-tight">{game.name}</span>
+                        </div>
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         <div className="absolute bottom-0 left-0 right-0 p-2 text-center transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
                           <p className="text-xs font-bold text-white">{game.name}</p>
