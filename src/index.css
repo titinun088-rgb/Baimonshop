@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Playpen+Sans+Thai:wght@100..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Athiti:wght@200;300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -82,7 +85,7 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
-    font-family: 'Athiti', sans-serif;
+    font-family: 'Playpen Sans Thai', cursive;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -109,7 +112,7 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Athiti', sans-serif;
+    font-family: 'Playpen Sans Thai', cursive;
   }
 }
 

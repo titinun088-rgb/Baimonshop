@@ -2,6 +2,7 @@
 import http from 'http';
 import fetch from 'node-fetch';
 import { HttpsProxyAgent } from 'https-proxy-agent';
+import { createHash } from 'crypto';
 import fs from 'fs';
 import path from 'path';
 
@@ -41,6 +42,30 @@ const INDEXGAME_PASSWORD = process.env.INDEXGAME_PASSWORD || 'titinun088';
 const FIXIE_URL = process.env.FIXIE_URL || 'http://fixie:KKToygSsimaMOLE@criterium.usefixie.com:80';
 const PEAMSUB_API_BASE_URL = 'https://api.peamsub24hr.com';
 const INDEXGAME_API_BASE_URL = 'https://indexgame.in.th';
+const WEPAY_API_URL = 'https://www.wepay.in.th/client_api.json.php';
+const WEPAY_USERNAME = process.env.WEPAY_USERNAME || 'toey098994';
+const WEPAY_PASSWORD = process.env.WEPAY_PASSWORD || 'Titinun088';
+const WEPAY_CALLBACK_URL = process.env.WEPAY_CALLBACK_URL || 'https://www.baimonshop.com/api/wepay-callback';
+
+// VPS Proxy - IP ถูก whitelist กับ Peamsub แล้ว
+const MY_VPS_PROXY = 'http://157.85.102.141:3002/proxy';
+
+// ส่งคำขอผ่าน VPS (IP ถูก whitelist)
+const fetchViaVPS = async (targetUrl, options) => {
+    return fetch(MY_VPS_PROXY, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            targetUrl,
+            method: options.method || 'GET',
+            headers: options.headers || {},
+            body: options.body
+        })
+    });
+};
+
+// md5 helper for wePAY
+const md5 = (str) => createHash('md5').update(str).digest('hex');
 
 const agent = new HttpsProxyAgent(FIXIE_URL);
 
@@ -120,21 +145,19 @@ const server = http.createServer(async (req, res) => {
             console.log(`📡 Request: ${req.method} ${url}`);
 
             if (url === '/api/peamsub') {
-                // Generic Proxy
+                // ส่งผ่าน VPS Proxy (157.85.102.141) ที่ whitelist กับ Peamsub แล้ว
                 const { endpoint, method = 'GET', body: apiBody } = data;
-
                 const authHeader = `Basic ${Buffer.from(PEAMSUB_API_KEY).toString('base64')}`;
 
-                console.log(`   Forwarding to: ${PEAMSUB_API_BASE_URL}${endpoint}`);
+                console.log(`   [VPS→Peamsub] ${method} ${PEAMSUB_API_BASE_URL}${endpoint}`);
 
-                const apiRes = await fetch(`${PEAMSUB_API_BASE_URL}${endpoint}`, {
+                const apiRes = await fetchViaVPS(`${PEAMSUB_API_BASE_URL}${endpoint}`, {
                     method: method,
                     headers: {
                         'Authorization': authHeader,
                         'Content-Type': 'application/json'
                     },
-                    body: apiBody ? JSON.stringify(apiBody) : undefined,
-                    agent
+                    body: apiBody ? JSON.stringify(apiBody) : undefined
                 });
 
                 const responseText = await apiRes.text();
@@ -143,6 +166,14 @@ const server = http.createServer(async (req, res) => {
                     apiData = JSON.parse(responseText);
                 } catch (e) {
                     apiData = { message: responseText };
+                }
+
+                // Peamsub 404 = endpoint ไม่มี, 418 = บัญชีไม่มีสิทธิ์ → return empty gracefully
+                if (apiRes.status === 404 || apiRes.status === 418) {
+                    console.warn(`⚠️ [VPS→Peamsub] ${apiRes.status}: ${endpoint} - returning empty`);
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ statusCode: 200, data: [] }));
+                    return;
                 }
 
                 res.writeHead(apiRes.status === 407 ? 500 : apiRes.status, { 'Content-Type': 'application/json' });
@@ -222,6 +253,55 @@ const server = http.createServer(async (req, res) => {
                         message: apiData.message
                     }
                 }));
+                return;
+
+            } else if (url === '/api/wepay-game') {
+                // wePAY Game API - ส่งผ่าน VPS Proxy
+                const { action, ...params } = data;
+                const password_hash = md5(WEPAY_PASSWORD);
+
+                console.log(`   [VPS→wePAY] action: ${action}`);
+
+                let wepayBody;
+
+                if (action === 'balance') {
+                    wepayBody = { username: WEPAY_USERNAME, password_hash, type: 'balance_inquiry' };
+                } else if (action === 'products') {
+                    wepayBody = { username: WEPAY_USERNAME, password_hash, type: 'mtopup' };
+                    if (params.pay_to_company) { wepayBody.pay_to_company = params.pay_to_company; wepayBody.payee_info = 'true'; }
+                } else if (action === 'game_list') {
+                    const glRes = await fetchViaVPS('https://www.wepay.in.th/comp_export.php?json', { method: 'GET', headers: {} });
+                    const glText = await glRes.text();
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    try { res.end(JSON.stringify(JSON.parse(glText))); } catch { res.end(glText); }
+                    return;
+                } else if (action === 'purchase') {
+                    const { dest_ref, pay_to_company, pay_to_amount, pay_to_ref1, pay_to_ref2 } = params;
+                    if (!dest_ref || !pay_to_company || !pay_to_amount || !pay_to_ref1) {
+                        res.writeHead(400, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ error: 'Missing required parameters' }));
+                        return;
+                    }
+                    wepayBody = { username: WEPAY_USERNAME, password_hash, resp_url: WEPAY_CALLBACK_URL, dest_ref, type: params.type || 'gtopup', pay_to_company, pay_to_amount: String(pay_to_amount), pay_to_ref1 };
+                    if (pay_to_ref2) wepayBody.pay_to_ref2 = pay_to_ref2;
+                } else if (action === 'check_order') {
+                    const { transaction_id } = params;
+                    if (!transaction_id) { res.writeHead(400); res.end(JSON.stringify({ error: 'Missing transaction_id' })); return; }
+                    wepayBody = { username: WEPAY_USERNAME, password_hash, type: 'get_output', transaction_id };
+                } else {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: `Unknown action: ${action}` }));
+                    return;
+                }
+
+                const wpRes = await fetchViaVPS(WEPAY_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(wepayBody)
+                });
+                const wpText = await wpRes.text();
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                try { res.end(JSON.stringify(JSON.parse(wpText))); } catch { res.end(wpText); }
                 return;
 
             } else if (url === '/api/indexgame') {

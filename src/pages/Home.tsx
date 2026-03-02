@@ -30,6 +30,8 @@ import {
   getPeamsubCashCardProducts,
   PeamsubCashCardProduct
 } from "@/lib/peamsubUtils";
+import { getWepayGameProducts } from "@/lib/wepayGameUtils";
+import { getAllCustomGameImages } from "@/lib/gameImageUtils";
 
 // Type สำหรับสินค้าที่รวมทุกประเภท
 type MixedProduct = {
@@ -58,15 +60,29 @@ const Home = () => {
     setGamesLoading(true);
     try {
       // โหลดทุกประเภทสินค้าพร้อมกัน
-      const [premiumData, gameData, mobileData, cashCardData] = await Promise.all([
+      const [premiumData, peamsubGames, mobileData, cashCardData, wepayGames, customImages] = await Promise.all([
         getPeamsubProducts().catch(() => []),
         getPeamsubGameProducts().catch(() => []),
         getPeamsubMobileProducts().catch(() => []),
-        getPeamsubCashCardProducts().catch(() => [])
+        getPeamsubCashCardProducts().catch(() => []),
+        getWepayGameProducts().catch(() => []),
+        getAllCustomGameImages().catch(() => ({}))
       ]);
 
+      // รวมเกมจาก wePAY และ Peamsub (เอา wePAY ขึ้นก่อน)
+      const mergedGameData = [...wepayGames, ...peamsubGames];
+      
+      // อัปเดตรูปภาพจาก customImages
+      mergedGameData.forEach(p => {
+        if (p.id && !p.img && customImages[p.id]) {
+          p.img = customImages[p.id];
+        } else if (p.category && !p.img && customImages[p.category]) {
+          p.img = customImages[p.category];
+        }
+      });
+
       setProducts(premiumData);
-      setGameProducts(gameData);
+      setGameProducts(mergedGameData as any);
 
       // รวมสินค้าทุกประเภท
       const allProducts: MixedProduct[] = [];
@@ -85,13 +101,13 @@ const Home = () => {
       });
 
       // เพิ่มเกม (ใช้ category แทน id เพื่อไม่ให้ซ้ำ)
-      const gameCategories = new Map<string, PeamsubGameProduct>();
-      gameData.forEach(p => {
-        if (p.img && !gameCategories.has(p.category)) {
-          gameCategories.set(p.category, p);
+      const gameCategoriesMap = new Map<string, any>();
+      mergedGameData.forEach(p => {
+        if (p.img && !gameCategoriesMap.has(p.category)) {
+          gameCategoriesMap.set(p.category, p);
         }
       });
-      gameCategories.forEach(p => {
+      gameCategoriesMap.forEach(p => {
         allProducts.push({
           id: `game-${p.category}`,
           name: p.category,
@@ -228,7 +244,7 @@ const Home = () => {
     }
   ];
 
-  // จัดกลุ่มเกมตามหมวดหมู่จาก API
+  // จัดกลุ่มเกมตามหมวดหมู่จาก API แล้วสุ่มลำดับเกมยอดนิยม
   const getPopularGames = () => {
     if (gameProducts.length === 0) return [];
 
@@ -237,7 +253,9 @@ const Home = () => {
     const seenCategories = new Set<string>();
 
     // กรองเอาเฉพาะเกมที่มีรูป
-    const gamesWithImages = gameProducts.filter(product => product.img && product.img.trim() !== '');
+    const gamesWithImages = gameProducts.filter(
+      (product) => product.img && product.img.trim() !== ""
+    );
 
     // ดึงเกมแต่ละ category ไม่ซ้ำกัน
     for (const product of gamesWithImages) {
@@ -246,39 +264,40 @@ const Home = () => {
       let simpleName = product.category;
 
       // จับคู่กับชื่อที่รู้จัก
-      if (categoryLower.includes('rov')) simpleName = 'ROV';
-      else if (categoryLower.includes('free fire') || categoryLower.includes('freefire')) simpleName = 'Free Fire';
-      else if (categoryLower.includes('pubg')) simpleName = 'PUBG Mobile';
-      else if (categoryLower.includes('mobile legend')) simpleName = 'Mobile Legends';
-      else if (categoryLower.includes('genshin')) simpleName = 'Genshin Impact';
-      else if (categoryLower.includes('honkai')) simpleName = 'Honkai Star Rail';
-      else if (categoryLower.includes('valorant')) simpleName = 'Valorant';
-      else if (categoryLower.includes('roblox')) simpleName = 'Roblox';
-      else if (categoryLower.includes('ragnarok')) simpleName = 'Ragnarok';
-      else if (categoryLower.includes('fifa') || categoryLower.includes('fc mobile')) simpleName = 'FIFA Mobile';
-      else if (categoryLower.includes('call of duty') || categoryLower.includes('cod mobile')) simpleName = 'Call of Duty';
-      else if (categoryLower.includes('standoff')) simpleName = 'Standoff 2';
-      else if (categoryLower.includes('tower of fantasy') || categoryLower.includes('tof')) simpleName = 'Tower of Fantasy';
-      else if (categoryLower.includes('apex')) simpleName = 'Apex Legends';
-      else if (categoryLower.includes('arena')) simpleName = 'Arena of Valor';
-      else if (categoryLower.includes('clash')) simpleName = 'Clash of Clans';
-      else if (categoryLower.includes('subway')) simpleName = 'Subway Surfers';
+      if (categoryLower.includes("rov")) simpleName = "ROV";
+      else if (categoryLower.includes("free fire") || categoryLower.includes("freefire")) simpleName = "Free Fire";
+      else if (categoryLower.includes("pubg")) simpleName = "PUBG Mobile";
+      else if (categoryLower.includes("mobile legend")) simpleName = "Mobile Legends";
+      else if (categoryLower.includes("genshin")) simpleName = "Genshin Impact";
+      else if (categoryLower.includes("honkai")) simpleName = "Honkai Star Rail";
+      else if (categoryLower.includes("valorant")) simpleName = "Valorant";
+      else if (categoryLower.includes("roblox")) simpleName = "Roblox";
+      else if (categoryLower.includes("ragnarok")) simpleName = "Ragnarok";
+      else if (categoryLower.includes("fifa") || categoryLower.includes("fc mobile")) simpleName = "FIFA Mobile";
+      else if (categoryLower.includes("call of duty") || categoryLower.includes("cod mobile")) simpleName = "Call of Duty";
+      else if (categoryLower.includes("standoff")) simpleName = "Standoff 2";
+      else if (categoryLower.includes("tower of fantasy") || categoryLower.includes("tof")) simpleName = "Tower of Fantasy";
+      else if (categoryLower.includes("apex")) simpleName = "Apex Legends";
+      else if (categoryLower.includes("arena")) simpleName = "Arena of Valor";
+      else if (categoryLower.includes("clash")) simpleName = "Clash of Clans";
+      else if (categoryLower.includes("subway")) simpleName = "Subway Surfers";
 
       // ถ้ายังไม่เคยเพิ่ม category นี้
       if (!seenCategories.has(simpleName)) {
         uniqueGames.push({
           name: simpleName,
           img: product.img,
-          category: product.category
+          category: product.category,
         });
         seenCategories.add(simpleName);
 
-        // ถ้าครบ 14 เกมแล้วให้หยุด
-        if (uniqueGames.length >= 14) break;
+        // ถ้าครบ 21 เกมแล้วให้หยุด
+        if (uniqueGames.length >= 21) break;
       }
     }
 
-    return uniqueGames;
+    // สุ่มลำดับเกมยอดนิยมก่อนส่งออกไปแสดง และจำกัดให้เหลือ 8 เกม
+    return uniqueGames.sort(() => Math.random() - 0.5).slice(0, 8);
   };
 
   const popularGames = getPopularGames();
@@ -335,7 +354,7 @@ const Home = () => {
         <link rel="canonical" href="https://www.baimonshop.com/" />
       </Helmet>
 
-      <div className="relative bg-black text-white min-h-screen font-['Kanit',sans-serif] -mx-3 sm:-mx-4 lg:-mx-6 xl:-mx-8 overflow-hidden">
+      <div className="relative bg-black text-white min-h-screen -mx-3 sm:-mx-4 lg:-mx-6 xl:-mx-8 overflow-hidden">
 
         {/* Gaming Animated Background */}
         <div className="absolute inset-0">

@@ -25,6 +25,8 @@ import {
   getPeamsubCashCardProducts,
   PeamsubCashCardProduct
 } from "@/lib/peamsubUtils";
+import { getWepayGameProducts } from "@/lib/wepayGameUtils";
+import { getAllCustomGameImages } from "@/lib/gameImageUtils";
 
 // Type สำหรับสินค้าที่รวมทุกประเภท
 type MixedProduct = {
@@ -79,17 +81,30 @@ const Landing = () => {
     setLoading(true);
     try {
       // โหลดทุกประเภทพร้อมกัน
-      const [gameProducts, premium, mobile, cashCard] = await Promise.all([
+      const [peamsubGames, premium, mobile, cashCard, wepayGames, customImages] = await Promise.all([
         getPeamsubGameProducts().catch(() => []),
         getPeamsubProducts().catch(() => []),
         getPeamsubMobileProducts().catch(() => []),
-        getPeamsubCashCardProducts().catch(() => [])
+        getPeamsubCashCardProducts().catch(() => []),
+        getWepayGameProducts().catch(() => []),
+        getAllCustomGameImages().catch(() => ({}))
       ]);
 
-      // จัดกลุ่มเกม
-      const categoryMap = new Map<string, PeamsubGameProduct[]>();
+      // รวมเกมจาก wePAY และ Peamsub (เอา wePAY ขึ้นก่อน)
+      const gameProducts = [...wepayGames, ...peamsubGames];
+
+      // จัดกลุ่มเกมตาม category
+      const categoryMap = new Map<string, any[]>();
       gameProducts.forEach((product) => {
         const category = product.category || "อื่นๆ";
+        
+        // ถ้าเป็นเกมจาก wePAY ให้ลองหารูปจาก customImages
+        if (product.id && !product.img && customImages[product.id]) {
+          product.img = customImages[product.id];
+        } else if (product.category && !product.img && customImages[product.category]) {
+          product.img = customImages[product.category];
+        }
+
         if (!categoryMap.has(category)) {
           categoryMap.set(category, []);
         }
@@ -192,7 +207,7 @@ const Landing = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#1a0d1a] via-[#2d1a3d] to-[#1a0d1a] text-white font-['Kanit',sans-serif]">
+    <div className="min-h-screen bg-gradient-to-b from-[#1a0d1a] via-[#2d1a3d] to-[#1a0d1a] text-white">
       {/* Header with Login/Register buttons */}
       <header className="bg-pink-900/20 backdrop-blur-sm border-b border-pink-400/30 sticky top-0 z-50 shadow-pink">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -447,7 +462,7 @@ const Landing = () => {
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {Array.from(gameCategories.entries()).slice(0, 10).map(([category, products]) => (
+              {Array.from(gameCategories.entries()).slice(0, 20).map(([category, products]) => (
                 <Card
                   key={category}
                   className="group cursor-default transition-all duration-300 hover:scale-105 hover:shadow-xl bg-black/30 backdrop-blur-sm border-purple-500/30 overflow-hidden"
