@@ -20,8 +20,11 @@ import {
     Image as ImageIcon,
     Save,
     Trash2,
-    ExternalLink,
-    RefreshCw
+    RefreshCw,
+    FileJson,
+    FileSpreadsheet,
+    Copy,
+    Check
 } from "lucide-react";
 import { toast } from "sonner";
 import { getWepayGameProducts, WepayGameProduct } from "@/lib/wepayGameUtils";
@@ -46,6 +49,15 @@ const GameImageManagement = () => {
     // Form states
     const [imageUrl, setImageUrl] = useState("");
     const [saving, setSaving] = useState(false);
+    const [copied, setCopied] = useState(false);
+
+    const handleCopyUrl = () => {
+        if (!imageUrl) return;
+        navigator.clipboard.writeText(imageUrl);
+        setCopied(true);
+        toast.success("คัดลอก URL แล้ว");
+        setTimeout(() => setCopied(false), 2000);
+    };
 
     // โหลดข้อมูลเริ่มต้น
     useEffect(() => {
@@ -141,6 +153,47 @@ const GameImageManagement = () => {
         }
     };
 
+    // ส่งออกข้อมูลเป็น JSON
+    const exportAsJSON = () => {
+        const data = filteredGames.map(game => ({
+            gameCode: game.gameCode,
+            name: game.name,
+            imageUrl: game.currentImage,
+            isCustom: game.isCustom
+        }));
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `wepay_game_images_${new Date().toISOString().split('T')[0]}.json`;
+        link.click();
+        toast.success("ส่งออกข้อมูล JSON เรียบร้อยแล้ว");
+    };
+
+    // ส่งออกข้อมูลเป็น CSV
+    const exportAsCSV = () => {
+        const headers = ["Game Code", "Game Name", "Image URL", "Is Custom"];
+        const rows = filteredGames.map(game => [
+            game.gameCode,
+            `"${game.name.replace(/"/g, '""')}"`,
+            game.currentImage,
+            game.isCustom ? "Yes" : "No"
+        ]);
+
+        const csvContent = [
+            headers.join(","),
+            ...rows.map(row => row.join(","))
+        ].join("\n");
+
+        const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `wepay_game_images_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+        toast.success("ส่งออกข้อมูล CSV เรียบร้อยแล้ว");
+    };
+
     return (
         <RoleProtectedRoute allowedRoles={["admin"]}>
             <Layout>
@@ -153,14 +206,36 @@ const GameImageManagement = () => {
                                 กำหนดรูปภาพที่ต้องการให้แสดงในหน้าเติมเกม wePAY (แทนที่รูปมาตรฐานจาก API)
                             </p>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap gap-2">
+                             <Button
+                                onClick={exportAsCSV}
+                                variant="outline"
+                                size="sm"
+                                className="h-9"
+                                disabled={loading || filteredGames.length === 0}
+                            >
+                                <FileSpreadsheet className="mr-2 h-4 w-4" />
+                                Export CSV
+                            </Button>
+                            <Button
+                                onClick={exportAsJSON}
+                                variant="outline"
+                                size="sm"
+                                className="h-9"
+                                disabled={loading || filteredGames.length === 0}
+                            >
+                                <FileJson className="mr-2 h-4 w-4" />
+                                Export JSON
+                            </Button>
                             <Button
                                 onClick={() => loadData(true)}
                                 variant="outline"
+                                size="sm"
+                                className="h-9"
                                 disabled={loading}
                             >
                                 <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                                รีเฟรชข้อมูลล่าสุด (Full)
+                                รีเฟรช Full
                             </Button>
                         </div>
                     </div>
@@ -247,12 +322,24 @@ const GameImageManagement = () => {
                         <div className="space-y-4 pt-4">
                             <div className="space-y-2">
                                 <Label htmlFor="imageUrl">URL รูปภาพ *</Label>
-                                <Input
-                                    id="imageUrl"
-                                    placeholder="https://example.com/logo.png"
-                                    value={imageUrl}
-                                    onChange={(e) => setImageUrl(e.target.value)}
-                                />
+                                <div className="flex gap-2">
+                                    <Input
+                                        id="imageUrl"
+                                        placeholder="https://example.com/logo.png"
+                                        value={imageUrl}
+                                        onChange={(e) => setImageUrl(e.target.value)}
+                                        className="flex-1"
+                                    />
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={handleCopyUrl}
+                                        disabled={!imageUrl}
+                                        title="คัดลอก URL"
+                                    >
+                                        {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                                    </Button>
+                                </div>
                                 <p className="text-[10px] text-muted-foreground">
                                     แนะนำขนาด 512x512 หรือสัดส่วน 1:1 เพื่อความสวยงาม
                                 </p>
